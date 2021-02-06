@@ -10,7 +10,7 @@
       <a-sub-menu key="sub1" @titleClick="titleClick">
         <span slot="title"><a-icon type="mail" /><span>流程</span></span>
         <a-menu-item key="checkin">
-          窗口检验
+          窗口登记
         </a-menu-item>
         <a-menu-item key="sendout">
           项目派件
@@ -91,8 +91,8 @@ export default {
     async clickrequest(e) {
       const users = await request.get("/cxch/role");
       console.log(users);
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss">
