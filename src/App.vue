@@ -1,13 +1,12 @@
 <template>
-  <a-locale-provider :locale="zh_CN">
+  <a-config-provider :locale="zh_CN">
     <div class="app">
-      <div class="header"></div>
-      <div class="content">
-        <router-link to="/"></router-link>
+      <!-- <div class="header"></div>
+      <div class="content"> -->
         <router-view />
-      </div>
+      <!-- </div> -->
     </div>
-  </a-locale-provider>
+  </a-config-provider>
 </template>
 <script>
 import zh_CN from "ant-design-vue/lib/locale-provider/zh_CN";
@@ -28,14 +27,5 @@ export default {
   height: 100%;
   margin: 0;
   padding: 0;
-  .header {
-    height: 60px;
-    width: 100%;
-    background-color: rgb(20, 55, 122);
-  }
-  .content {
-    width: 100%;
-    height: calc(100% - 60px);
-  }
 }
 </style>

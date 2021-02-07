@@ -24,10 +24,11 @@
           </a-button>
         </div>
       </div>
+
       <div class="itemRight">
         <a-button type="primary" icon="file-add" style="width:110px">
-            新增项目
-          </a-button>
+          新增项目
+        </a-button>
       </div>
     </div>
     <div class="table_contianer" v-if="data">

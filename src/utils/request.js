@@ -1,7 +1,8 @@
 import axios from "axios";
 import store from "@/store";
 import NProgress from "nprogress";
-const VUE_APP_BASE_URL = "http://192.168.0.101:66";
+const VUE_APP_BASE_URL = "http://192.168.18.38:66";
+const VUE_APP_BASE_URL_HOME = "http://192.168.0.101:66";
 NProgress.configure({ showSpinner: false });
 const request = axios.create({
   baseURL: VUE_APP_BASE_URL,
