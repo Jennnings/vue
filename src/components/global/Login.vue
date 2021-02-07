@@ -19,15 +19,11 @@
             style="width: 200px;margin-left:10px"
             placeholder="请输入密码"
             v-model="passWord"
+            @keyup.enter.native="onEnterPress"
           />
         </div>
         <div class="inputItemButton">
-          <a-button
-            type="primary"
-            @click="login"
-            style="width:110px"
-            @keyup.enter.native="login"
-          >
+          <a-button type="primary" @click="login" style="width:110px">
             登录
           </a-button>
         </div>
@@ -72,6 +68,10 @@ export default {
       }
       //   sessionStorage.setItem("userToken", "xxxx");
       //   this.$router.replace("/home");
+    },
+    onEnterPress() {
+      console.log("enter express");
+      this.login();
     },
   },
 };

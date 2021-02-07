@@ -1,10 +1,7 @@
 <template>
   <a-config-provider :locale="zh_CN">
     <div class="app">
-      <!-- <div class="header"></div>
-      <div class="content"> -->
-        <router-view />
-      <!-- </div> -->
+      <router-view />
     </div>
   </a-config-provider>
 </template>

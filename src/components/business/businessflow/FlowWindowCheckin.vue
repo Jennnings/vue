@@ -1,7 +1,15 @@
 <template>
   <div class="contianer">
     <div class="titlebar">
-      窗口登记
+      <a-page-header
+        style="border: 1px solid rgb(235, 237, 240);
+        height:50px;
+        padding-top:10px;
+        padding-left:10px;
+        font-weight:
+        "
+        title="窗口登记"
+      />
     </div>
     <div class="toolbar">
       <div class="itemLeft">
@@ -26,7 +34,12 @@
       </div>
 
       <div class="itemRight">
-        <a-button type="primary" icon="file-add" style="width:110px">
+        <a-button
+          type="primary"
+          icon="file-add"
+          style="width:110px"
+          @click="newProject"
+        >
           新增项目
         </a-button>
       </div>
@@ -41,10 +54,19 @@
         <span slot="customTitle"><a-icon type="smile-o" /> 项目名称</span>
       </a-table>
     </div>
+    <a-modal
+      v-model="createModalVisible"
+      title="新建项目"
+      :footer="null"
+      width="1300px"
+    >
+      <CreateProject @childFn="parentFn" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
+import CreateProject from "./FlowWindowCheckin/CreateProject";
 const columns = [
   {
     dataIndex: "Projectname",
@@ -78,11 +100,15 @@ const pagination_setting = {
   defaultPageSize: 10,
 };
 export default {
+  components: {
+    CreateProject,
+  },
   data() {
     return {
       data: null,
       columns,
       pagination_setting,
+      createModalVisible: false,
     };
   },
   methods: {
@@ -96,6 +122,12 @@ export default {
     onendDateChange(date, dateString) {
       console.log(date, dateString);
     },
+    newProject() {
+      this.createModalVisible = true;
+    },
+    parentFn() {
+      this.createModalVisible = false;
+    },
   },
   created: function() {
     this.clickrequest();
@@ -104,19 +136,20 @@ export default {
 </script>
 <style lang="scss">
 .contianer {
-  padding: 20px;
+  padding: 3px 20px 20px 20px;
   display: flex;
   min-width: 1200px;
   flex-direction: column;
   .titlebar {
-    height: 40px;
+    height: fit-content;
     width: 100%;
-    background: blue;
+    // background: blue;
   }
   .toolbar {
     height: 40px;
     width: 100%;
     //background: #eeeeee;
+    margin-top: 5px;
     display: flex;
     flex-direction: row;
     align-items: center;
