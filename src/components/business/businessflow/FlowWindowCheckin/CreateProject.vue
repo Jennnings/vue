@@ -2,14 +2,33 @@
   <div>
     <div class="projectInfo">
       <a-descriptions title="项目信息" bordered :column="2" size="small">
-        <a-descriptions-item label="项目名称" :span="1">
-          <a-input placeholder="项目名称" />
-        </a-descriptions-item>
+        <a-form-item label="项目名称" :span="1">
+          <a-badge dot>
+            <a-input
+              placeholder="项目名称"
+              name="projectname"
+              v-model="params.projectName"
+              aria-required="true"
+            >
+              <a-tooltip slot="suffix" title="必填项目">
+                <a-icon type="info-circle" style="color: red" />
+              </a-tooltip>
+            </a-input>
+          </a-badge>
+        </a-form-item>
         <a-descriptions-item label="委托单位" :span="1">
-          <a-input placeholder="委托单位" />
+          <a-badge dot>
+            <a-input placeholder="委托单位" v-model="params.projectClient">
+              <a-tooltip slot="suffix" title="必填项目">
+                <a-icon type="info-circle" style="color: red" />
+              </a-tooltip>
+            </a-input>
+          </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="委托时间" :span="1">
-          <a-input placeholder="委托时间" />
+          <a-badge dot>
+            <a-date-picker style="width:100%" @change="getcreateTime" />
+          </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="委托单位地址" :span="1">
           <a-input placeholder="委托单位地址" />
@@ -33,97 +52,17 @@
           <a-input placeholder="合同名称" />
         </a-descriptions-item>
         <a-descriptions-item label="项目类型" :span="2">
-          <a-checkbox-group>
-            <a-row>
-              <a-col :span="3">
-                <a-checkbox value="A">
-                  面积预测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="B">
-                  面积实测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="C">
-                  人防预测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="D">
-                  人防实测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  施工放样
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="A">
-                  竣工测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="B">
-                  控制测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="C">
-                  日照测量
-                </a-checkbox>
-              </a-col>
-            </a-row>
-            <a-row>
-              <a-col :span="3">
-                <a-checkbox value="D">
-                  管线测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  土方测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  断面测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  地形测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  形变测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  宗地调查
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  其他测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  分户调查
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  土地分割
-                </a-checkbox>
-              </a-col>
-            </a-row>
-          </a-checkbox-group>
+          <a-badge dot>
+            <a-checkbox-group>
+              <div class="supportMaterials">
+                <div v-for="data in projectType" :key="data.index">
+                  <a-checkbox :value="data.key">
+                    {{ data.value }}
+                  </a-checkbox>
+                </div>
+              </div>
+            </a-checkbox-group>
+          </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="现场坐落" :span="1">
           <a-input placeholder="现场坐落" />
@@ -136,95 +75,13 @@
         </a-descriptions-item>
         <a-descriptions-item label="资料清单" :span="2">
           <a-checkbox-group>
-            <a-row>
-              <a-col :span="3">
-                <a-checkbox value="A">
-                  面积预测
+            <div class="supportMaterials">
+              <div v-for="data in otherMaterial" :key="data.index">
+                <a-checkbox :value="data.key">
+                  {{ data.value }}
                 </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="B">
-                  面积实测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="C">
-                  人防预测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="D">
-                  人防实测
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  施工放样
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="A">
-                  竣工测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="B">
-                  控制测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="C">
-                  日照测量
-                </a-checkbox>
-              </a-col>
-            </a-row>
-            <a-row>
-              <a-col :span="3">
-                <a-checkbox value="D">
-                  管线测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  土方测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  断面测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  地形测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  形变测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  宗地调查
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  其他测量
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  分户调查
-                </a-checkbox>
-              </a-col>
-              <a-col :span="3">
-                <a-checkbox value="E">
-                  土地分割
-                </a-checkbox>
-              </a-col>
-            </a-row>
+              </div>
+            </div>
           </a-checkbox-group>
         </a-descriptions-item>
         <a-descriptions-item label="文件上传" :span="2">
@@ -238,18 +95,17 @@
                 <a-button> <a-icon type="upload" /> 选择文件 </a-button>
               </a-upload>
             </div>
-             <div class="tempFile">
-
-            <a-button
-              type="primary"
-              :disabled="fileList.length === 0"
-              :loading="uploading"
-              style="margin-top: 16px"
-              @click="handleUpload"
-            >
-              {{ uploading ? "正在上传..." : "开始上传" }}
-            </a-button>
-             </div>
+            <div class="tempFile">
+              <a-button
+                type="primary"
+                :disabled="fileList.length === 0"
+                :loading="uploading"
+                style="margin-top: 16px"
+                @click="handleUpload"
+              >
+                {{ uploading ? "正在上传..." : "开始上传" }}
+              </a-button>
+            </div>
           </div>
         </a-descriptions-item>
       </a-descriptions>
@@ -269,17 +125,32 @@
   </div>
 </template>
 <script>
+import listdata from "../../../../assets/menulist/other-material.json";
+import projectdata from "../../../../assets/menulist/project-type.json";
+import axios from "axios";
+const listData = listdata;
+const projectData = projectdata;
 export default {
   name: "create-project",
   data() {
     return {
       fileList: [],
       uploading: false,
+      otherMaterial: listData.data,
+      projectType: projectData.data,
+      params: {
+        projectName: "",
+        projectClient: "",
+        createTime: "",
+      },
+      formLayout: "horizontal",
+      form: this.$form.createForm(this, { name: "coordinated" }),
     };
   },
   methods: {
     confirmProjectCreate() {
       console.log("create Project");
+      console.log(this.otherMaterial);
       this.$emit("childFn");
     },
     cancelProjectCreate() {
@@ -296,6 +167,9 @@ export default {
       this.fileList = [...this.fileList, file];
       return false;
     },
+    getcreateTime(date, dateString) {
+      this.params.createTime = dateString;
+    },
     handleUpload() {
       const { fileList } = this;
       const formData = new FormData();
@@ -303,8 +177,6 @@ export default {
         formData.append("files[]", file);
       });
       this.uploading = true;
-
-      // You can use any AJAX library you like
     },
   },
 };
@@ -324,6 +196,15 @@ export default {
 }
 .ant-modal-header {
   padding: 10px 24px;
+}
+.ant-badge {
+  width: 100%;
+}
+.supportMaterials {
+  width: 1110px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 .buttonGtoup {
   margin-top: 10px;

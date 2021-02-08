@@ -9,8 +9,8 @@ const request = axios.create({
   timeout: 12000,
   headers: {
     "Content-Type": "application/json",
-    Accept: "application/json"
-  }
+    Accept: "application/json",
+  },
 });
 
 //请求拦截器

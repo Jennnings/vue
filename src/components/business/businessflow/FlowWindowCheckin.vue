@@ -27,7 +27,12 @@
           <a-date-picker @change="onendDateChange" style="margin-left:10px" />
         </div>
         <div class="itemName">
-          <a-button type="primary" icon="search" style="width:110px">
+          <a-button
+            type="primary"
+            icon="search"
+            style="width:110px"
+            @click="queryClicked"
+          >
             项目查询
           </a-button>
         </div>
@@ -59,6 +64,8 @@
       title="新建项目"
       :footer="null"
       width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
     >
       <CreateProject @childFn="parentFn" />
     </a-modal>
@@ -67,6 +74,7 @@
 <script>
 import request from "@/utils/request";
 import CreateProject from "./FlowWindowCheckin/CreateProject";
+import axios from "axios";
 const columns = [
   {
     dataIndex: "Projectname",
@@ -109,6 +117,8 @@ export default {
       columns,
       pagination_setting,
       createModalVisible: false,
+      distoryThis: false,
+      params:null,
     };
   },
   methods: {
@@ -127,6 +137,18 @@ export default {
     },
     parentFn() {
       this.createModalVisible = false;
+    },
+    queryClicked() {
+      console.log("queryClicked");
+      this.params = new URLSearchParams();
+      this.params.append("username", "username66666");
+      this.params.append("password", "passwprd");
+      this.params.append("id", "idididdi");
+      axios
+        .post("http://127.0.0.1:8000/cxch/insertUser",this.params)
+        .then((res) => {
+          console.log(res);
+        });
     },
   },
   created: function() {
