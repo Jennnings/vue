@@ -9,6 +9,7 @@
               name="projectname"
               v-model="params.projectName"
               aria-required="true"
+              autocomplete="off"
             >
               <a-tooltip slot="suffix" title="必填项目">
                 <a-icon type="info-circle" style="color: red" />
@@ -170,13 +171,25 @@ export default {
     getcreateTime(date, dateString) {
       this.params.createTime = dateString;
     },
+    //文件上传前端
     handleUpload() {
       const { fileList } = this;
       const formData = new FormData();
       fileList.forEach((file) => {
-        formData.append("files[]", file);
+        formData.append("myfile", file);
       });
       this.uploading = true;
+      axios
+        .post("http://127.0.0.1:8000/cxch/uploadfile", formData)
+        .then((res) => {
+          console.log(res);
+          if (res.data === "upload over") {
+            this.$message.success("上传成功");
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
     },
   },
 };

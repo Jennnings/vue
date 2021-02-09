@@ -145,7 +145,7 @@ export default {
       this.params.append("password", "passwprd");
       this.params.append("id", "idididdi");
       axios
-        .post("http://127.0.0.1:8000/cxch/insertUser",this.params)
+        .post("http://192.168.18.38:66/cxch/insertUser",this.params)
         .then((res) => {
           console.log(res);
         });
