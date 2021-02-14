@@ -10,17 +10,31 @@
       <a-sub-menu key="sub1" @titleClick="titleClick">
         <span slot="title"><a-icon type="mail" /><span>流程</span></span>
         <a-menu-item key="checkin">
-          窗口检验
+          窗口登记
         </a-menu-item>
         <a-menu-item key="sendout">
           项目派件
         </a-menu-item>
-
         <a-menu-item key="3">
-          Option 3
+          测绘承办
         </a-menu-item>
         <a-menu-item key="4">
-          Option 4
+          质量检查
+        </a-menu-item>
+        <a-menu-item key="5">
+          成果审核
+        </a-menu-item>
+        <a-menu-item key="6">
+          成果神品
+        </a-menu-item>
+        <a-menu-item key="7">
+          核算收费
+        </a-menu-item>
+        <a-menu-item key="8">
+          项目归档
+        </a-menu-item>
+        <a-menu-item key="contractmanagement">
+          合同管理
         </a-menu-item>
       </a-sub-menu>
       <a-sub-menu key="sub2" @titleClick="titleClick">
