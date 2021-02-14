@@ -19,7 +19,7 @@ const routes = [
         path: "checkin",
         name: "FlowCheckIn",
         component: () =>
-          import("../components/business/businessflow/FlowWindowCheckin.vue"),
+          import("../components/business/businessflow/FlowWindowCheckin.vue")
       },
       {
         path: "sendout",
@@ -27,9 +27,15 @@ const routes = [
         component: () =>
           import(
             "../components/business/businessflow/FlowWindowProjectSendOut.vue"
-          ),
+          )
       },
-    ],
+      {
+        path: "contractmanagement",
+        name: "FlowWindowContract",
+        component: () =>
+          import("../components/business/businessflow/FlowWindowContract.vue")
+      }
+    ]
   },
   {
     path: "/about",

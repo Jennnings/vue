@@ -32,29 +32,29 @@
           </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="委托单位地址" :span="1">
-          <a-input placeholder="委托单位地址" />
+          <a-input placeholder="委托单位地址" v-model="params.clientAddress" />
         </a-descriptions-item>
         <a-descriptions-item label="委托人" :span="1">
-          <a-input placeholder="委托人" />
+          <a-input placeholder="委托人" v-model="params.client" />
         </a-descriptions-item>
         <a-descriptions-item label="委托人电话" :span="1">
-          <a-input placeholder="委托人电话" />
+          <a-input placeholder="委托人电话" v-model="params.clientTelephone" />
         </a-descriptions-item>
         <a-descriptions-item label="联系人" :span="1">
-          <a-input placeholder="联系人" />
+          <a-input placeholder="联系人" v-model="params.contactPerson" />
         </a-descriptions-item>
         <a-descriptions-item label="联系人电话" :span="1">
-          <a-input placeholder="联系人电话" />
+          <a-input placeholder="联系人电话" v-model="params.contactTelephone" />
         </a-descriptions-item>
         <a-descriptions-item label="合同编号" :span="1">
-          <a-input placeholder="合同编号" />
+          <a-input placeholder="合同编号" v-model="params.aggreementID" />
         </a-descriptions-item>
         <a-descriptions-item label="合同名称" :span="1">
-          <a-input placeholder="合同名称" />
+          <a-input placeholder="合同名称" v-model="params.aggrementName" />
         </a-descriptions-item>
         <a-descriptions-item label="项目类型" :span="2">
           <a-badge dot>
-            <a-checkbox-group>
+            <a-checkbox-group @change="projectTypeSelection">
               <div class="supportMaterials">
                 <div v-for="data in projectType" :key="data.index">
                   <a-checkbox :value="data.key">
@@ -66,16 +66,20 @@
           </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="现场坐落" :span="1">
-          <a-input placeholder="现场坐落" />
+          <a-input placeholder="现场坐落" v-model="params.sceneLocation" />
         </a-descriptions-item>
         <a-descriptions-item label="希望进场时间" :span="1">
-          <a-date-picker style="width:100%" />
+          <a-date-picker style="width:100%" @change="hopeToEnterTime" />
         </a-descriptions-item>
         <a-descriptions-item label="其他要求" :span="2">
-          <a-textarea placeholder="其他要求" :rows="3" />
+          <a-textarea
+            placeholder="其他要求"
+            :rows="3"
+            v-model="params.otherRequirement"
+          />
         </a-descriptions-item>
         <a-descriptions-item label="资料清单" :span="2">
-          <a-checkbox-group>
+          <a-checkbox-group @change="supportMaterials">
             <div class="supportMaterials">
               <div v-for="data in otherMaterial" :key="data.index">
                 <a-checkbox :value="data.key">
@@ -129,6 +133,7 @@
 import listdata from "../../../../assets/menulist/other-material.json";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import axios from "axios";
+import { message } from "ant-design-vue";
 const listData = listdata;
 const projectData = projectdata;
 export default {
@@ -144,15 +149,56 @@ export default {
         projectClient: "",
         createTime: "",
       },
+      projectTypeSelected: [],
+      supportMaterialsSelected: [],
       formLayout: "horizontal",
       form: this.$form.createForm(this, { name: "coordinated" }),
+      postParams: null,
     };
   },
   methods: {
     confirmProjectCreate() {
       console.log("create Project");
-      console.log(this.otherMaterial);
-      this.$emit("childFn");
+      this.params["projectTypeChecked"] = this.projectTypeSelected;
+      this.params["otherMaterial"] = this.supportMaterialsSelected;
+      console.log("params", this.params);
+      if (this.params.projectName == "") {
+        this.$message.error("项目名称为必填");
+        return;
+      }
+      if (this.params.projectClient == "") {
+        this.$message.error("委托单位为必填");
+        return;
+      }
+      if (this.params.createTime == "") {
+        this.$message.error("委托时间为必填");
+        return;
+      }
+      if (this.params.projectTypeChecked.length == 0) {
+        this.$message.error("请选择项目类型");
+        return;
+      }
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectName", this.params.projectName);
+      this.postParams.append("projectClient", this.params.projectClient);
+      this.postParams.append("createTime", this.params.createTime);
+      this.postParams.append("client", this.params.client);
+      this.postParams.append("clientTelephone", this.params.clientTelephone);
+      this.postParams.append("contactPerson", this.params.contactPerson);
+      this.postParams.append("contactTelephone", this.params.contactTelephone);
+      this.postParams.append("aggreementID", this.params.aggreementID);
+      this.postParams.append("aggrementName", this.params.aggrementName);
+      this.postParams.append(
+        "projectTypeChecked",
+        this.params.projectTypeChecked
+      );
+      this.postParams.append("otherMaterial", this.params.otherMaterial);
+      axios
+        .post("http://127.0.0.1:8000/cxch/insertProject", this.postParams)
+        .then((res) => {
+          console.log(res);
+        });
+      //this.$emit("childFn");
     },
     cancelProjectCreate() {
       console.log("cancel Project");
@@ -171,6 +217,15 @@ export default {
     getcreateTime(date, dateString) {
       this.params.createTime = dateString;
     },
+    hopeToEnterTime(date, dateString) {
+      this.params.hopeToEnterTime = dateString;
+    },
+    projectTypeSelection(e) {
+      this.projectTypeSelected = e;
+    },
+    supportMaterials(e) {
+      this.supportMaterialsSelected = e;
+    },
     //文件上传前端
     handleUpload() {
       const { fileList } = this;
@@ -180,7 +235,7 @@ export default {
       });
       this.uploading = true;
       axios
-        .post("http://127.0.0.1:8000/cxch/uploadfile", formData)
+        .post("http://192.168.0.101:66/cxch/uploadfile", formData)
         .then((res) => {
           console.log(res);
           if (res.data === "upload over") {

@@ -55,8 +55,21 @@
         :data-source="data"
         :pagination="pagination_setting"
       >
-        <a slot="name" slot-scope="text">{{ text }}</a>
-        <span slot="customTitle"><a-icon type="smile-o" /> 项目名称</span>
+        <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{ text }}</a>
+        <span slot="customTitle"><a-icon type="smile-o" /> 项目登记号</span>
+        <span slot="tags" slot-scope="tags">
+          <a-tag
+            v-for="tag in tags"
+            :key="tag"
+            :color="
+              tag === '1' ? 'volcano' : tag.length > 5 ? 'geekblue' : 'green'
+            "
+          >
+            <span v-if="tag === '1'">登记中</span>
+            <span v-if="tag === '2'">派件中</span>
+            <span v-if="tag !== '1' && tag !== '2'">结算中</span>
+          </a-tag>
+        </span>
       </a-table>
     </div>
     <a-modal
@@ -81,27 +94,50 @@ const columns = [
     key: "Projectname",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
+    width:350,
   },
   {
-    title: "客户",
+    title: "项目名称",
     dataIndex: "Client",
     key: "Client",
+    width:350,
   },
   {
-    title: "合同",
+    title: "登记时间",
     dataIndex: "Contact",
     key: "Contact",
+    width:250,
   },
   {
-    title: "联系电话",
+    title: "委托单位",
     key: "Contacttel",
     dataIndex: "Contacttel",
-    scopedSlots: { customRender: "tags" },
+    width:150,
   },
   {
-    title: "地址",
-    key: "Projectaddress",
-    dataIndex: "Projectaddress",
+    title: "当前环节",
+    key: "processCondition",
+    dataIndex: "processCondition",
+    scopedSlots: { customRender: "tags" },
+    width:100,
+  },
+  {
+    title: "操作者",
+    key: "processer",
+    dataIndex: "processer",
+    width:150,
+  },
+  {
+    title: "编辑",
+    key: "editor",
+    dataIndex: "editor",
+    width:100,
+  },
+  {
+    title: "删除",
+    key: "delete",
+    dataIndex: "delete",
+    width:100,
   },
 ];
 const pagination_setting = {
@@ -118,7 +154,7 @@ export default {
       pagination_setting,
       createModalVisible: false,
       distoryThis: false,
-      params:null,
+      params: null,
     };
   },
   methods: {
@@ -145,10 +181,13 @@ export default {
       this.params.append("password", "passwprd");
       this.params.append("id", "idididdi");
       axios
-        .post("http://192.168.18.38:66/cxch/insertUser",this.params)
+        .post("http://192.168.0.101:66/cxch/insertUser", this.params)
         .then((res) => {
           console.log(res);
         });
+    },
+    clickforInfo(info) {
+      this.$message.success(info)
     },
   },
   created: function() {
@@ -192,6 +231,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
+    user-select: none;
   }
 }
 </style>
