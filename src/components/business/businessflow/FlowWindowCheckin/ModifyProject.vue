@@ -148,6 +148,7 @@ const listData = listdata;
 const projectData = projectdata;
 import request from "@/utils/request";
 import moment from "moment";
+import GLOBAL from "./../../../../utils/global_variable";
 export default {
   name: "mofify-project",
   props: ["projectInfo"],
@@ -270,18 +271,16 @@ export default {
         formData.append("myfile", file);
       });
       this.uploading = true;
-      axios
-        .post("http://192.168.18.38:66/cxch/uploadfile", formData)
-        .then((res) => {
-          console.log(res);
-          if (res.data === "upload over") {
-            this.$message.success("上传成功");
-            this.fileList = [];
-          } else {
-            this.$message.error("上传失败");
-          }
-          this.uploading = false;
-        });
+      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
+        console.log(res);
+        if (res.data === "upload over") {
+          this.$message.success("上传成功");
+          this.fileList = [];
+        } else {
+          this.$message.error("上传失败");
+        }
+        this.uploading = false;
+      });
     },
   },
   created: function() {

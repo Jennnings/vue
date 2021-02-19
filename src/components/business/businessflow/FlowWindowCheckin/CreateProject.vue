@@ -137,6 +137,7 @@ import listdata from "../../../../assets/menulist/other-material.json";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import axios from "axios";
 import { message } from "ant-design-vue";
+import GLOBAL from "./../../../../utils/global_variable";
 const listData = listdata;
 const projectData = projectdata;
 export default {
@@ -201,7 +202,7 @@ export default {
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       );
       axios
-        .post("http://127.0.0.1:8000/cxch/insertProject", this.postParams)
+        .post(GLOBAL.env + "/cxch/insertProject", this.postParams)
         .then((res) => {
           console.log(res);
           this.$emit("childFn");
@@ -241,17 +242,15 @@ export default {
         formData.append("myfile", file);
       });
       this.uploading = true;
-      axios
-        .post("http://192.168.0.101:66/cxch/uploadfile", formData)
-        .then((res) => {
-          console.log(res);
-          if (res.data === "upload over") {
-            this.$message.success("上传成功");
-          } else {
-            this.$message.error("上传失败");
-          }
-          this.uploading = false;
-        });
+      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
+        console.log(res);
+        if (res.data === "upload over") {
+          this.$message.success("上传成功");
+        } else {
+          this.$message.error("上传失败");
+        }
+        this.uploading = false;
+      });
     },
   },
 };

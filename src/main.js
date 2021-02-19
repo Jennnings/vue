@@ -12,6 +12,7 @@ import moment from "moment";
 
 Vue.config.productionTip = false;
 Vue.prototype.$moment = moment;
+
 Vue.use(Antd);
 
 // Vue.use(ElementUI);

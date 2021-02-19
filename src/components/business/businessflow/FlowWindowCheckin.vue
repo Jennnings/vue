@@ -106,6 +106,7 @@ import request from "@/utils/request";
 import CreateProject from "./FlowWindowCheckin/CreateProject";
 import ModifyProject from "./FlowWindowCheckin/ModifyProject";
 import axios from "axios";
+import GLOBAL from "./../../../utils/global_variable";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -241,9 +242,10 @@ export default {
             postParams = new URLSearchParams();
             postParams.append("Projectsn", item);
             axios
-              .post("http://127.0.0.1:8000/cxch/deleteProject", postParams)
+              .post(GLOBAL.env + "/cxch/deleteProject", postParams)
               .then((res) => {
                 if (res.data === "修改成功") {
+                  that.$message.success("删除成功");
                   that.queryClicked();
                 }
               });
