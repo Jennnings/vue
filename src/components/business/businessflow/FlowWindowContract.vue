@@ -74,13 +74,13 @@ const innerColumns = [
   { title: "日期", dataIndex: "date", key: "date" },
   { title: "历史文件", dataIndex: "name", key: "name" },
   { title: "文件性质", key: "state", scopedSlots: { customRender: "status" } },
-//   { title: "Upgrade Status", dataIndex: "upgradeNum", key: "upgradeNum" },
-//   {
-//     title: "Action",
-//     dataIndex: "operation",
-//     key: "operation",
-//     scopedSlots: { customRender: "operation" },
-//   },
+  //   { title: "Upgrade Status", dataIndex: "upgradeNum", key: "upgradeNum" },
+  //   {
+  //     title: "Action",
+  //     dataIndex: "operation",
+  //     key: "operation",
+  //     scopedSlots: { customRender: "operation" },
+  //   },
 ];
 
 const innerData = [];

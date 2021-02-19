@@ -6,13 +6,15 @@ import store from "./store";
 import "./assets/styles/styles.scss";
 import Antd from "ant-design-vue"; // 引入Ant Design Vue组件
 import "ant-design-vue/dist/antd.css"; // 引入Ant Design Vue样式
-import ElementUI from 'element-ui';
-import 'element-ui/lib/theme-chalk/index.css';
-
+// import ElementUI from 'element-ui';
+// import 'element-ui/lib/theme-chalk/index.css';
+import moment from "moment";
 
 Vue.config.productionTip = false;
+Vue.prototype.$moment = moment;
 Vue.use(Antd);
-Vue.use(ElementUI);
+
+// Vue.use(ElementUI);
 const VueRouterPush = VueRouter.prototype.push;
 VueRouter.prototype.push = function push(to) {
   return VueRouterPush.call(this, to).catch((err) => err);
