@@ -67,8 +67,8 @@
               :value="projectTypeSelected"
             >
               <div class="supportMaterials">
-                <div v-for="data in projectType" :key="data.key">
-                  <a-checkbox :value="data.key">
+                <div v-for="data in projectType" :key="data.index">
+                  <a-checkbox :value="data.index">
                     {{ data.value }}
                   </a-checkbox>
                 </div>
@@ -80,7 +80,12 @@
           <a-input placeholder="现场坐落" v-model="params.sceneLocation" />
         </a-descriptions-item>
         <a-descriptions-item label="希望进场时间" :span="1">
-          <a-date-picker style="width:100%" @change="hopeToEnterTime" />
+          <a-date-picker
+            style="width:100%"
+            @change="hopeToEnterTime"
+            v-if="params.createTime"
+            :defaultValue="moment(params.hopeToEnterTime, 'YYYY-MM-DD')"
+          />
         </a-descriptions-item>
         <a-descriptions-item label="其他要求" :span="2">
           <a-textarea
@@ -90,10 +95,13 @@
           />
         </a-descriptions-item>
         <a-descriptions-item label="资料清单" :span="2">
-          <a-checkbox-group @change="supportMaterials">
+          <a-checkbox-group
+            @change="supportMaterials"
+            :value="supportMaterialsSelected"
+          >
             <div class="supportMaterials">
               <div v-for="data in otherMaterial" :key="data.index">
-                <a-checkbox :value="data.key">
+                <a-checkbox :value="data.index">
                   {{ data.value }}
                 </a-checkbox>
               </div>
@@ -173,21 +181,31 @@ export default {
   },
   methods: {
     async getProjectInfo() {
+      const that = this;
       const tmpdata = await request("/cxch/modifyProjectInfoQuery", {
         params: {
           Projectsn: this.projectInfo,
         },
       });
-      this.params.projectName = tmpdata.data[0].Projectname;
-      this.params.createTime = tmpdata.data[0].Clientdate;
-      this.params.projectClient = tmpdata.data[0].Client;
-      this.params.clientAddress = tmpdata.data[0].Projectaddress;
-      this.params.client = tmpdata.data[0].Clientpeople;
-      this.params.clientTelephone = tmpdata.data[0].Clientpeopletel;
-      this.projectTypeSelected = tmpdata.data[0].Projecttypeid.split(",").map(
-        Number
-      );
-      console.log("modify data", tmpdata.data[0]);
+      Object.keys(tmpdata.data[0]).forEach(function(k) {
+        console.log(k + " - ");
+        if (tmpdata.data[0][k] === "undefined") {
+          that.params[k] = "";
+        } else {
+          if (k === "projectTypeSelected") {
+            that.projectTypeSelected = tmpdata.data[0][k]
+              .split(",")
+              .map(Number);
+          } else if (k === "otherMaterial") {
+            that.supportMaterialsSelected = tmpdata.data[0][k]
+              .split(",")
+              .map(Number);
+          } else {
+            that.params[k] = tmpdata.data[0][k];
+          }
+        }
+      });
+      console.log("modify data", tmpdata.data[0], this.params);
     },
     moment,
     confirmProjectCreate() {

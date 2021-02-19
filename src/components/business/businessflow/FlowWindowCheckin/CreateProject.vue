@@ -72,7 +72,9 @@
           <a-input placeholder="现场坐落" v-model="params.sceneLocation" />
         </a-descriptions-item>
         <a-descriptions-item label="希望进场时间" :span="1">
-          <a-date-picker style="width:100%" @change="hopeToEnterTime" />
+          <a-badge dot>
+            <a-date-picker style="width:100%" @change="hopeToEnterTime" />
+          </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="其他要求" :span="2">
           <a-textarea
@@ -84,8 +86,8 @@
         <a-descriptions-item label="资料清单" :span="2">
           <a-checkbox-group @change="supportMaterials">
             <div class="supportMaterials">
-              <div v-for="data in otherMaterial" :key="data.key">
-                <a-checkbox :value="data.key">
+              <div v-for="data in otherMaterial" :key="data.index">
+                <a-checkbox :value="data.index">
                   {{ data.value }}
                 </a-checkbox>
               </div>
@@ -136,7 +138,6 @@
 import listdata from "../../../../assets/menulist/other-material.json";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import axios from "axios";
-import { message } from "ant-design-vue";
 import GLOBAL from "./../../../../utils/global_variable";
 const listData = listdata;
 const projectData = projectdata;
@@ -163,6 +164,7 @@ export default {
   methods: {
     confirmProjectCreate() {
       console.log("create Project");
+      const that = this;
       this.params["projectTypeChecked"] = this.projectTypeSelected;
       this.params["otherMaterial"] = this.supportMaterialsSelected;
       console.log("params", this.params);
@@ -178,29 +180,44 @@ export default {
         this.$message.error("委托时间为必填");
         return;
       }
+      if (this.params.hopeToEnterTime == "") {
+        this.$message.error("希望进场时间为必填");
+        return;
+      }
       if (this.params.projectTypeChecked.length == 0) {
         this.$message.error("请选择项目类型");
         return;
       }
+      this.params = JSON.parse(
+        JSON.stringify(this.params).replace("undefined", "")
+      );
       this.postParams = new URLSearchParams();
-      this.postParams.append("projectName", this.params.projectName);
-      this.postParams.append("projectClient", this.params.projectClient);
-      this.postParams.append("createTime", this.params.createTime);
-      this.postParams.append("client", this.params.client);
-      this.postParams.append("clientTelephone", this.params.clientTelephone);
-      this.postParams.append("contactPerson", this.params.contactPerson);
-      this.postParams.append("contactTelephone", this.params.contactTelephone);
-      this.postParams.append("aggreementID", this.params.aggreementID);
-      this.postParams.append("aggrementName", this.params.aggrementName);
+      this.postParams.append("projectName", this.params.projectName); //项目名称
+      this.postParams.append("projectClient", this.params.projectClient); //委托单位名称
+      this.postParams.append("createTime", this.params.createTime); //委托时间
+      this.postParams.append("clientAddress", this.params.clientAddress); //委托单位地址
+      this.postParams.append("client", this.params.client); //委托人
+      this.postParams.append("clientTelephone", this.params.clientTelephone); //委托人电话
+      this.postParams.append("contactPerson", this.params.contactPerson); //联系人
+      this.postParams.append("contactTelephone", this.params.contactTelephone); //联系人电话
+      this.postParams.append("aggreementID", this.params.aggreementID); //合同编号
+      this.postParams.append("aggrementName", this.params.aggrementName); //合同名称
+      this.postParams.append(
+        "agentConstruction",
+        this.params.agentConstruction
+      ); //代建单位
       this.postParams.append(
         "projectTypeChecked",
         this.params.projectTypeChecked
-      );
-      this.postParams.append("otherMaterial", this.params.otherMaterial);
+      ); //项目类型
+      this.postParams.append("sceneLocation", this.params.sceneLocation); //现场坐落
+      this.postParams.append("hopeToEnterTime", this.params.hopeToEnterTime); //希望进场时间
+      this.postParams.append("otherRequirement", this.params.otherRequirement); //其他要求
+      this.postParams.append("otherMaterial", this.params.otherMaterial); //资料清单
       this.postParams.append(
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
-      );
+      ); //创建人信息->需要修改 直接后端判断的
       axios
         .post(GLOBAL.env + "/cxch/insertProject", this.postParams)
         .then((res) => {
