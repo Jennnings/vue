@@ -28,7 +28,12 @@
         </a-descriptions-item>
         <a-descriptions-item label="委托时间" :span="1">
           <a-badge dot>
-            <a-date-picker style="width:100%" @change="getcreateTime" />
+            <a-date-picker
+              style="width:100%"
+              @change="getcreateTime"
+              v-if="params.createTime"
+              :defaultValue="moment(params.createTime, 'YYYY-MM-DD')"
+            />
           </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="委托单位地址" :span="1">
@@ -57,10 +62,13 @@
         </a-descriptions-item>
         <a-descriptions-item label="项目类型" :span="2">
           <a-badge dot>
-            <a-checkbox-group @change="projectTypeSelection">
+            <a-checkbox-group
+              @change="projectTypeSelection"
+              :value="projectTypeSelected"
+            >
               <div class="supportMaterials">
-                <div v-for="data in projectType" :key="data.index">
-                  <a-checkbox :value="data.index">
+                <div v-for="data in projectType" :key="data.key">
+                  <a-checkbox :value="data.key">
                     {{ data.value }}
                   </a-checkbox>
                 </div>
@@ -84,7 +92,7 @@
         <a-descriptions-item label="资料清单" :span="2">
           <a-checkbox-group @change="supportMaterials">
             <div class="supportMaterials">
-              <div v-for="data in otherMaterial" :key="data.key">
+              <div v-for="data in otherMaterial" :key="data.index">
                 <a-checkbox :value="data.key">
                   {{ data.value }}
                 </a-checkbox>
@@ -136,11 +144,13 @@
 import listdata from "../../../../assets/menulist/other-material.json";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import axios from "axios";
-import { message } from "ant-design-vue";
 const listData = listdata;
 const projectData = projectdata;
+import request from "@/utils/request";
+import moment from "moment";
 export default {
-  name: "create-project",
+  name: "mofify-project",
+  props: ["projectInfo"],
   data() {
     return {
       fileList: [],
@@ -152,6 +162,7 @@ export default {
         projectClient: "",
         createTime: "",
       },
+
       projectTypeSelected: [],
       supportMaterialsSelected: [],
       formLayout: "horizontal",
@@ -160,6 +171,24 @@ export default {
     };
   },
   methods: {
+    async getProjectInfo() {
+      const tmpdata = await request("/cxch/modifyProjectInfoQuery", {
+        params: {
+          Projectsn: this.projectInfo,
+        },
+      });
+      this.params.projectName = tmpdata.data[0].Projectname;
+      this.params.createTime = tmpdata.data[0].Clientdate;
+      this.params.projectClient = tmpdata.data[0].Client;
+      this.params.clientAddress = tmpdata.data[0].Projectaddress;
+      this.params.client = tmpdata.data[0].Clientpeople;
+      this.params.clientTelephone = tmpdata.data[0].Clientpeopletel;
+      this.projectTypeSelected = tmpdata.data[0].Projecttypeid.split(",").map(
+        Number
+      );
+      console.log("modify data", tmpdata.data[0]);
+    },
+    moment,
     confirmProjectCreate() {
       console.log("create Project");
       this.params["projectTypeChecked"] = this.projectTypeSelected;
@@ -200,12 +229,12 @@ export default {
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       );
-      axios
-        .post("http://127.0.0.1:8000/cxch/insertProject", this.postParams)
-        .then((res) => {
-          console.log(res);
-          this.$emit("childFn");
-        });
+      //   axios
+      //     .post("http://127.0.0.1:8000/cxch/insertProject", this.postParams)
+      //     .then((res) => {
+      //       console.log(res);
+      //     });
+      this.$emit("childFn");
     },
     cancelProjectCreate() {
       console.log("cancel Project");
@@ -242,17 +271,21 @@ export default {
       });
       this.uploading = true;
       axios
-        .post("http://192.168.0.101:66/cxch/uploadfile", formData)
+        .post("http://192.168.18.38:66/cxch/uploadfile", formData)
         .then((res) => {
           console.log(res);
           if (res.data === "upload over") {
             this.$message.success("上传成功");
+            this.fileList = [];
           } else {
             this.$message.error("上传失败");
           }
           this.uploading = false;
         });
     },
+  },
+  created: function() {
+    this.getProjectInfo();
   },
 };
 </script>

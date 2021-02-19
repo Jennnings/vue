@@ -25,7 +25,7 @@
           成果审核
         </a-menu-item>
         <a-menu-item key="6">
-          成果神品
+          成果审批
         </a-menu-item>
         <a-menu-item key="7">
           核算收费

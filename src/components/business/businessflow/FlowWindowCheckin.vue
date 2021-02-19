@@ -18,6 +18,7 @@
           <a-auto-complete
             style="width: 200px;margin-left:10px"
             placeholder="项目名称"
+            v-model="queryProjectName"
           />
         </div>
         <div class="itemName">
@@ -55,7 +56,9 @@
         :data-source="data"
         :pagination="pagination_setting"
       >
-        <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{ text }}</a>
+        <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
+          text
+        }}</a>
         <span slot="customTitle"><a-icon type="smile-o" /> 项目登记号</span>
         <span slot="tags" slot-scope="tags">
           <a-tag
@@ -70,6 +73,10 @@
             <span v-if="tag !== '1' && tag !== '2'">结算中</span>
           </a-tag>
         </span>
+        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <span slot="delete" slot-scope="item" @click="deleteClick(item)">
+          <a>删除</a>
+        </span>
       </a-table>
     </div>
     <a-modal
@@ -82,62 +89,75 @@
     >
       <CreateProject @childFn="parentFn" />
     </a-modal>
+    <a-modal
+      v-model="modifyModalVisible"
+      title="修改项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import CreateProject from "./FlowWindowCheckin/CreateProject";
+import ModifyProject from "./FlowWindowCheckin/ModifyProject";
 import axios from "axios";
 const columns = [
   {
-    dataIndex: "Projectname",
-    key: "Projectname",
+    dataIndex: "Projectsn",
+    key: "Projectsn",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
-    width:350,
+    width: 100,
   },
   {
     title: "项目名称",
-    dataIndex: "Client",
-    key: "Client",
-    width:350,
+    dataIndex: "Projectname",
+    key: "Projectname",
+    width: 250,
   },
   {
     title: "登记时间",
-    dataIndex: "Contact",
-    key: "Contact",
-    width:250,
+    dataIndex: "Clientdate",
+    key: "Clientdate",
+    width: 150,
   },
   {
     title: "委托单位",
-    key: "Contacttel",
-    dataIndex: "Contacttel",
-    width:150,
+    key: "Client",
+    dataIndex: "Client",
+    width: 250,
   },
   {
     title: "当前环节",
     key: "processCondition",
     dataIndex: "processCondition",
     scopedSlots: { customRender: "tags" },
-    width:100,
+    width: 150,
   },
   {
     title: "操作者",
-    key: "processer",
-    dataIndex: "processer",
-    width:150,
+    key: "djmanUser",
+    dataIndex: "djmanUser",
+    width: 150,
   },
   {
     title: "编辑",
     key: "editor",
-    dataIndex: "editor",
-    width:100,
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "editor" },
+    width: 150,
   },
   {
     title: "删除",
     key: "delete",
-    dataIndex: "delete",
-    width:100,
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "delete" },
+    width: 150,
   },
 ];
 const pagination_setting = {
@@ -146,6 +166,7 @@ const pagination_setting = {
 export default {
   components: {
     CreateProject,
+    ModifyProject,
   },
   data() {
     return {
@@ -153,8 +174,13 @@ export default {
       columns,
       pagination_setting,
       createModalVisible: false,
-      distoryThis: false,
+      modifyModalVisible: false,
+      distoryThis: true,
       params: null,
+      sDate: "",
+      eDate: "",
+      queryProjectName: "",
+      selectProjectInfo: "",
     };
   },
   methods: {
@@ -163,31 +189,71 @@ export default {
       this.data = user.data;
     },
     onstartDateChange(date, dateString) {
-      console.log(date, dateString);
+      this.sDate = dateString;
     },
     onendDateChange(date, dateString) {
-      console.log(date, dateString);
+      this.eDate = dateString;
     },
     newProject() {
       this.createModalVisible = true;
     },
     parentFn() {
       this.createModalVisible = false;
+      this.queryClicked();
     },
-    queryClicked() {
-      console.log("queryClicked");
-      this.params = new URLSearchParams();
-      this.params.append("username", "username66666");
-      this.params.append("password", "passwprd");
-      this.params.append("id", "idididdi");
-      axios
-        .post("http://192.168.0.101:66/cxch/insertUser", this.params)
-        .then((res) => {
-          console.log(res);
-        });
+    async queryClicked() {
+      console.log(
+        "queryClicked",
+        this.eDate,
+        this.sDate,
+        this.queryProjectName
+      );
+      const user = await request.get("/cxch/getQueryProject", {
+        params: {
+          eDate: this.eDate,
+          sDate: this.sDate,
+          projectName: this.queryProjectName,
+        },
+      });
+      console.log("user", user);
+      this.data = user.data;
     },
     clickforInfo(info) {
-      this.$message.success(info)
+      //this.$message.success(info);
+    },
+    editorClick(item) {
+      this.modifyModalVisible = true;
+      this.selectProjectInfo = item;
+    },
+    deleteClick(item) {
+      let postParams;
+      let that = this;
+      this.$confirm({
+        title: "确定删除该项目?",
+        content: "删除项目将无法恢复",
+        okText: "确认",
+        okType: "danger",
+        cancelText: "取消",
+        onOk() {
+          console.log("OK");
+          //执行删除操作
+          if (item) {
+            postParams = new URLSearchParams();
+            postParams.append("Projectsn", item);
+            axios
+              .post("http://127.0.0.1:8000/cxch/deleteProject", postParams)
+              .then((res) => {
+                if (res.data === "修改成功") {
+                  that.queryClicked();
+                }
+              });
+          }
+          console.log(item);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
     },
   },
   created: function() {

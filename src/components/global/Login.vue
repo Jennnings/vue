@@ -50,8 +50,6 @@ export default {
       });
     },
     async login() {
-      console.log(this.userName);
-      console.log(this.passWord);
       this.loginInfo = await request.get("/cxch/login", {
         params: { username: this.userName, password: this.passWord },
       });
@@ -59,7 +57,10 @@ export default {
       if (this.loginInfo.data === "wrong") {
         this.error();
       } else {
-        sessionStorage.setItem("userToken", this.loginInfo.data);
+        sessionStorage.setItem(
+          "userToken",
+          JSON.stringify(this.loginInfo.data[0])
+        );
         sessionStorage.setItem(
           "userInfo",
           JSON.stringify({ userName: this.userName })
