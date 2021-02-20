@@ -26,14 +26,15 @@ VueRouter.prototype.replace = function replace(to) {
   return VueRouterReplace.call(this, to).catch((err) => err);
 };
 router.beforeEach((to, from, next) => {
-  const userToken = sessionStorage.getItem("userToken");
-  if (userToken !== null) {
+  if (to.name === "login" || from.path === "/" || to.name === "login_name") {
     next();
   } else {
-    if (to.name === "login" || from.path === "/") {
-      next();
+    let userToken = sessionStorage.getItem("userToken");
+    console.log("userToken", userToken);
+    if (userToken === null || userToken === "") {
+      next({ path: "/" });
     } else {
-      next("/login");
+      next();
     }
   }
 });

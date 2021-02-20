@@ -59,7 +59,7 @@
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
         }}</a>
-        <span slot="customTitle"><a-icon type="smile-o" /> 项目登记号</span>
+        <span slot="customTitle"><a-icon type="tags" /> 项目登记号</span>
         <span slot="tags" slot-scope="tags">
           <a-tag
             v-for="tag in tags"
@@ -74,6 +74,17 @@
           </a-tag>
         </span>
         <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <a-popconfirm
+          title="确认提交"
+          ok-text="确定"
+          cancel-text="取消"
+          slot="tonext"
+          slot-scope="item"
+          @confirm="confirmUpload(item)"
+          @cancel="cancelUpload"
+        >
+          <a>提交派件</a>
+        </a-popconfirm>
         <span slot="delete" slot-scope="item" @click="deleteClick(item)">
           <a>删除</a>
         </span>
@@ -151,14 +162,21 @@ const columns = [
     key: "editor",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "editor" },
-    width: 150,
+    width: 100,
+  },
+  {
+    title: "提交派件",
+    key: "toNext",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "tonext" },
+    width: 120,
   },
   {
     title: "删除",
     key: "delete",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "delete" },
-    width: 150,
+    width: 100,
   },
 ];
 const pagination_setting = {
@@ -226,6 +244,9 @@ export default {
       this.modifyModalVisible = true;
       this.selectProjectInfo = item;
     },
+    toNextStep(item) {
+      console.log(item);
+    },
     deleteClick(item) {
       let postParams;
       let that = this;
@@ -255,6 +276,21 @@ export default {
         onCancel() {
           console.log("Cancel");
         },
+      });
+    },
+    cancelUpload() {
+      console.log("取消");
+    },
+    confirmUpload(item) {
+      let postParams;
+      let that = this;
+      postParams = new URLSearchParams();
+      postParams.append("Projectsn", item);
+      axios.post(GLOBAL.env + "/cxch/toNextStep", postParams).then((res) => {
+        if (res.data === "修改成功") {
+          that.$message.success("提交成功");
+          that.queryClicked();
+        }
       });
     },
   },

@@ -19,7 +19,7 @@ const routes = [
         path: "checkin",
         name: "FlowCheckIn",
         component: () =>
-          import("../components/business/businessflow/FlowWindowCheckin.vue")
+          import("../components/business/businessflow/FlowWindowCheckin.vue"),
       },
       {
         path: "sendout",
@@ -27,15 +27,31 @@ const routes = [
         component: () =>
           import(
             "../components/business/businessflow/FlowWindowProjectSendOut.vue"
-          )
+          ),
+      },
+      {
+        path: "mappingundertaking",
+        name: "mappingundertaking",
+        component: () =>
+          import(
+            "../components/business/businessflow/FlowWindowMappingUndertaking.vue"
+          ),
+      },
+      {
+        path: "qualitycheck",
+        name: "qualitycheck",
+        component: () =>
+          import(
+            "../components/business/businessflow/FlowWindowQualityCheck.vue"
+          ),
       },
       {
         path: "contractmanagement",
         name: "FlowWindowContract",
         component: () =>
-          import("../components/business/businessflow/FlowWindowContract.vue")
-      }
-    ]
+          import("../components/business/businessflow/FlowWindowContract.vue"),
+      },
+    ],
   },
   {
     path: "/about",
@@ -48,7 +64,7 @@ const routes = [
   },
   {
     path: "/login",
-    name: "login",
+    name: "login_name",
     component: () => import("../components/global/Login.vue"),
   },
 ];

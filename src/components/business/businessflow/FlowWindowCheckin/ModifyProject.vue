@@ -141,7 +141,7 @@
         </a-button>
       </div>
       <div class="singlebutton">
-        <a-button type="primary" @click="confirmProjectCreate">
+        <a-button type="primary" @click="confirmProjectModify">
           确认
         </a-button>
       </div>
@@ -208,7 +208,7 @@ export default {
       console.log("modify data", tmpdata.data[0], this.params);
     },
     moment,
-    confirmProjectCreate() {
+    confirmProjectModify() {
       console.log("create Project");
       this.params["projectTypeChecked"] = this.projectTypeSelected;
       this.params["otherMaterial"] = this.supportMaterialsSelected;
@@ -229,31 +229,46 @@ export default {
         this.$message.error("请选择项目类型");
         return;
       }
+      this.$message.loading({ content: "更新中...", key: "updating" });
       this.postParams = new URLSearchParams();
-      this.postParams.append("projectName", this.params.projectName);
-      this.postParams.append("projectClient", this.params.projectClient);
-      this.postParams.append("createTime", this.params.createTime);
-      this.postParams.append("client", this.params.client);
-      this.postParams.append("clientTelephone", this.params.clientTelephone);
-      this.postParams.append("contactPerson", this.params.contactPerson);
-      this.postParams.append("contactTelephone", this.params.contactTelephone);
-      this.postParams.append("aggreementID", this.params.aggreementID);
-      this.postParams.append("aggrementName", this.params.aggrementName);
+      this.postParams.append("projectName", this.params.projectName); //项目名称
+      this.postParams.append("projectClient", this.params.projectClient); //委托单位名称
+      this.postParams.append("createTime", this.params.createTime); //委托时间
+      this.postParams.append("clientAddress", this.params.clientAddress); //委托单位地址
+      this.postParams.append("client", this.params.client); //委托人
+      this.postParams.append("clientTelephone", this.params.clientTelephone); //委托人电话
+      this.postParams.append("contactPerson", this.params.contactPerson); //联系人
+      this.postParams.append("contactTelephone", this.params.contactTelephone); //联系人电话
+      this.postParams.append("aggreementID", this.params.aggreementID); //合同编号
+      this.postParams.append("aggrementName", this.params.aggrementName); //合同名称
+      this.postParams.append(
+        "agentConstruction",
+        this.params.agentConstruction
+      ); //代建单位
       this.postParams.append(
         "projectTypeChecked",
         this.params.projectTypeChecked
-      );
-      this.postParams.append("otherMaterial", this.params.otherMaterial);
+      ); //项目类型
+      this.postParams.append("sceneLocation", this.params.sceneLocation); //现场坐落
+      this.postParams.append("hopeToEnterTime", this.params.hopeToEnterTime); //希望进场时间
+      this.postParams.append("otherRequirement", this.params.otherRequirement); //其他要求
+      this.postParams.append("otherMaterial", this.params.otherMaterial); //资料清单
       this.postParams.append(
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
-      );
-      //   axios
-      //     .post("http://127.0.0.1:8000/cxch/insertProject", this.postParams)
-      //     .then((res) => {
-      //       console.log(res);
-      //     });
-      this.$emit("childFn");
+      ); //创建人信息->需要修改 直接后端判断的
+      this.postParams.append("Prjectsn", this.projectInfo);
+      axios
+        .post(GLOBAL.env + "/cxch/modifyProject", this.postParams)
+        .then((res) => {
+          console.log(res);
+          this.$message.success({
+            content: "更新成功!",
+            key: "updating",
+            duration: 2,
+          });
+          //this.$emit("childFn");
+        });
     },
     cancelProjectCreate() {
       console.log("cancel Project");
