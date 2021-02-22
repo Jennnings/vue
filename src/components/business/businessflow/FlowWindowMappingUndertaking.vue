@@ -34,7 +34,7 @@
           <a-auto-complete
             style="width: 200px;margin-left:10px"
             placeholder="委托单位"
-            v-model="queryProjectName"
+            v-model="queryProjectClient"
           />
         </div>
         <div class="itemName">
@@ -190,26 +190,49 @@ export default {
       queryProjectName: "",
       selectProjectInfo: "",
       queryProjectsn: "",
+      queryProjectClient: "",
     };
   },
   methods: {
     async clickrequest() {
       const user = await request.get("/mappingundertaking/project");
       this.data = user.data;
+      console.log(this.data);
     },
-    queryClicked() {
-      console.log("queryClicked");
-      this.clickrequest();
+    async queryClicked() {
+      console.log(
+        "queryClicked",
+        this.eDate,
+        this.sDate,
+        this.queryProjectName,
+        this.queryProjectsn
+      );
+      const user = await request.get("/mappingundertaking/projectQuery", {
+        params: {
+          eDate: this.eDate,
+          sDate: this.sDate,
+          projectName: this.queryProjectName,
+          projectSn: this.queryProjectsn,
+          projectClient: this.queryProjectClient,
+        },
+      });
+      console.log("user", user);
+      this.data = user.data;
     },
     editorClick(item) {
       this.modifyModalVisible = true;
       this.selectProjectInfo = item;
     },
-    onendDateChange() {},
-    onstartDateChange() {},
+    onendDateChange(date, dateString) {
+      this.eDate = dateString;
+    },
+    onstartDateChange(date, dateString) {
+      this.sDate = dateString;
+    },
   },
   created: function() {
     this.clickrequest();
+    console.log(this.data);
   },
 };
 </script>

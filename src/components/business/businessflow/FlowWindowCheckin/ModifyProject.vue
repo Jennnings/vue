@@ -188,7 +188,6 @@ export default {
         },
       });
       Object.keys(tmpdata.data[0]).forEach(function(k) {
-        console.log(k + " - ");
         if (tmpdata.data[0][k] === "undefined") {
           that.params[k] = "";
         } else {

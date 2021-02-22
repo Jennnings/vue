@@ -34,7 +34,7 @@
           <a-auto-complete
             style="width: 200px;margin-left:10px"
             placeholder="委托单位"
-            v-model="queryProjectName"
+            v-model="queryProjectClient"
           />
         </div>
         <div class="itemName">
@@ -106,7 +106,10 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ProjectSendOut v-bind:projectInfo="selectProjectInfo" />
+      <ProjectSendOut
+        v-bind:projectInfo="selectProjectInfo"
+        @childFn="parentFn"
+      />
     </a-modal>
   </div>
 </template>
@@ -193,6 +196,9 @@ export default {
       projectSendoutVisible: false,
       selectProjectInfo: "",
       distoryThis: true,
+      eDate: "",
+      sDate: "",
+      queryProjectClient: "",
     };
   },
   methods: {
@@ -200,19 +206,43 @@ export default {
       const user = await request.get("/sendout/project");
       this.data = user.data;
     },
-    queryClicked() {
-      console.log("queryClicked");
-      this.clickrequest();
+    async queryClicked() {
+      console.log(
+        "queryClicked",
+        this.eDate,
+        this.sDate,
+        this.queryProjectName,
+        this.queryProjectsn
+      );
+      const user = await request.get("/sendout/projectQuery", {
+        params: {
+          eDate: this.eDate,
+          sDate: this.sDate,
+          projectName: this.queryProjectName,
+          projectSn: this.queryProjectsn,
+          projectClient: this.queryProjectClient,
+        },
+      });
+      console.log("user", user);
+      this.data = user.data;
     },
     editorClick(item) {
       this.modifyModalVisible = true;
       this.selectProjectInfo = item;
     },
-    onstartDateChange() {},
-    onendDateChange() {},
+    onstartDateChange(date, dateString) {
+      this.sDate = dateString;
+    },
+    onendDateChange(date, dateString) {
+      this.eDate = dateString;
+    },
     projectSendOut(item) {
       this.projectSendoutVisible = true;
       this.selectProjectInfo = item;
+    },
+    parentFn() {
+      this.projectSendoutVisible = false;
+      this.clickrequest();
     },
   },
   created: function() {

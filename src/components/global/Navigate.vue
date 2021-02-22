@@ -2,7 +2,7 @@
   <div class="container">
     <a-menu
       style="width: 200px;height:100%"
-      :default-selected-keys="['1']"
+      :default-selected-keys="defaultSelect"
       :open-keys.sync="openKeys"
       mode="inline"
       @click="handleClick"
@@ -87,6 +87,7 @@ export default {
     return {
       current: ["mail"],
       openKeys: ["sub1"],
+      defaultSelect: [],
     };
   },
   watch: {
@@ -106,6 +107,10 @@ export default {
       const users = await request.get("/cxch/role");
       console.log(users);
     },
+  },
+  created: function() {
+    const arr = window.location.href.split("/");
+    this.defaultSelect.push(arr[arr.length - 1]);
   },
 };
 </script>

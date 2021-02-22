@@ -25,14 +25,14 @@
         </div>
         <div>
           <a-textarea
-            placeholder="Basic usage"
             :rows="3"
             style="width: 350px;"
+            v-model="sendOutOpinion"
           />
         </div>
       </div>
       <div class="item-option">
-        <a-button type="primary">
+        <a-button type="primary" @click="sendOutFunction">
           分配
         </a-button>
       </div>
@@ -49,9 +49,9 @@
         </div>
         <div>
           <a-textarea
-            placeholder="Basic usage"
             :rows="3"
             style="width: 350px;"
+            v-model="sendBackOpinion"
           />
         </div>
       </div>
@@ -65,11 +65,17 @@
 </template>
 <script>
 import request from "@/utils/request";
+import axios from "axios";
+import GLOBAL from "./../../../../utils/global_variable";
 export default {
   props: ["projectInfo"],
   data() {
     return {
       userData: null,
+      sendOutOpinion: "请按照作业规范执行。",
+      sendBackOpinion: "",
+      sendOutUserID: "",
+      postParams: null,
     };
   },
   methods: {
@@ -79,6 +85,24 @@ export default {
     },
     selectChUserChange(value) {
       console.log(`selected ${value}`);
+      this.sendOutUserID = value;
+    },
+    sendOutFunction() {
+      if (this.sendOutUserID === "") {
+        this.$message.warn("请选择测绘承办人");
+        return;
+      }
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectSn", this.projectInfo);
+      this.postParams.append("clmanUserID", this.sendOutUserID);
+      this.postParams.append("clyj", this.sendOutOpinion);
+      axios
+        .post(GLOBAL.env + "/sendout/projectSendOut", this.postParams)
+        .then((res) => {
+          console.log(res);
+          this.$emit("childFn");
+        });
+      console.log("sendOut");
     },
   },
   created: function() {
