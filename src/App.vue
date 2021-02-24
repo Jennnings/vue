@@ -13,9 +13,9 @@ moment.locale("zh-cn");
 export default {
   data() {
     return {
-      zh_CN
+      zh_CN,
     };
-  }
+  },
 };
 </script>
 
