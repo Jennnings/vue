@@ -97,11 +97,24 @@
     >
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <a-modal
+      v-model="mappingOpinionVisible"
+      title="测绘意见"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <MappingOpinionModal v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+import axios from "axios";
+import GLOBAL from "./../../../utils/global_variable";
+import MappingOpinionModal from "./FlowWindowMappingUndertaking/MappingOpinionModal";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -175,6 +188,7 @@ const pagination_setting = {
 export default {
   components: {
     ModifyProject,
+    MappingOpinionModal,
   },
   data() {
     return {
@@ -183,6 +197,7 @@ export default {
       pagination_setting,
       createModalVisible: false,
       modifyModalVisible: false,
+      mappingOpinionVisible: false,
       distoryThis: true,
       params: null,
       sDate: "",
@@ -228,6 +243,45 @@ export default {
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
+    },
+    deleteClick(item) {
+      let postParams;
+      let that = this;
+      this.$confirm({
+        title: "确定删除该项目?",
+        content: "删除项目将无法恢复",
+        okText: "确认",
+        okType: "danger",
+        cancelText: "取消",
+        onOk() {
+          console.log("OK");
+          //执行删除操作
+          if (item) {
+            postParams = new URLSearchParams();
+            postParams.append("Projectsn", item);
+            axios
+              .post(
+                GLOBAL.env + "/mappingundertaking/deleteProject",
+                postParams
+              )
+              .then((res) => {
+                if (res.data === "success") {
+                  that.$message.success("删除成功");
+                  that.clickrequest();
+                }
+              });
+          }
+          console.log(item);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    },
+    tonextstep(item) {
+      this.mappingOpinionVisible = true;
+      this.selectProjectInfo = item;
+      console.log("to next step", item);
     },
   },
   created: function() {
