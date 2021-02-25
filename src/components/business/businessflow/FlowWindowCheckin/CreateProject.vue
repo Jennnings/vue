@@ -226,7 +226,7 @@ export default {
         });
     },
     cancelProjectCreate() {
-      console.log("cancel Project");
+      //console.log("cancel Project");
       this.$emit("childFn");
     },
     handleRemove(file) {

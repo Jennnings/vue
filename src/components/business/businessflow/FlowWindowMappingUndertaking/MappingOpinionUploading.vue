@@ -43,12 +43,12 @@
           </a-select-option>
         </a-select>
       </div>
-      <div class="detail-item">
+      <!-- <div class="detail-item">
         <div class="basicInfo-title">
           工作内容
         </div>
-        <a-textarea :rows="2" style="margin-top:5px" />
-      </div>
+        <a-textarea :rows="2" style="margin-top:5px" v-model="workingDetail" />
+      </div> -->
       <div class="detail-item">
         <div class="basicInfo-title">
           <span>工程量</span>
@@ -63,7 +63,7 @@
         </div>
         <a-table
           bordered
-          :data-source="dataSource"
+          :data-source="chgclAddGroup"
           :columns="columns"
           size="small"
           style="margin-top:10px"
@@ -75,6 +75,7 @@
               placeholder="选择项目类型"
               @change="selectprojectType(record.key, $event)"
               v-if="projectType"
+              :default-value="record.number"
             >
               <a-select-option v-for="item in projectType" :key="item.indexs">
                 {{ item.value }}
@@ -89,7 +90,7 @@
           </template>
           <template slot="operation" slot-scope="text, record">
             <a-popconfirm
-              v-if="dataSource.length"
+              v-if="chgclAddGroup.length"
               title="是否确认删除?"
               @confirm="() => onDelete(record.key)"
             >
@@ -102,15 +103,27 @@
         <div class="basicInfo-title">
           事项说明
         </div>
-        <a-textarea :rows="2" style="margin-top:5px" />
+        <a-textarea
+          :rows="2"
+          style="margin-top:5px"
+          v-model="eventExplaination"
+        />
       </div>
       <div class="detail-item otherInfoContainer">
         <div class="otherInfo">
           <div class="smallContainer">
             <div class="title">项目起止时间:</div>
             <div class=" positionModify">
-              <a-date-picker @change="onChange" />~
-              <a-date-picker @change="onChange" />
+              <a-date-picker
+                @change="projectStartTimeChange"
+                v-if="projectStartDate"
+                :default-value="moment(projectStartDate, 'YYYY-MM-DD')"
+              />~
+              <a-date-picker
+                @change="projectEndDateChange"
+                v-if="projectEndDate"
+                :default-value="moment(projectEndDate, 'YYYY-MM-DD')"
+              />
             </div>
           </div>
           <div class="smallContainer">
@@ -124,21 +137,35 @@
           <div class="smallContainer">
             <div class="title">委托单位现场负责人:</div>
             <div class="inputContainer">
-              <a-input placeholder="委托单位现场负责人" />
+              <a-input
+                placeholder="委托单位现场负责人"
+                v-model="sceneClientCharge"
+              />
             </div>
             <div class="title title_two">确认时间:</div>
             <div class="inputContainer">
-              <a-date-picker @change="onChange" />
+              <a-date-picker
+                @change="clientConfirmDateChange"
+                v-if="clientConfirmDate"
+                :default-value="moment(clientConfirmDate, 'YYYY-MM-DD')"
+              />
             </div>
           </div>
           <div class="smallContainer">
             <div class="title">测绘现场负责人:</div>
             <div class="inputContainer">
-              <a-input placeholder="测绘现场负责人" />
+              <a-input
+                placeholder="测绘现场负责人"
+                v-model="sceneChargePerson"
+              />
             </div>
             <div class="title title_two">确认时间:</div>
             <div class="inputContainer">
-              <a-date-picker @change="onChange" />
+              <a-date-picker
+                @change="sceneConfirmDateChange"
+                v-if="sceneConfirmDate"
+                :default-value="moment(sceneConfirmDate, 'YYYY-MM-DD')"
+              />
             </div>
           </div>
         </div>
@@ -146,7 +173,7 @@
           <div class="smallContainer">
             <div class="title">提交资料:</div>
             <div class="inputContainer">
-              <a-checkbox-group @change="onChange">
+              <a-checkbox-group @change="onMaterialChange">
                 <a-row>
                   <a-checkbox value="A">
                     外业草图
@@ -164,10 +191,14 @@
         </div>
       </div>
       <div class="detail-item buttonContainer">
-        <a-button type="default" style="margin-right:10px">
+        <a-button
+          type="default"
+          style="margin-right:10px"
+          @click="temporarySave"
+        >
           暂存
         </a-button>
-        <a-button type="primary">
+        <a-button type="primary" @click="upLoadMappingResult">
           提交
         </a-button>
       </div>
@@ -178,7 +209,10 @@
 import request from "@/utils/request";
 import MappingOpinionEditableTable from "./MappingOpinionEditableTable";
 import projectdata from "../../../../assets/menulist/project-type.json";
+import moment from "moment";
 const projectData = projectdata;
+import axios from "axios";
+import GLOBAL from "./../../../../utils/global_variable";
 export default {
   props: ["projectInfo"],
   components: {
@@ -186,16 +220,34 @@ export default {
   },
   data() {
     return {
-      undertakingOpinion: "已完成测绘，通过自查，现提交质检",
+      undertakingOpinion: "已完成测绘，通过自查，现提交质检。",
       fileList: [],
       uploading: false,
       userData: null,
-      dataSource: [],
-      count: 0,
+      chgclAddGroup: [
+        {
+          key: 0,
+          number: "2",
+          type: "",
+          unit: "平方米",
+        },
+      ],
+      count: 1,
       projectType: projectData.data,
+      projectStartDate: moment().format("YYYY-MM-DD"),
+      projectEndDate: moment().format("YYYY-MM-DD"),
+      clientConfirmDate: moment().format("YYYY-MM-DD"),
+      sceneConfirmDate: moment().format("YYYY-MM-DD"),
+      uploadMaterialType: [],
+      sceneChargePerson: "",
+      sceneClientCharge: "",
+      mappingStaffGroup: "",
+      workingDetail: "",
+      eventExplaination: "",
+      postParams: null,
       columns: [
         {
-          title: "工程类别",
+          title: "工作内容",
           dataIndex: "projectType",
           width: "20%",
           scopedSlots: { customRender: "projectType" },
@@ -218,6 +270,7 @@ export default {
     };
   },
   methods: {
+    moment,
     //***********************文件上传开始 ******************************//
     handleRemove(file) {
       const index = this.fileList.indexOf(file);
@@ -243,54 +296,157 @@ export default {
       this.userData = user.data;
     },
     staffPicker(value) {
-      console.log(`selected ${value}`);
+      this.mappingStaffGroup = value;
     },
     //* 动态添加任务 *//
     onChange(date, dateString) {},
     selectprojectType(key, value) {
-      const dataSource = [...this.dataSource];
-      console.log(key, value, dataSource);
-      const target = dataSource.find((item) => item.key === key);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      // this.postParams.append(key, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
         target.number = value;
-        if (value == 1) {
-          target.unit = "平方米";
-        } else {
-          target.unit = "棵";
+        switch (value) {
+          case "1":
+            target.unit = "平方米";
+            break;
+          case "2":
+            target.unit = "平方米";
+            break;
+          case "3":
+            target.unit = "平方米";
+            break;
+          case "4":
+            target.unit = "栋";
+            break;
+          case "5":
+            target.unit = "栋";
+            break;
+          case "6":
+            target.unit = "栋";
+            break;
+          case "7":
+            target.unit = "个";
+            break;
+          case "8":
+            target.unit = "栋";
+            break;
+          case "9":
+            target.unit = "公里";
+            break;
+          case "10":
+            target.unit = "平方米";
+            break;
+          case "11":
+            target.unit = "公里";
+            break;
+          case "12":
+            target.unit = "平方米";
+            break;
+          case "13":
+            target.unit = "点";
+            break;
+          case "14":
+            target.unit = "平方米";
+            break;
+          case "15":
+            target.unit = "棵";
+            break;
+          case "16":
+            target.unit = "户";
+            break;
+          case "17":
+            target.unit = "平方米";
+            break;
         }
-        this.dataSource = dataSource;
+        this.chgclAddGroup = chgclAddGroup;
       }
-      console.log(this.dataSource);
+      // this.postParams.append(this.chgclAddGroup);
     },
     onCellChange(key, dataIndex, value) {
-      const dataSource = [...this.dataSource];
-      console.log(key, dataIndex, value, dataSource);
-      const target = dataSource.find((item) => item.key === key);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      //this.postParams.append(key, dataIndex, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
         target[dataIndex] = value;
-        this.dataSource = dataSource;
+        this.chgclAddGroup = chgclAddGroup;
       }
     },
     onDelete(key) {
-      console.log(key);
-      const dataSource = [...this.dataSource];
-      this.dataSource = dataSource.filter((item) => item.key !== key);
+      // this.postParams.append(key);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      this.chgclAddGroup = chgclAddGroup.filter((item) => item.key !== key);
     },
     handleAdd() {
-      const { count, dataSource } = this;
+      const { count, chgclAddGroup } = this;
       const newData = {
         key: this.count,
         type: "",
         number: "",
         unit: "",
       };
-      this.dataSource = [...dataSource, newData];
+      this.chgclAddGroup = [...chgclAddGroup, newData];
       this.count = count + 1;
+    },
+    //* 动态添加任务结束 *//
+    projectStartTimeChange(date, dateString) {
+      this.projectStartDate = dateString;
+    },
+    projectEndDateChange(date, dateString) {
+      this.projectEndDate = dateString;
+    },
+    clientConfirmDateChange(date, dateString) {
+      this.clientConfirmDate = dateString;
+    },
+    sceneConfirmDateChange(date, dateString) {
+      this.sceneConfirmDate = dateString;
+    },
+    onMaterialChange(checkedValues) {
+      this.uploadMaterialType = checkedValues;
+    },
+    upLoadMappingResult() {
+      console.log("uploadClicked");
+      console.log("承办意见", this.undertakingOpinion);
+      console.log("全部参与测绘人员", this.mappingStaffGroup);
+      console.log("工作内容", this.workingDetail);
+      console.log("工程量", this.chgclAddGroup);
+      console.log("事项说明", this.eventExplaination);
+      console.log("projectsdate", this.projectStartDate);
+      console.log("项目结束时间", this.projectEndDate);
+      console.log("委托单位现场负责人", this.sceneClientCharge);
+      console.log("委托单位确认时间", this.clientConfirmDate);
+      console.log("测绘现场负责人", this.sceneChargePerson);
+      console.log("测绘现场确认时间", this.sceneConfirmDate);
+      console.log("提交资料", this.uploadMaterialType);
+    },
+    temporarySave() {
+      console.log("暂存");
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectsn", this.projectInfo);
+      //this.postParams.append("承办意见", this.undertakingOpinion);
+      this.postParams.append("dongbz", this.mappingStaffGroup); //  需要格式化
+      this.postParams.append("gznr", this.workingDetail);
+      this.postParams.append("gcl", this.chgclAddGroup);
+      this.postParams.append("smsx", this.eventExplaination);
+      this.postParams.append("timebegin", this.projectStartDate);
+      this.postParams.append("timeend", this.projectEndDate);
+      this.postParams.append("wtdwxcfzr", this.sceneClientCharge);
+      this.postParams.append("wtdwqrsj", this.clientConfirmDate);
+      this.postParams.append("chxcfzr", this.sceneChargePerson);
+      this.postParams.append("chqrjs", this.sceneConfirmDate);
+      this.postParams.append("tjzllist", this.uploadMaterialType);
+      axios
+        .post(
+          GLOBAL.env + "/mappingundertaking/remainMappingUndertaking",
+          this.postParams
+        )
+        .then((res) => {
+          console.log(res);
+        });
     },
   },
   created: function() {
     this.getchUsers();
-    console.log(this.projectInfo);
   },
 };
 </script>

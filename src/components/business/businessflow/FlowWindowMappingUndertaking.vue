@@ -155,9 +155,9 @@ const columns = [
     width: 120,
   },
   {
-    title: "窗口登记",
-    key: "djmanUser",
-    dataIndex: "djmanUser",
+    title: "操作者",
+    key: "pjmanUser",
+    dataIndex: "pjmanUser",
     width: 120,
   },
   {
