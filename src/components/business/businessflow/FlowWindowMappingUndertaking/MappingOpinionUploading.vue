@@ -37,8 +37,13 @@
         <span>
           全部参与测绘人员:
         </span>
-        <a-select mode="tags" style="width: 80%" @change="staffPicker">
-          <a-select-option v-for="user in userData" :key="user.UserID">
+        <a-select
+          mode="tags"
+          style="width: 80%"
+          @change="staffPicker"
+          :default-value="mappingStaffGroup"
+        >
+          <a-select-option v-for="user in userData" :key="user.UserName">
             {{ user.UserName }}
           </a-select-option>
         </a-select>
@@ -75,7 +80,7 @@
               placeholder="选择项目类型"
               @change="selectprojectType(record.key, $event)"
               v-if="projectType"
-              :default-value="record.number"
+              :default-value="record.type"
             >
               <a-select-option v-for="item in projectType" :key="item.indexs">
                 {{ item.value }}
@@ -85,7 +90,7 @@
           <template slot="projectNumber" slot-scope="text, record">
             <MappingOpinionEditableTable
               :text="text"
-              @change="onCellChange(record.key, 'projectNumber', $event)"
+              @change="onCellChange(record.key, 'number', $event)"
             />
           </template>
           <template slot="operation" slot-scope="text, record">
@@ -173,15 +178,18 @@
           <div class="smallContainer">
             <div class="title">提交资料:</div>
             <div class="inputContainer">
-              <a-checkbox-group @change="onMaterialChange">
+              <a-checkbox-group
+                @change="onMaterialChange"
+                :value="uploadMaterialType"
+              >
                 <a-row>
-                  <a-checkbox value="A">
+                  <a-checkbox value="1">
                     外业草图
                   </a-checkbox>
-                  <a-checkbox value="B">
+                  <a-checkbox value="2">
                     成果资料
                   </a-checkbox>
-                  <a-checkbox value="C">
+                  <a-checkbox value="3">
                     其他
                   </a-checkbox>
                 </a-row>
@@ -224,24 +232,17 @@ export default {
       fileList: [],
       uploading: false,
       userData: null,
-      chgclAddGroup: [
-        {
-          key: 0,
-          number: "2",
-          type: "",
-          unit: "平方米",
-        },
-      ],
+      chgclAddGroup: [],
       count: 1,
       projectType: projectData.data,
-      projectStartDate: moment().format("YYYY-MM-DD"),
-      projectEndDate: moment().format("YYYY-MM-DD"),
-      clientConfirmDate: moment().format("YYYY-MM-DD"),
-      sceneConfirmDate: moment().format("YYYY-MM-DD"),
+      projectStartDate: "",
+      projectEndDate: "",
+      clientConfirmDate: "",
+      sceneConfirmDate: "",
       uploadMaterialType: [],
       sceneChargePerson: "",
       sceneClientCharge: "",
-      mappingStaffGroup: "",
+      mappingStaffGroup: [],
       workingDetail: "",
       eventExplaination: "",
       postParams: null,
@@ -295,6 +296,63 @@ export default {
       const user = await request.get("/mappingundertaking/getchUsers");
       this.userData = user.data;
     },
+    async getUndertakingInfo() {
+      const data = await request.get(
+        "/mappingundertaking/mappingUndertakingInit",
+        { params: { projectsn: this.projectInfo } }
+      );
+      //this.postParams.append("smsx", this.eventExplaination); //说明事项
+      // this.postParams.append("gznr", project_type_str); //工作内容
+      // this.postParams.append("gcl", project_num_str); //工程量
+      // this.postParams.append("smsx", this.eventExplaination); //说明事项
+      // this.postParams.append("timebegin", this.projectStartDate); //开始时间
+      // this.postParams.append("timeend", this.projectEndDate); //结束时间
+      // this.postParams.append("wtdwxcfzr", this.sceneClientCharge); //委托单位负责人
+      // this.postParams.append("wtdwqrsj", this.clientConfirmDate); //委托单位确认时间
+      // this.postParams.append("chxcfzr", this.sceneChargePerson); //测绘现场负责人
+      // this.postParams.append("chqrsj", this.sceneConfirmDate); //测绘确认时间
+      // this.postParams.append("tjzllist", this.uploadMaterialType); //提交资料清单
+      console.log("data", data.data[0]);
+      this.eventExplaination = data.data[0].smsx;
+      this.sceneClientCharge = data.data[0].wtdwxcfzr;
+      this.sceneChargePerson = data.data[0].chxcfzr;
+      this.projectStartDate = data.data[0].timebegin;
+      this.clientConfirmDate = data.data[0].wtdwqrsj;
+      this.sceneConfirmDate = data.data[0].chqrsj;
+      this.uploadMaterialType = data.data[0].tjzllist.split(",");
+      //this.mappingStaffGroup = data.data[0].dongbz.split(",");
+      console.log(data.data[0].gznr);
+      console.log(data.data[0].gcl);
+      for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
+        this.mappingStaffGroup.push(
+          data.data[0].dongbz.split(";")[j].split(",")[0]
+        );
+      }
+      this.count = data.data[0].gznr.split(",").length;
+      for (let j = 0; j < this.count; j++) {
+        let newData = {
+          key: j + 1,
+          type: data.data[0].gznr.split(",")[j],
+          number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
+          unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
+        };
+        console.log(newData);
+        this.chgclAddGroup.push(newData);
+      }
+      if (this.projectStartDate === "") {
+        this.projectStartDate = moment().format("YYYY-MM-DD");
+      }
+      this.projectEndDate = data.data[0].timeend;
+      if (this.projectEndDate === "") {
+        this.projectEndDate = moment().format("YYY-MM-DD");
+      }
+      if (this.clientConfirmDate === "") {
+        this.clientConfirmDate = moment().format("YYY-MM-DD");
+      }
+      if (this.sceneConfirmDate === "") {
+        this.sceneConfirmDate = moment().format("YYY-MM-DD");
+      }
+    },
     staffPicker(value) {
       this.mappingStaffGroup = value;
     },
@@ -305,57 +363,73 @@ export default {
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
-        target.number = value;
         switch (value) {
           case "1":
+            target.type = "面积预测";
             target.unit = "平方米";
             break;
           case "2":
+            target.type = "面积实测";
             target.unit = "平方米";
             break;
           case "3":
+            target.type = "人防预测";
             target.unit = "平方米";
             break;
           case "4":
+            target.type = "人防实测";
             target.unit = "栋";
             break;
           case "5":
+            target.type = "施工放样";
             target.unit = "栋";
             break;
           case "6":
+            target.type = "竣工测量";
             target.unit = "栋";
             break;
           case "7":
+            target.type = "控制测量";
             target.unit = "个";
             break;
           case "8":
+            target.type = "日照测量";
             target.unit = "栋";
             break;
           case "9":
+            target.type = "管线测量";
             target.unit = "公里";
             break;
           case "10":
+            target.type = "土方测量";
             target.unit = "平方米";
             break;
           case "11":
+            target.type = "断面测量";
             target.unit = "公里";
             break;
           case "12":
+            target.type = "地形测量";
             target.unit = "平方米";
             break;
           case "13":
+            target.type = "变形测量";
             target.unit = "点";
             break;
           case "14":
+            target.type = "宗地调查";
             target.unit = "平方米";
             break;
           case "15":
+            target.type = "其他测量";
             target.unit = "棵";
             break;
           case "16":
+            target.type = "分户调查";
             target.unit = "户";
             break;
           case "17":
+            target.type = "土地分割";
             target.unit = "平方米";
             break;
         }
@@ -423,18 +497,32 @@ export default {
       console.log("暂存");
       this.postParams = new URLSearchParams();
       this.postParams.append("projectsn", this.projectInfo);
-      //this.postParams.append("承办意见", this.undertakingOpinion);
-      this.postParams.append("dongbz", this.mappingStaffGroup); //  需要格式化
-      this.postParams.append("gznr", this.workingDetail);
-      this.postParams.append("gcl", this.chgclAddGroup);
-      this.postParams.append("smsx", this.eventExplaination);
-      this.postParams.append("timebegin", this.projectStartDate);
-      this.postParams.append("timeend", this.projectEndDate);
-      this.postParams.append("wtdwxcfzr", this.sceneClientCharge);
-      this.postParams.append("wtdwqrsj", this.clientConfirmDate);
-      this.postParams.append("chxcfzr", this.sceneChargePerson);
-      this.postParams.append("chqrjs", this.sceneConfirmDate);
-      this.postParams.append("tjzllist", this.uploadMaterialType);
+      let staff_str = "";
+      for (let j = 0; j < this.mappingStaffGroup.length; j++) {
+        staff_str += this.mappingStaffGroup[j] + ",0" + ";";
+      }
+      this.postParams.append("dongbz", staff_str); //  测绘参与全部人员
+      let project_type_str = "";
+      let project_num_str = "";
+      for (let j = 0; j < this.chgclAddGroup.length; j++) {
+        project_type_str += this.chgclAddGroup[j].type + ",";
+        project_num_str +=
+          this.chgclAddGroup[j].number + this.chgclAddGroup[j].unit + ";";
+      }
+      project_type_str = project_type_str.substring(
+        0,
+        project_type_str.length - 1
+      );
+      this.postParams.append("gznr", project_type_str); //工作内容
+      this.postParams.append("gcl", project_num_str); //工程量
+      this.postParams.append("smsx", this.eventExplaination); //说明事项
+      this.postParams.append("timebegin", this.projectStartDate); //开始时间
+      this.postParams.append("timeend", this.projectEndDate); //结束时间
+      this.postParams.append("wtdwxcfzr", this.sceneClientCharge); //委托单位负责人
+      this.postParams.append("wtdwqrsj", this.clientConfirmDate); //委托单位确认时间
+      this.postParams.append("chxcfzr", this.sceneChargePerson); //测绘现场负责人
+      this.postParams.append("chqrsj", this.sceneConfirmDate); //测绘确认时间
+      this.postParams.append("tjzllist", this.uploadMaterialType); //提交资料清单
       axios
         .post(
           GLOBAL.env + "/mappingundertaking/remainMappingUndertaking",
@@ -447,6 +535,9 @@ export default {
   },
   created: function() {
     this.getchUsers();
+  },
+  mounted: function() {
+    this.getUndertakingInfo();
   },
 };
 </script>
