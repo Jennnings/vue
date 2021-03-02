@@ -46,6 +46,38 @@ const routes = [
           ),
       },
       {
+        path: "resultcheck",
+        name: "FlowWindowResultCheck",
+        component: () =>
+          import(
+            "../components/business/businessflow/FlowWindowResultCheck.vue"
+          ),
+      },
+      {
+        path: "resultapprovement",
+        name: "FlowWindowResultApprovement",
+        component: () =>
+          import(
+            "../components/business/businessflow/FlowWindowResultApprovement.vue"
+          ),
+      },
+      {
+        path: "calculateexpense",
+        name: "FlowWindowCalculateExpense",
+        component: () =>
+          import(
+            "../components/business/businessflow/FlowWindowCalculateExpense.vue"
+          ),
+      },
+      {
+        path: "recordproject",
+        name: "FlowWindowRecordProject",
+        component: () =>
+          import(
+            "../components/business/businessflow/FlowWindowRecordProject.vue"
+          ),
+      },
+      {
         path: "contractmanagement",
         name: "FlowWindowContract",
         component: () =>

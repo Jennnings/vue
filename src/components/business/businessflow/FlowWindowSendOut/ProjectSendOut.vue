@@ -56,7 +56,7 @@
         </div>
       </div>
       <div class="item-option">
-        <a-button type="danger">
+        <a-button type="danger" @click="sendBack">
           退回
         </a-button>
       </div>
@@ -103,6 +103,16 @@ export default {
           this.$emit("childFn");
         });
       console.log("sendOut");
+    },
+    sendBack() {
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectsn", this.projectInfo);
+      axios
+        .post(GLOBAL.env + "/sendout/projectSendBack", this.postParams)
+        .then((res) => {
+          console.log(res);
+          this.$emit("childFn");
+        });
     },
   },
   created: function() {

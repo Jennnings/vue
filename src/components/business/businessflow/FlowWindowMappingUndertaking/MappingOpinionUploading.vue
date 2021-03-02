@@ -123,11 +123,13 @@
                 @change="projectStartTimeChange"
                 v-if="projectStartDate"
                 :default-value="moment(projectStartDate, 'YYYY-MM-DD')"
+                :allowClear="false"
               />~
               <a-date-picker
                 @change="projectEndDateChange"
                 v-if="projectEndDate"
                 :default-value="moment(projectEndDate, 'YYYY-MM-DD')"
+                :allowClear="false"
               />
             </div>
           </div>
@@ -153,6 +155,7 @@
                 @change="clientConfirmDateChange"
                 v-if="clientConfirmDate"
                 :default-value="moment(clientConfirmDate, 'YYYY-MM-DD')"
+                :allowClear="false"
               />
             </div>
           </div>
@@ -170,6 +173,7 @@
                 @change="sceneConfirmDateChange"
                 v-if="sceneConfirmDate"
                 :default-value="moment(sceneConfirmDate, 'YYYY-MM-DD')"
+                :allowClear="false"
               />
             </div>
           </div>
@@ -301,43 +305,44 @@ export default {
         "/mappingundertaking/mappingUndertakingInit",
         { params: { projectsn: this.projectInfo } }
       );
-      //this.postParams.append("smsx", this.eventExplaination); //说明事项
-      // this.postParams.append("gznr", project_type_str); //工作内容
-      // this.postParams.append("gcl", project_num_str); //工程量
-      // this.postParams.append("smsx", this.eventExplaination); //说明事项
-      // this.postParams.append("timebegin", this.projectStartDate); //开始时间
-      // this.postParams.append("timeend", this.projectEndDate); //结束时间
-      // this.postParams.append("wtdwxcfzr", this.sceneClientCharge); //委托单位负责人
-      // this.postParams.append("wtdwqrsj", this.clientConfirmDate); //委托单位确认时间
-      // this.postParams.append("chxcfzr", this.sceneChargePerson); //测绘现场负责人
-      // this.postParams.append("chqrsj", this.sceneConfirmDate); //测绘确认时间
-      // this.postParams.append("tjzllist", this.uploadMaterialType); //提交资料清单
-      console.log("data", data.data[0]);
       this.eventExplaination = data.data[0].smsx;
       this.sceneClientCharge = data.data[0].wtdwxcfzr;
       this.sceneChargePerson = data.data[0].chxcfzr;
       this.projectStartDate = data.data[0].timebegin;
       this.clientConfirmDate = data.data[0].wtdwqrsj;
       this.sceneConfirmDate = data.data[0].chqrsj;
-      this.uploadMaterialType = data.data[0].tjzllist.split(",");
+      if (data.data[0].tjzllist != null) {
+        this.uploadMaterialType = data.data[0].tjzllist.split(",");
+      } else {
+        this.uploadMaterialType = [];
+      }
       //this.mappingStaffGroup = data.data[0].dongbz.split(",");
       console.log(data.data[0].gznr);
       console.log(data.data[0].gcl);
-      for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
-        this.mappingStaffGroup.push(
-          data.data[0].dongbz.split(";")[j].split(",")[0]
-        );
+      if (data.data[0].dongbz != null) {
+        for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
+          this.mappingStaffGroup.push(
+            data.data[0].dongbz.split(";")[j].split(",")[0]
+          );
+        }
+      } else {
+        this.mappingStaffGroup = [];
       }
-      this.count = data.data[0].gznr.split(",").length;
-      for (let j = 0; j < this.count; j++) {
-        let newData = {
-          key: j + 1,
-          type: data.data[0].gznr.split(",")[j],
-          number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
-          unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
-        };
-        console.log(newData);
-        this.chgclAddGroup.push(newData);
+      if (data.data[0].gznr != null) {
+        this.count = data.data[0].gznr.split(",").length;
+        for (let j = 0; j < this.count; j++) {
+          let newData = {
+            key: j + 1,
+            type: data.data[0].gznr.split(",")[j],
+            number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
+            unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
+          };
+          console.log(newData);
+          this.chgclAddGroup.push(newData);
+        }
+      } else {
+        this.count = 0;
+        this.chgclAddGroup = [];
       }
       if (this.projectStartDate === "") {
         this.projectStartDate = moment().format("YYYY-MM-DD");
@@ -357,7 +362,6 @@ export default {
       this.mappingStaffGroup = value;
     },
     //* 动态添加任务 *//
-    onChange(date, dateString) {},
     selectprojectType(key, value) {
       const chgclAddGroup = [...this.chgclAddGroup];
       // this.postParams.append(key, value, chgclAddGroup);
@@ -479,19 +483,46 @@ export default {
       this.uploadMaterialType = checkedValues;
     },
     upLoadMappingResult() {
-      console.log("uploadClicked");
-      console.log("承办意见", this.undertakingOpinion);
-      console.log("全部参与测绘人员", this.mappingStaffGroup);
-      console.log("工作内容", this.workingDetail);
-      console.log("工程量", this.chgclAddGroup);
-      console.log("事项说明", this.eventExplaination);
-      console.log("projectsdate", this.projectStartDate);
-      console.log("项目结束时间", this.projectEndDate);
-      console.log("委托单位现场负责人", this.sceneClientCharge);
-      console.log("委托单位确认时间", this.clientConfirmDate);
-      console.log("测绘现场负责人", this.sceneChargePerson);
-      console.log("测绘现场确认时间", this.sceneConfirmDate);
-      console.log("提交资料", this.uploadMaterialType);
+      console.log("提交");
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectsn", this.projectInfo);
+      let staff_str = "";
+      for (let j = 0; j < this.mappingStaffGroup.length; j++) {
+        staff_str += this.mappingStaffGroup[j] + ",0" + ";";
+      }
+      this.postParams.append("dongbz", staff_str); //  测绘参与全部人员
+      let project_type_str = "";
+      let project_num_str = "";
+      for (let j = 0; j < this.chgclAddGroup.length; j++) {
+        project_type_str += this.chgclAddGroup[j].type + ",";
+        project_num_str +=
+          this.chgclAddGroup[j].number + this.chgclAddGroup[j].unit + ";";
+      }
+      project_type_str = project_type_str.substring(
+        0,
+        project_type_str.length - 1
+      );
+      this.postParams.append("gznr", project_type_str); //工作内容
+      this.postParams.append("gcl", project_num_str); //工程量
+      this.postParams.append("smsx", this.eventExplaination); //说明事项
+      this.postParams.append("timebegin", this.projectStartDate); //开始时间
+      this.postParams.append("timeend", this.projectEndDate); //结束时间
+      this.postParams.append("wtdwxcfzr", this.sceneClientCharge); //委托单位负责人
+      this.postParams.append("wtdwqrsj", this.clientConfirmDate); //委托单位确认时间
+      this.postParams.append("chxcfzr", this.sceneChargePerson); //测绘现场负责人
+      this.postParams.append("chqrsj", this.sceneConfirmDate); //测绘确认时间
+      this.postParams.append("tjzllist", this.uploadMaterialType); //提交资料清单
+      axios
+        .post(
+          GLOBAL.env + "/mappingundertaking/postMappingUndertaking",
+          this.postParams
+        )
+        .then((res) => {
+          if (res.data == "success") {
+            this.$message.success("提交成功");
+            this.$emit("uploadSuccess");
+          }
+        });
     },
     temporarySave() {
       console.log("暂存");
@@ -529,7 +560,9 @@ export default {
           this.postParams
         )
         .then((res) => {
-          console.log(res);
+          if (res.data == "success") {
+            this.$message.success("修改成功");
+          }
         });
     },
   },

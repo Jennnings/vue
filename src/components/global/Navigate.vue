@@ -21,16 +21,16 @@
         <a-menu-item key="qualitycheck">
           质量检查
         </a-menu-item>
-        <a-menu-item key="5">
+        <a-menu-item key="resultcheck">
           成果审核
         </a-menu-item>
-        <a-menu-item key="6">
+        <a-menu-item key="resultapprovement">
           成果审批
         </a-menu-item>
-        <a-menu-item key="7">
+        <a-menu-item key="calculateexpense">
           核算收费
         </a-menu-item>
-        <a-menu-item key="8">
+        <a-menu-item key="recordproject">
           项目归档
         </a-menu-item>
         <a-menu-item key="contractmanagement">

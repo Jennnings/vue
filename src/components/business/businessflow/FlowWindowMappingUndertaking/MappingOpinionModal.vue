@@ -7,7 +7,10 @@
       @tabChange="(key) => onTabChange(key, 'noTitleKey')"
     >
       <div v-if="noTitleKey === 'undertaking'">
-        <MappingOpinionUploading v-bind:projectInfo="projectInfo" />
+        <MappingOpinionUploading
+          v-bind:projectInfo="projectInfo"
+          @uploadSuccess="postSuccess"
+        />
       </div>
       <div v-else-if="noTitleKey === 'backtoformer'">
         <div class="backFormerContainer">
@@ -18,7 +21,7 @@
             <a-textarea placeholder="退回意见" :rows="4" />
           </div>
           <div class="buttonContainer">
-            <a-button type="danger">
+            <a-button type="danger" @click="sendBack">
               退回
             </a-button>
           </div>
@@ -54,6 +57,7 @@ export default {
       userData: null,
       undertakingOpinion: "已完成测绘，通过自查，现提交质检。",
       undertakingOpinionParams: {},
+      postParams: null,
     };
   },
   methods: {
@@ -64,32 +68,23 @@ export default {
     onTabChange(key, type) {
       this[type] = key;
     },
-    staffPicker(value) {
-      console.log(`selected `);
+    postSuccess() {
+      this.$emit("modalClose");
     },
-    onChange(date, dateString) {},
-    onCellChange(key, dataIndex, value) {
-      const dataSource = [...this.dataSource];
-      const target = dataSource.find((item) => item.key === key);
-      if (target) {
-        target[dataIndex] = value;
-        this.dataSource = dataSource;
-      }
-    },
-    onDelete(key) {
-      const dataSource = [...this.dataSource];
-      this.dataSource = dataSource.filter((item) => item.key !== key);
-    },
-    handleAdd() {
-      const { count, dataSource } = this;
-      const newData = {
-        key: count,
-        name: `Edward King ${count}`,
-        age: 32,
-        address: `London, Park Lane no. ${count}`,
-      };
-      this.dataSource = [...dataSource, newData];
-      this.count = count + 1;
+    sendBack() {
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectsn", this.projectInfo);
+      axios
+        .post(
+          GLOBAL.env + "/mappingundertaking/projectSendBack",
+          this.postParams
+        )
+        .then((res) => {
+          if (res.data == "success") {
+            this.$message.success("退回成功");
+            this.$emit("modalClose");
+          }
+        });
     },
   },
   created: function() {
@@ -182,6 +177,7 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    margin-right: 10px;
   }
 }
 </style>

@@ -105,7 +105,10 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <MappingOpinionModal v-bind:projectInfo="selectProjectInfo" />
+      <MappingOpinionModal
+        v-bind:projectInfo="selectProjectInfo"
+        @modalClose="postSuccessParent"
+      />
     </a-modal>
   </div>
 </template>
@@ -121,7 +124,7 @@ const columns = [
     key: "Projectsn",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
-    width: 100,
+    width: 150,
   },
   {
     title: "项目名称",
@@ -282,6 +285,11 @@ export default {
       this.mappingOpinionVisible = true;
       this.selectProjectInfo = item;
       console.log("to next step", item);
+    },
+    postSuccessParent() {
+      console.log("要删除这个窗口");
+      this.mappingOpinionVisible = false;
+      this.clickrequest();
     },
   },
   created: function() {

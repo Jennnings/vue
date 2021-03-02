@@ -34,7 +34,7 @@
           <a-auto-complete
             style="width: 200px;margin-left:10px"
             placeholder="委托单位"
-            v-model="queryProjectName"
+            v-model="queryProjectClient"
           />
         </div>
         <div class="itemName">
@@ -75,7 +75,7 @@
           >
             <span v-if="tag === '1'">登记中</span>
             <span v-if="tag === '2'">派件中</span>
-            <span v-if="tag !== '1' && tag !== '2'">测绘中</span>
+            <span v-if="tag !== '1' && tag !== '2'">检查中</span>
           </a-tag>
         </span>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
@@ -99,11 +99,25 @@
     >
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <a-modal
+      v-model="qualityCheckOpinionVisible"
+      title="质检意见"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <QualityCheck
+        v-bind:projectInfo="selectProjectInfo"
+        @closemodal="parentCloseModal"
+      />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+import QualityCheck from "./FlowWindowQualityCheck/QualityCheckOpinion";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -131,24 +145,26 @@ const columns = [
     width: 150,
   },
   {
-    title: "派件时间",
-    key: "hopeToEnterTime",
-    dataIndex: "hopeToEnterTime",
-    width: 100,
-  },
-  {
     title: "当前环节",
     key: "processCondition",
     dataIndex: "processCondition",
     scopedSlots: { customRender: "tags" },
     width: 120,
   },
+
   {
-    title: "窗口登记",
-    key: "djmanUser",
-    dataIndex: "djmanUser",
+    title: "测绘承办",
+    key: "clmanUser",
+    dataIndex: "clmanUser",
     width: 120,
   },
+  {
+    title: "测绘提交",
+    key: "clComfirmTime",
+    dataIndex: "clComfirmTime",
+    width: 100,
+  },
+  //TODO 查看模态框取消编辑状态
   {
     title: "查看",
     key: "viewdetail",
@@ -170,6 +186,7 @@ const pagination_setting = {
 export default {
   components: {
     ModifyProject,
+    QualityCheck,
   },
   data() {
     return {
@@ -183,8 +200,11 @@ export default {
       sDate: "",
       eDate: "",
       queryProjectName: "",
+      queryProjectClient: "",
       selectProjectInfo: "",
       queryProjectsn: "",
+      spinning: true,
+      qualityCheckOpinionVisible: false,
     };
   },
   methods: {
@@ -192,16 +212,38 @@ export default {
       const user = await request.get("/qualitycheck/project");
       this.data = user.data;
     },
-    queryClicked() {
+    async queryClicked() {
       console.log("queryClicked");
-      this.clickrequest();
+      const data = await request.get("qualitycheck/projectquery", {
+        params: {
+          projectsn: this.queryProjectsn,
+          projectname: this.queryProjectName,
+          projectClient: this.queryProjectClient,
+          sDate: this.sDate,
+          eDate: this.eDate,
+        },
+      });
+      this.data = data.data;
     },
     viewdetail(item) {
       this.modifyModalVisible = true;
       this.selectProjectInfo = item;
     },
-    onendDateChange() {},
-    onstartDateChange() {},
+    onendDateChange(date, dateString) {
+      this.eDate = dateString;
+    },
+    onstartDateChange(date, dateString) {
+      this.sDate = dateString;
+    },
+    tonextstep(item) {
+      console.log("tonextstep");
+      this.qualityCheckOpinionVisible = true;
+      this.selectProjectInfo = item;
+    },
+    parentCloseModal() {
+      this.qualityCheckOpinionVisible = false;
+      this.clickrequest();
+    },
   },
   created: function() {
     this.clickrequest();
