@@ -2,7 +2,7 @@
   <div class="container">
     <a-menu
       style="width: 200px;height:100%"
-      :default-selected-keys="['1']"
+      :default-selected-keys="defaultSelect"
       :open-keys.sync="openKeys"
       mode="inline"
       @click="handleClick"
@@ -15,22 +15,22 @@
         <a-menu-item key="sendout">
           项目派件
         </a-menu-item>
-        <a-menu-item key="3">
+        <a-menu-item key="mappingundertaking">
           测绘承办
         </a-menu-item>
-        <a-menu-item key="4">
+        <a-menu-item key="qualitycheck">
           质量检查
         </a-menu-item>
-        <a-menu-item key="5">
+        <a-menu-item key="resultcheck">
           成果审核
         </a-menu-item>
-        <a-menu-item key="6">
+        <a-menu-item key="resultapprovement">
           成果审批
         </a-menu-item>
-        <a-menu-item key="7">
+        <a-menu-item key="calculateexpense">
           核算收费
         </a-menu-item>
-        <a-menu-item key="8">
+        <a-menu-item key="recordproject">
           项目归档
         </a-menu-item>
         <a-menu-item key="contractmanagement">
@@ -87,6 +87,7 @@ export default {
     return {
       current: ["mail"],
       openKeys: ["sub1"],
+      defaultSelect: [],
     };
   },
   watch: {
@@ -106,6 +107,10 @@ export default {
       const users = await request.get("/cxch/role");
       console.log(users);
     },
+  },
+  created: function() {
+    const arr = window.location.href.split("/");
+    this.defaultSelect.push(arr[arr.length - 1]);
   },
 };
 </script>

@@ -67,8 +67,8 @@
               :value="projectTypeSelected"
             >
               <div class="supportMaterials">
-                <div v-for="data in projectType" :key="data.key">
-                  <a-checkbox :value="data.key">
+                <div v-for="data in projectType" :key="data.index">
+                  <a-checkbox :value="data.index">
                     {{ data.value }}
                   </a-checkbox>
                 </div>
@@ -80,7 +80,12 @@
           <a-input placeholder="现场坐落" v-model="params.sceneLocation" />
         </a-descriptions-item>
         <a-descriptions-item label="希望进场时间" :span="1">
-          <a-date-picker style="width:100%" @change="hopeToEnterTime" />
+          <a-date-picker
+            style="width:100%"
+            @change="hopeToEnterTime"
+            v-if="params.createTime"
+            :defaultValue="moment(params.hopeToEnterTime, 'YYYY-MM-DD')"
+          />
         </a-descriptions-item>
         <a-descriptions-item label="其他要求" :span="2">
           <a-textarea
@@ -90,10 +95,13 @@
           />
         </a-descriptions-item>
         <a-descriptions-item label="资料清单" :span="2">
-          <a-checkbox-group @change="supportMaterials">
+          <a-checkbox-group
+            @change="supportMaterials"
+            :value="supportMaterialsSelected"
+          >
             <div class="supportMaterials">
               <div v-for="data in otherMaterial" :key="data.index">
-                <a-checkbox :value="data.key">
+                <a-checkbox :value="data.index">
                   {{ data.value }}
                 </a-checkbox>
               </div>
@@ -133,7 +141,7 @@
         </a-button>
       </div>
       <div class="singlebutton">
-        <a-button type="primary" @click="confirmProjectCreate">
+        <a-button type="primary" @click="confirmProjectModify">
           确认
         </a-button>
       </div>
@@ -148,6 +156,7 @@ const listData = listdata;
 const projectData = projectdata;
 import request from "@/utils/request";
 import moment from "moment";
+import GLOBAL from "./../../../../utils/global_variable";
 export default {
   name: "mofify-project",
   props: ["projectInfo"],
@@ -172,24 +181,33 @@ export default {
   },
   methods: {
     async getProjectInfo() {
+      const that = this;
       const tmpdata = await request("/cxch/modifyProjectInfoQuery", {
         params: {
           Projectsn: this.projectInfo,
         },
       });
-      this.params.projectName = tmpdata.data[0].Projectname;
-      this.params.createTime = tmpdata.data[0].Clientdate;
-      this.params.projectClient = tmpdata.data[0].Client;
-      this.params.clientAddress = tmpdata.data[0].Projectaddress;
-      this.params.client = tmpdata.data[0].Clientpeople;
-      this.params.clientTelephone = tmpdata.data[0].Clientpeopletel;
-      this.projectTypeSelected = tmpdata.data[0].Projecttypeid.split(",").map(
-        Number
-      );
-      console.log("modify data", tmpdata.data[0]);
+      Object.keys(tmpdata.data[0]).forEach(function(k) {
+        if (tmpdata.data[0][k] === "undefined") {
+          that.params[k] = "";
+        } else {
+          if (k === "projectTypeSelected") {
+            that.projectTypeSelected = tmpdata.data[0][k]
+              .split(",")
+              .map(Number);
+          } else if (k === "otherMaterial") {
+            that.supportMaterialsSelected = tmpdata.data[0][k]
+              .split(",")
+              .map(Number);
+          } else {
+            that.params[k] = tmpdata.data[0][k];
+          }
+        }
+      });
+      console.log("modify data", tmpdata.data[0], this.params);
     },
     moment,
-    confirmProjectCreate() {
+    confirmProjectModify() {
       console.log("create Project");
       this.params["projectTypeChecked"] = this.projectTypeSelected;
       this.params["otherMaterial"] = this.supportMaterialsSelected;
@@ -210,31 +228,46 @@ export default {
         this.$message.error("请选择项目类型");
         return;
       }
+      this.$message.loading({ content: "更新中...", key: "updating" });
       this.postParams = new URLSearchParams();
-      this.postParams.append("projectName", this.params.projectName);
-      this.postParams.append("projectClient", this.params.projectClient);
-      this.postParams.append("createTime", this.params.createTime);
-      this.postParams.append("client", this.params.client);
-      this.postParams.append("clientTelephone", this.params.clientTelephone);
-      this.postParams.append("contactPerson", this.params.contactPerson);
-      this.postParams.append("contactTelephone", this.params.contactTelephone);
-      this.postParams.append("aggreementID", this.params.aggreementID);
-      this.postParams.append("aggrementName", this.params.aggrementName);
+      this.postParams.append("projectName", this.params.projectName); //项目名称
+      this.postParams.append("projectClient", this.params.projectClient); //委托单位名称
+      this.postParams.append("createTime", this.params.createTime); //委托时间
+      this.postParams.append("clientAddress", this.params.clientAddress); //委托单位地址
+      this.postParams.append("client", this.params.client); //委托人
+      this.postParams.append("clientTelephone", this.params.clientTelephone); //委托人电话
+      this.postParams.append("contactPerson", this.params.contactPerson); //联系人
+      this.postParams.append("contactTelephone", this.params.contactTelephone); //联系人电话
+      this.postParams.append("aggreementID", this.params.aggreementID); //合同编号
+      this.postParams.append("aggrementName", this.params.aggrementName); //合同名称
+      this.postParams.append(
+        "agentConstruction",
+        this.params.agentConstruction
+      ); //代建单位
       this.postParams.append(
         "projectTypeChecked",
         this.params.projectTypeChecked
-      );
-      this.postParams.append("otherMaterial", this.params.otherMaterial);
+      ); //项目类型
+      this.postParams.append("sceneLocation", this.params.sceneLocation); //现场坐落
+      this.postParams.append("hopeToEnterTime", this.params.hopeToEnterTime); //希望进场时间
+      this.postParams.append("otherRequirement", this.params.otherRequirement); //其他要求
+      this.postParams.append("otherMaterial", this.params.otherMaterial); //资料清单
       this.postParams.append(
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
-      );
-      //   axios
-      //     .post("http://127.0.0.1:8000/cxch/insertProject", this.postParams)
-      //     .then((res) => {
-      //       console.log(res);
-      //     });
-      this.$emit("childFn");
+      ); //创建人信息->需要修改 直接后端判断的
+      this.postParams.append("Prjectsn", this.projectInfo);
+      axios
+        .post(GLOBAL.env + "/cxch/modifyProject", this.postParams)
+        .then((res) => {
+          console.log(res);
+          this.$message.success({
+            content: "更新成功!",
+            key: "updating",
+            duration: 2,
+          });
+          //this.$emit("childFn");
+        });
     },
     cancelProjectCreate() {
       console.log("cancel Project");
@@ -270,18 +303,16 @@ export default {
         formData.append("myfile", file);
       });
       this.uploading = true;
-      axios
-        .post("http://192.168.18.38:66/cxch/uploadfile", formData)
-        .then((res) => {
-          console.log(res);
-          if (res.data === "upload over") {
-            this.$message.success("上传成功");
-            this.fileList = [];
-          } else {
-            this.$message.error("上传失败");
-          }
-          this.uploading = false;
-        });
+      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
+        console.log(res);
+        if (res.data === "upload over") {
+          this.$message.success("上传成功");
+          this.fileList = [];
+        } else {
+          this.$message.error("上传失败");
+        }
+        this.uploading = false;
+      });
     },
   },
   created: function() {

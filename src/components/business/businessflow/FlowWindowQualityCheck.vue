@@ -8,7 +8,7 @@
         padding-left:10px;
         font-weight:
         "
-        title="项目派件"
+        title="质量检查"
       />
     </div>
     <div class="toolbar">
@@ -17,7 +17,7 @@
           <span>项目登记号:</span>
           <a-auto-complete
             style="width: 200px;margin-left:10px"
-            placeholder="项目登记号"
+            placeholder="项目名称"
             v-model="queryProjectsn"
           />
         </div>
@@ -75,16 +75,17 @@
           >
             <span v-if="tag === '1'">登记中</span>
             <span v-if="tag === '2'">派件中</span>
-            <span v-if="tag !== '1' && tag !== '2'">结算中</span>
+            <span v-if="tag !== '1' && tag !== '2'">检查中</span>
           </a-tag>
         </span>
-        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
-        <span
-          slot="projectsendout"
-          slot-scope="item"
-          @click="projectSendOut(item)"
+        <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
+          >编辑</a
         >
-          <a>办理</a>
+        <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
+          >办理</a
+        >
+        <span slot="delete" slot-scope="item" @click="deleteClick(item)">
+          <a>删除</a>
         </span>
       </a-table>
     </div>
@@ -99,16 +100,16 @@
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
     <a-modal
-      v-model="projectSendoutVisible"
-      title="派件意见"
+      v-model="qualityCheckOpinionVisible"
+      title="质检意见"
       :footer="null"
-      width="800px"
+      width="1300px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ProjectSendOut
+      <QualityCheck
         v-bind:projectInfo="selectProjectInfo"
-        @childFn="parentFn"
+        @closemodal="parentCloseModal"
       />
     </a-modal>
   </div>
@@ -116,7 +117,7 @@
 <script>
 import request from "@/utils/request";
 import ModifyProject from "./FlowWindowCheckin/ModifyProject";
-import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
+import QualityCheck from "./FlowWindowQualityCheck/QualityCheckOpinion";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -144,36 +145,38 @@ const columns = [
     width: 150,
   },
   {
-    title: "希望进场时间",
-    key: "hopeToEnterTime",
-    dataIndex: "hopeToEnterTime",
-    width: 100,
-  },
-  {
     title: "当前环节",
     key: "processCondition",
     dataIndex: "processCondition",
     scopedSlots: { customRender: "tags" },
-    width: 150,
+    width: 120,
+  },
+
+  {
+    title: "测绘承办",
+    key: "clmanUser",
+    dataIndex: "clmanUser",
+    width: 120,
   },
   {
-    title: "窗口登记",
-    key: "djmanUser",
-    dataIndex: "djmanUser",
-    width: 150,
+    title: "测绘提交",
+    key: "clComfirmTime",
+    dataIndex: "clComfirmTime",
+    width: 100,
   },
+  //TODO 查看模态框取消编辑状态
   {
-    title: "编辑",
-    key: "editor",
+    title: "查看",
+    key: "viewdetail",
     dataIndex: "Projectsn",
-    scopedSlots: { customRender: "editor" },
+    scopedSlots: { customRender: "viewdetail" },
     width: 100,
   },
   {
     title: "办理",
-    key: "projectsendout",
+    key: "tonextstep",
     dataIndex: "Projectsn",
-    scopedSlots: { customRender: "projectsendout" },
+    scopedSlots: { customRender: "tonextstep" },
     width: 100,
   },
 ];
@@ -183,65 +186,62 @@ const pagination_setting = {
 export default {
   components: {
     ModifyProject,
-    ProjectSendOut,
+    QualityCheck,
   },
   data() {
     return {
-      queryProjectName: "",
-      queryProjectsn: "",
       data: null,
       columns,
       pagination_setting,
+      createModalVisible: false,
       modifyModalVisible: false,
-      projectSendoutVisible: false,
-      selectProjectInfo: "",
       distoryThis: true,
-      eDate: "",
+      params: null,
       sDate: "",
+      eDate: "",
+      queryProjectName: "",
       queryProjectClient: "",
+      selectProjectInfo: "",
+      queryProjectsn: "",
+      spinning: true,
+      qualityCheckOpinionVisible: false,
     };
   },
   methods: {
     async clickrequest() {
-      const user = await request.get("/sendout/project");
+      const user = await request.get("/qualitycheck/project");
       this.data = user.data;
     },
     async queryClicked() {
-      console.log(
-        "queryClicked",
-        this.eDate,
-        this.sDate,
-        this.queryProjectName,
-        this.queryProjectsn
-      );
-      const user = await request.get("/sendout/projectQuery", {
+      console.log("queryClicked");
+      const data = await request.get("qualitycheck/projectquery", {
         params: {
-          eDate: this.eDate,
-          sDate: this.sDate,
-          projectName: this.queryProjectName,
-          projectSn: this.queryProjectsn,
+          projectsn: this.queryProjectsn,
+          projectname: this.queryProjectName,
           projectClient: this.queryProjectClient,
+          sDate: this.sDate,
+          eDate: this.eDate,
         },
       });
-      console.log("user", user);
-      this.data = user.data;
+      this.data = data.data;
     },
-    editorClick(item) {
+    viewdetail(item) {
       this.modifyModalVisible = true;
       this.selectProjectInfo = item;
-    },
-    onstartDateChange(date, dateString) {
-      this.sDate = dateString;
     },
     onendDateChange(date, dateString) {
       this.eDate = dateString;
     },
-    projectSendOut(item) {
-      this.projectSendoutVisible = true;
+    onstartDateChange(date, dateString) {
+      this.sDate = dateString;
+    },
+    tonextstep(item) {
+      console.log("tonextstep");
+      this.qualityCheckOpinionVisible = true;
       this.selectProjectInfo = item;
     },
-    parentFn() {
-      this.projectSendoutVisible = false;
+    parentCloseModal() {
+      this.qualityCheckOpinionVisible = false;
       this.clickrequest();
     },
   },

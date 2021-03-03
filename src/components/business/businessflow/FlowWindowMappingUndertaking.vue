@@ -8,7 +8,7 @@
         padding-left:10px;
         font-weight:
         "
-        title="项目派件"
+        title="测绘承办"
       />
     </div>
     <div class="toolbar">
@@ -75,16 +75,15 @@
           >
             <span v-if="tag === '1'">登记中</span>
             <span v-if="tag === '2'">派件中</span>
-            <span v-if="tag !== '1' && tag !== '2'">结算中</span>
+            <span v-if="tag !== '1' && tag !== '2'">测绘中</span>
           </a-tag>
         </span>
         <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
-        <span
-          slot="projectsendout"
-          slot-scope="item"
-          @click="projectSendOut(item)"
+        <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
+          >办理</a
         >
-          <a>办理</a>
+        <span slot="delete" slot-scope="item" @click="deleteClick(item)">
+          <a>删除</a>
         </span>
       </a-table>
     </div>
@@ -99,16 +98,16 @@
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
     <a-modal
-      v-model="projectSendoutVisible"
-      title="派件意见"
+      v-model="mappingOpinionVisible"
+      title="测绘意见"
       :footer="null"
-      width="800px"
+      width="1300px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ProjectSendOut
+      <MappingOpinionModal
         v-bind:projectInfo="selectProjectInfo"
-        @childFn="parentFn"
+        @modalClose="postSuccessParent"
       />
     </a-modal>
   </div>
@@ -116,14 +115,16 @@
 <script>
 import request from "@/utils/request";
 import ModifyProject from "./FlowWindowCheckin/ModifyProject";
-import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
+import axios from "axios";
+import GLOBAL from "./../../../utils/global_variable";
+import MappingOpinionModal from "./FlowWindowMappingUndertaking/MappingOpinionModal";
 const columns = [
   {
     dataIndex: "Projectsn",
     key: "Projectsn",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
-    width: 100,
+    width: 150,
   },
   {
     title: "项目名称",
@@ -144,7 +145,7 @@ const columns = [
     width: 150,
   },
   {
-    title: "希望进场时间",
+    title: "派件时间",
     key: "hopeToEnterTime",
     dataIndex: "hopeToEnterTime",
     width: 100,
@@ -154,13 +155,13 @@ const columns = [
     key: "processCondition",
     dataIndex: "processCondition",
     scopedSlots: { customRender: "tags" },
-    width: 150,
+    width: 120,
   },
   {
-    title: "窗口登记",
-    key: "djmanUser",
-    dataIndex: "djmanUser",
-    width: 150,
+    title: "操作者",
+    key: "pjmanUser",
+    dataIndex: "pjmanUser",
+    width: 120,
   },
   {
     title: "编辑",
@@ -171,9 +172,16 @@ const columns = [
   },
   {
     title: "办理",
-    key: "projectsendout",
+    key: "tonextstep",
     dataIndex: "Projectsn",
-    scopedSlots: { customRender: "projectsendout" },
+    scopedSlots: { customRender: "tonextstep" },
+    width: 100,
+  },
+  {
+    title: "删除",
+    key: "delete",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "delete" },
     width: 100,
   },
 ];
@@ -183,28 +191,31 @@ const pagination_setting = {
 export default {
   components: {
     ModifyProject,
-    ProjectSendOut,
+    MappingOpinionModal,
   },
   data() {
     return {
-      queryProjectName: "",
-      queryProjectsn: "",
       data: null,
       columns,
       pagination_setting,
+      createModalVisible: false,
       modifyModalVisible: false,
-      projectSendoutVisible: false,
-      selectProjectInfo: "",
+      mappingOpinionVisible: false,
       distoryThis: true,
-      eDate: "",
+      params: null,
       sDate: "",
+      eDate: "",
+      queryProjectName: "",
+      selectProjectInfo: "",
+      queryProjectsn: "",
       queryProjectClient: "",
     };
   },
   methods: {
     async clickrequest() {
-      const user = await request.get("/sendout/project");
+      const user = await request.get("/mappingundertaking/project");
       this.data = user.data;
+      console.log(this.data);
     },
     async queryClicked() {
       console.log(
@@ -214,7 +225,7 @@ export default {
         this.queryProjectName,
         this.queryProjectsn
       );
-      const user = await request.get("/sendout/projectQuery", {
+      const user = await request.get("/mappingundertaking/projectQuery", {
         params: {
           eDate: this.eDate,
           sDate: this.sDate,
@@ -230,23 +241,60 @@ export default {
       this.modifyModalVisible = true;
       this.selectProjectInfo = item;
     },
-    onstartDateChange(date, dateString) {
-      this.sDate = dateString;
-    },
     onendDateChange(date, dateString) {
       this.eDate = dateString;
     },
-    projectSendOut(item) {
-      this.projectSendoutVisible = true;
-      this.selectProjectInfo = item;
+    onstartDateChange(date, dateString) {
+      this.sDate = dateString;
     },
-    parentFn() {
-      this.projectSendoutVisible = false;
+    deleteClick(item) {
+      let postParams;
+      let that = this;
+      this.$confirm({
+        title: "确定删除该项目?",
+        content: "删除项目将无法恢复",
+        okText: "确认",
+        okType: "danger",
+        cancelText: "取消",
+        onOk() {
+          console.log("OK");
+          //执行删除操作
+          if (item) {
+            postParams = new URLSearchParams();
+            postParams.append("Projectsn", item);
+            axios
+              .post(
+                GLOBAL.env + "/mappingundertaking/deleteProject",
+                postParams
+              )
+              .then((res) => {
+                if (res.data === "success") {
+                  that.$message.success("删除成功");
+                  that.clickrequest();
+                }
+              });
+          }
+          console.log(item);
+        },
+        onCancel() {
+          console.log("Cancel");
+        },
+      });
+    },
+    tonextstep(item) {
+      this.mappingOpinionVisible = true;
+      this.selectProjectInfo = item;
+      console.log("to next step", item);
+    },
+    postSuccessParent() {
+      console.log("要删除这个窗口");
+      this.mappingOpinionVisible = false;
       this.clickrequest();
     },
   },
   created: function() {
     this.clickrequest();
+    console.log(this.data);
   },
 };
 </script>

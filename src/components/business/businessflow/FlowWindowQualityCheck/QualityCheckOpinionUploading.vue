@@ -1,0 +1,546 @@
+<template>
+  <div class="opinionContainer">
+    <div class="item">
+      <div class="itemTitle">
+        <span>小组填报工作量</span>
+        <a-button
+          class="editable-add-btn"
+          @click="handleGCLAdd"
+          size="small"
+          style="margin-left:10px"
+        >
+          添 加
+        </a-button>
+      </div>
+      <div class="itemContainer">
+        <a-table
+          bordered
+          :data-source="chgclAddGroup"
+          :columns="gclcolumns"
+          size="small"
+          style="margin-top:10px"
+          :pagination="false"
+        >
+          <template slot="projectType" slot-scope="text, record">
+            <a-select
+              style="width: 200px"
+              placeholder="选择项目类型"
+              @change="selectprojectType(record.key, $event)"
+              v-if="projectType"
+              :default-value="record.type"
+            >
+              <a-select-option v-for="item in projectType" :key="item.indexs">
+                {{ item.value }}
+              </a-select-option>
+            </a-select>
+          </template>
+          <template slot="operation" slot-scope="text, record">
+            <a-popconfirm
+              v-if="chgclAddGroup.length"
+              title="是否确认删除?"
+              @confirm="() => onDelete(record.key)"
+            >
+              <a href="javascript:;">删除</a>
+            </a-popconfirm>
+          </template>
+          <template slot="projectNumber" slot-scope="text, record">
+            <QualityCheckOpinionEditableTable
+              :text="text"
+              @change="onGCLChange(record.key, 'number', $event)"
+            />
+          </template>
+        </a-table>
+      </div>
+      <div class="itemOption">
+        <a-button
+          type="primary"
+          style="float:right;margin-right:10px;margin-top:10px"
+          @click="updateGCL"
+        >
+          工作量更新
+        </a-button>
+      </div>
+    </div>
+    <div class="item">
+      <div class="itemTitle">
+        详细意见
+      </div>
+      <div class="itemContainer">
+        <a-textarea
+          v-model="qualitycheckOpinion"
+          :rows="2"
+          style="margin-top:5px"
+        />
+      </div>
+    </div>
+    <div class="item">
+      <div class="itemTitle">
+        <span>
+          参与测绘人员工作量
+        </span>
+        <a-button
+          class="editable-add-btn"
+          @click="handleStaffAdd"
+          size="small"
+          style="margin-left:10px"
+        >
+          添 加
+        </a-button>
+      </div>
+      <div class="itemContainer">
+        <a-table
+          bordered
+          :data-source="mappingStaffGroup"
+          :columns="staffgclcolums"
+          size="small"
+          style="margin-top:10px"
+          :pagination="false"
+        >
+          <template slot="userSelect" slot-scope="text, record">
+            <a-select
+              style="width: 200px"
+              placeholder="选择人员"
+              @change="selectStaff(record.key, $event)"
+              v-if="userData"
+              :default-value="record.UserName"
+            >
+              <a-select-option v-for="item in userData" :key="item.UserName">
+                {{ item.UserName }}
+              </a-select-option>
+            </a-select>
+          </template>
+          <template slot="userOperation" slot-scope="text, record">
+            <a-popconfirm
+              v-if="mappingStaffGroup.length"
+              title="是否确认删除?"
+              @confirm="() => onDeleteStaffGZL(record.key)"
+            >
+              <a href="javascript:;">删除</a>
+            </a-popconfirm>
+          </template>
+          <template slot="gzl" slot-scope="text, record">
+            <QualityCheckOpinionEditableTable
+              :text="text"
+              @change="onStaffChange(record.key, 'gzl', $event)"
+            />
+          </template>
+        </a-table>
+      </div>
+      <div class="itemOption">
+        <a-button
+          type="primary"
+          style="float:right;margin-right:10px;margin-top:10px"
+          @click="updateStaff"
+        >
+          人员更新
+        </a-button>
+      </div>
+    </div>
+    <div class="itemupload">
+      <div class="splitLine"></div>
+      <a-button
+        type="primary"
+        style="float:right;margin-right:10px;margin-top:10px"
+        @click="uploadProject"
+      >
+        提交
+      </a-button>
+    </div>
+  </div>
+</template>
+<script>
+import request from "@/utils/request";
+import GLOBAL from "./../../../../utils/global_variable";
+import projectdata from "../../../../assets/menulist/project-type.json";
+import QualityCheckOpinionEditableTable from "./QualityCheckOpinionEditableTable";
+import axios from "axios";
+const projectData = projectdata;
+export default {
+  props: ["projectInfo"],
+  components: {
+    QualityCheckOpinionEditableTable,
+  },
+  data() {
+    return {
+      qualitycheckOpinion: "项目质检合格，现提交审核。",
+      gclcolumns: [
+        {
+          title: "工作内容",
+          dataIndex: "projectType",
+          width: "20%",
+          scopedSlots: { customRender: "projectType" },
+        },
+        {
+          title: "工程量",
+          dataIndex: "number",
+          scopedSlots: { customRender: "projectNumber" },
+        },
+        {
+          title: "单位",
+          dataIndex: "unit",
+        },
+        {
+          title: "操作",
+          dataIndex: "operation",
+          scopedSlots: { customRender: "operation" },
+        },
+      ],
+      staffgclcolums: [
+        {
+          title: "人员姓名",
+          dataIndex: "UserName",
+          width: "20%",
+          scopedSlots: { customRender: "userSelect" },
+        },
+        {
+          title: "工作量",
+          dataIndex: "gzl",
+          width: "50%",
+          scopedSlots: { customRender: "gzl" },
+        },
+        {
+          title: "操作",
+          dataIndex: "userOperation",
+          width: "30%",
+          scopedSlots: { customRender: "userOperation" },
+        },
+      ],
+      chgclAddGroup: [],
+      count: 0,
+      mappingStaffGroup: [],
+      mappingStaffGroupCount: 0,
+      projectType: projectData.data,
+      userData: null,
+      postParams: null,
+    };
+  },
+  methods: {
+    //初始化表单模态框
+    async getProjectInfo() {
+      const data = await request.get(
+        "/mappingundertaking/mappingUndertakingInit",
+        { params: { projectsn: this.projectInfo } }
+      );
+      this.eventExplaination = data.data[0].smsx;
+      this.sceneClientCharge = data.data[0].wtdwxcfzr;
+      this.sceneChargePerson = data.data[0].chxcfzr;
+      this.clientConfirmDate = data.data[0].wtdwqrsj;
+      this.sceneConfirmDate = data.data[0].chqrsj;
+      if (data.data[0].tjzllist != null) {
+        this.uploadMaterialType = data.data[0].tjzllist.split(",");
+      } else {
+        this.uploadMaterialType = [];
+      }
+      //this.mappingStaffGroup = data.data[0].dongbz.split(",");
+      console.log(data.data[0].gznr);
+      console.log(data.data[0].gcl);
+      //参与测绘人员工作量
+      if (data.data[0].dongbz != null) {
+        for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
+          let newData = {
+            key: j,
+            UserName: data.data[0].dongbz.split(";")[j].split(",")[0],
+            gzl: data.data[0].dongbz.split(";")[j].split(",")[1],
+          };
+          this.mappingStaffGroup.push(newData);
+        }
+      } else {
+        this.mappingStaffGroup = [];
+      }
+      this.mappingStaffGroupCount = this.mappingStaffGroup.length;
+      //小组填报工程量
+      if (data.data[0].gznr != null) {
+        this.count = data.data[0].gznr.split(",").length;
+        for (let j = 0; j < this.count; j++) {
+          let newData = {
+            key: j,
+            type: data.data[0].gznr.split(",")[j],
+            number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
+            unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
+          };
+          console.log(newData);
+          this.chgclAddGroup.push(newData);
+        }
+      } else {
+        this.count = 0;
+        this.chgclAddGroup = [];
+      }
+      console.log("mapping staff group", this.mappingStaffGroup);
+    },
+    //获取用户列表
+    async getchUsers() {
+      const user = await request.get("/mappingundertaking/getchUsers");
+      this.userData = user.data;
+    },
+    //工程量添加
+    handleGCLAdd() {
+      const { count, chgclAddGroup } = this;
+      const newData = {
+        key: this.count,
+        type: "",
+        number: "",
+        unit: "",
+      };
+      this.chgclAddGroup = [...chgclAddGroup, newData];
+      this.count = count + 1;
+    },
+    //工程量文字输入变化
+    onGCLChange(key, dataIndex, value) {
+      const chgclAddGroup = [...this.chgclAddGroup];
+      //this.postParams.append(key, dataIndex, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
+      if (target) {
+        target[dataIndex] = value;
+        this.chgclAddGroup = chgclAddGroup;
+      }
+    },
+    //人员工作量输入框变化
+    onStaffChange(key, dataIndex, value) {
+      const mappingStaffGroup = [...this.mappingStaffGroup];
+      const target = mappingStaffGroup.find((item) => item.key === key);
+      if (target) {
+        target[dataIndex] = value;
+        this.mappingStaffGroup = mappingStaffGroup;
+      }
+    },
+    //工作人员添加
+    handleStaffAdd() {
+      const { mappingStaffGroupCount, mappingStaffGroup } = this;
+      const newData = {
+        key: this.mappingStaffGroupCount,
+        userName: "",
+        gzl: "",
+      };
+      this.mappingStaffGroup = [...mappingStaffGroup, newData];
+      this.mappingStaffGroupCount = mappingStaffGroupCount + 1;
+    },
+    //选择项目/工作类型
+    selectprojectType(key, value) {
+      const chgclAddGroup = [...this.chgclAddGroup];
+      // this.postParams.append(key, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
+      if (target) {
+        switch (value) {
+          case "1":
+            target.type = "面积预测";
+            target.unit = "平方米";
+            break;
+          case "2":
+            target.type = "面积实测";
+            target.unit = "平方米";
+            break;
+          case "3":
+            target.type = "人防预测";
+            target.unit = "平方米";
+            break;
+          case "4":
+            target.type = "人防实测";
+            target.unit = "栋";
+            break;
+          case "5":
+            target.type = "施工放样";
+            target.unit = "栋";
+            break;
+          case "6":
+            target.type = "竣工测量";
+            target.unit = "栋";
+            break;
+          case "7":
+            target.type = "控制测量";
+            target.unit = "个";
+            break;
+          case "8":
+            target.type = "日照测量";
+            target.unit = "栋";
+            break;
+          case "9":
+            target.type = "管线测量";
+            target.unit = "公里";
+            break;
+          case "10":
+            target.type = "土方测量";
+            target.unit = "平方米";
+            break;
+          case "11":
+            target.type = "断面测量";
+            target.unit = "公里";
+            break;
+          case "12":
+            target.type = "地形测量";
+            target.unit = "平方米";
+            break;
+          case "13":
+            target.type = "变形测量";
+            target.unit = "点";
+            break;
+          case "14":
+            target.type = "宗地调查";
+            target.unit = "平方米";
+            break;
+          case "15":
+            target.type = "其他测量";
+            target.unit = "棵";
+            break;
+          case "16":
+            target.type = "分户调查";
+            target.unit = "户";
+            break;
+          case "17":
+            target.type = "土地分割";
+            target.unit = "平方米";
+            break;
+        }
+        this.chgclAddGroup = chgclAddGroup;
+      }
+      // this.postParams.append(this.chgclAddGroup);
+    },
+    //选择工程人员
+    selectStaff(key, value) {
+      const mappingStaffGroup = [...this.mappingStaffGroup];
+      const target = mappingStaffGroup.find((item) => item.key === key);
+      if (target) {
+        target.userName = value;
+      }
+    },
+    //人员工程量更新
+    updateStaff() {
+      if (!this.mappingWorkPercentCheck(this.mappingStaffGroup)) {
+        this.$notification.open({
+          message: "工作量百分比总和错误",
+          description: "工作量百分比总和应小于等于100%",
+          onClick: () => {
+            //console.log("Notification Clicked!");
+          },
+        });
+        return;
+      }
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectsn", this.projectInfo);
+      this.postParams.append(
+        "dongbz",
+        this.generateDongBZString(this.mappingStaffGroup)
+      );
+      axios
+        .post(GLOBAL.env + "/qualitycheck/updateStaffGZL", this.postParams)
+        .then((res) => {
+          //console.log(res);
+          if (res.data == "success") {
+            this.$message.success("人员工作量更新成功");
+            //this.$emit("uploadSuccess");
+          }
+        });
+      console.log(
+        "updateStaff",
+        this.generateDongBZString(this.mappingStaffGroup)
+      );
+    },
+    //人员工作量更新字符串
+    generateDongBZString(userdata) {
+      let tmp_str = "";
+      if (userdata.length === 0) {
+        return tmp_str;
+      }
+      userdata.forEach((element) => {
+        tmp_str = tmp_str + element.UserName + "," + element.gzl + ";";
+      });
+      return tmp_str;
+    },
+    //工程量更新
+    mappingWorkPercentCheck(userdata) {
+      if (userdata.length === 0) {
+        return true;
+      }
+      let percentSum = 0;
+      userdata.forEach((element) => {
+        percentSum = percentSum + Number(element.gzl);
+      });
+      if (percentSum <= 100) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    updateGCL() {
+      this.postParams = new URLSearchParams();
+      this.postParams.append("projectsn", this.projectInfo);
+      const updateData = this.generateGCLString(this.chgclAddGroup);
+      this.postParams.append("zyd_gznr", updateData.projecttype);
+      this.postParams.append("zyd_gcl", updateData.projectNumber);
+      axios
+        .post(GLOBAL.env + "/qualitycheck/updateGZL", this.postParams)
+        .then((res) => {
+          if (res.data == "success") {
+            this.$message.success("小组工作量更新成功");
+          }
+        });
+    },
+    generateGCLString(gcldata) {
+      let tmpobj = { projecttype: "", projectNumber: "" };
+      if (gcldata.length === 0) {
+        return tmpobj;
+      }
+      gcldata.forEach((element) => {
+        tmpobj.projecttype = tmpobj.projecttype + element.type + ",";
+        tmpobj.projectNumber =
+          tmpobj.projectNumber + element.number + element.unit + ";";
+      });
+      tmpobj.projecttype = tmpobj.projecttype.substring(
+        0,
+        tmpobj.projecttype.length - 1
+      );
+      return tmpobj;
+    },
+    //提交至下一步
+    uploadProject() {},
+    onDelete(key) {
+      // this.postParams.append(key);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      this.chgclAddGroup = chgclAddGroup.filter((item) => item.key !== key);
+    },
+    onDeleteStaffGZL(key) {
+      const mappingStaffGroup = [...this.mappingStaffGroup];
+      this.mappingStaffGroup = mappingStaffGroup.filter(
+        (item) => item.key !== key
+      );
+    },
+  },
+  created: function() {
+    this.getProjectInfo();
+    this.getchUsers();
+  },
+};
+</script>
+<style lang="scss">
+.opinionContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  overflow: auto;
+  .item {
+    margin-top: 10px;
+    .itemTitle {
+    }
+    .itemContainer {
+    }
+  }
+  .splitLine {
+    width: 100%;
+    height: 1px;
+    background-color: #d4d4d4;
+    margin-top: 10px;
+  }
+}
+.opinionContainer::-webkit-scrollbar-track {
+}
+
+.opinionContainer::-webkit-scrollbar {
+  width: 5px;
+}
+
+.opinionContainer::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  margin-left: 20px;
+  border-radius: 3px;
+}
+</style>
