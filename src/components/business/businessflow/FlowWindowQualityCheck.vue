@@ -160,8 +160,8 @@ const columns = [
   },
   {
     title: "测绘提交",
-    key: "clComfirmTime",
-    dataIndex: "clComfirmTime",
+    key: "cltjsj",
+    dataIndex: "cltjsj",
     width: 100,
   },
   //TODO 查看模态框取消编辑状态

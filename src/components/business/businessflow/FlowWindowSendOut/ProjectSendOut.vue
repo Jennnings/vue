@@ -96,6 +96,10 @@ export default {
       this.postParams.append("projectSn", this.projectInfo);
       this.postParams.append("clmanUserID", this.sendOutUserID);
       this.postParams.append("clyj", this.sendOutOpinion);
+      this.postParams.append(
+        "pjmanuserid",
+        JSON.parse(sessionStorage.getItem("userToken")).UserID
+      );
       axios
         .post(GLOBAL.env + "/sendout/projectSendOut", this.postParams)
         .then((res) => {

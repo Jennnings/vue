@@ -44,7 +44,7 @@
             </a-popconfirm>
           </template>
           <template slot="projectNumber" slot-scope="text, record">
-            <QualityCheckOpinionEditableTable
+            <ApprovementOpinionEditableTable
               :text="text"
               @change="onGCLChange(record.key, 'number', $event)"
             />
@@ -119,7 +119,7 @@
             </a-popconfirm>
           </template>
           <template slot="gzl" slot-scope="text, record">
-            <QualityCheckOpinionEditableTable
+            <ApprovementOpinionEditableTable
               :text="text"
               @change="onStaffChange(record.key, 'gzl', $event)"
             />
@@ -152,17 +152,17 @@
 import request from "@/utils/request";
 import GLOBAL from "./../../../../utils/global_variable";
 import projectdata from "../../../../assets/menulist/project-type.json";
-import QualityCheckOpinionEditableTable from "./QualityCheckOpinionEditableTable";
+import ApprovementOpinionEditableTable from "./ApprovementOpinionEditableTable";
 import axios from "axios";
 const projectData = projectdata;
 export default {
   props: ["projectInfo"],
   components: {
-    QualityCheckOpinionEditableTable,
+    ApprovementOpinionEditableTable,
   },
   data() {
     return {
-      qualitycheckOpinion: "项目质检合格，现提交审核。",
+      qualitycheckOpinion: "同意，请按照收费标准进行收费。",
       gclcolumns: [
         {
           title: "工作内容",
@@ -498,11 +498,11 @@ export default {
       let params = new URLSearchParams();
       params.append("projectsn", this.projectInfo);
       params.append(
-        "jcmanuserid",
+        "spmanuserid",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       );
       axios
-        .post(GLOBAL.env + "/qualitycheck/projectSendOut", params)
+        .post(GLOBAL.env + "/resultapprovement/projectSendOut", params)
         .then((res) => {
           //console.log(res);
           if (res.data == "success") {

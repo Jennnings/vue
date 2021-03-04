@@ -6,8 +6,8 @@
       :active-tab-key="noTitleKey"
       @tabChange="(key) => onTabChange(key, 'noTitleKey')"
     >
-      <div v-if="noTitleKey === 'qualitycheck'">
-        <QualityCheckOpinionUploading
+      <div v-if="noTitleKey === 'resultcheck'">
+        <ResultCheckOpinionUpload
           v-bind:projectInfo="projectInfo"
           @updateSuccess="updateSuccess"
         />
@@ -31,27 +31,25 @@
   </div>
 </template>
 <script>
-import QualityCheckOpinionUploading from "./QualityCheckOpinionUploading";
 import GLOBAL from "./../../../../utils/global_variable";
+import ResultCheckOpinionUpload from "./ResultCheckOpinionUpload";
 import axios from "axios";
 export default {
   props: ["projectInfo"],
-  components: {
-    QualityCheckOpinionUploading,
-  },
+  components: { ResultCheckOpinionUpload },
   data() {
     return {
       tabListNoTitle: [
         {
-          key: "qualitycheck",
-          tab: "质检意见",
+          key: "resultcheck",
+          tab: "审核意见",
         },
         {
           key: "backtoformer",
           tab: "退回意见",
         },
       ],
-      noTitleKey: "qualitycheck",
+      noTitleKey: "resultcheck",
       postParams: null,
     };
   },
@@ -63,7 +61,7 @@ export default {
       this.postParams = new URLSearchParams();
       this.postParams.append("projectsn", this.projectInfo);
       axios
-        .post(GLOBAL.env + "/qualitycheck/projectSendBack", this.postParams)
+        .post(GLOBAL.env + "/resultcheck/projectSendBack", this.postParams)
         .then((res) => {
           if (res.data == "success") {
             this.$message.success("退回成功");

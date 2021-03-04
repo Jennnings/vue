@@ -286,6 +286,10 @@ export default {
       let that = this;
       postParams = new URLSearchParams();
       postParams.append("Projectsn", item);
+      postParams.append(
+        "djmanuserid",
+        JSON.parse(sessionStorage.getItem("userToken")).UserID
+      );
       axios.post(GLOBAL.env + "/cxch/toNextStep", postParams).then((res) => {
         if (res.data === "修改成功") {
           that.$message.success("提交成功");

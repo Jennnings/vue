@@ -86,6 +86,10 @@
         >
           <a>办理</a>
         </span>
+        <span slot="sceneLocation" slot-scope="text">
+          <span v-if="text === 'undefined'"></span>
+          <span v-else>{{ text }}</span>
+        </span>
       </a-table>
     </div>
     <a-modal
@@ -115,7 +119,7 @@
 </template>
 <script>
 import request from "@/utils/request";
-import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+import ModifyProject from "./FlowWindowSendOut/ModifyProject";
 import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
 const columns = [
   {
@@ -141,6 +145,7 @@ const columns = [
     title: "坐落",
     key: "sceneLocation",
     dataIndex: "sceneLocation",
+    scopedSlots: { customRender: "sceneLocation" },
     width: 150,
   },
   {
@@ -202,18 +207,14 @@ export default {
     };
   },
   methods: {
+    //初始化查询 undefined问题
     async clickrequest() {
-      const user = await request.get("/sendout/project");
-      this.data = user.data;
+      const that = this;
+      const tmpdata = await request.get("/sendout/project");
+      this.data = tmpdata.data;
     },
+    //点击按钮查询
     async queryClicked() {
-      console.log(
-        "queryClicked",
-        this.eDate,
-        this.sDate,
-        this.queryProjectName,
-        this.queryProjectsn
-      );
       const user = await request.get("/sendout/projectQuery", {
         params: {
           eDate: this.eDate,

@@ -308,9 +308,6 @@ export default {
       this.eventExplaination = data.data[0].smsx;
       this.sceneClientCharge = data.data[0].wtdwxcfzr;
       this.sceneChargePerson = data.data[0].chxcfzr;
-      this.projectStartDate = data.data[0].timebegin;
-      this.clientConfirmDate = data.data[0].wtdwqrsj;
-      this.sceneConfirmDate = data.data[0].chqrsj;
       if (data.data[0].tjzllist != null) {
         this.uploadMaterialType = data.data[0].tjzllist.split(",");
       } else {
@@ -344,19 +341,25 @@ export default {
         this.count = 0;
         this.chgclAddGroup = [];
       }
+      this.projectStartDate = data.data[0].timebegin;
+      this.projectEndDate = data.data[0].timeend;
+      this.clientConfirmDate = data.data[0].wtdwqrsj;
+      this.sceneConfirmDate = data.data[0].chqrsj;
+      console.log("end", this.projectEndDate);
       if (this.projectStartDate === "") {
         this.projectStartDate = moment().format("YYYY-MM-DD");
       }
-      this.projectEndDate = data.data[0].timeend;
       if (this.projectEndDate === "") {
-        this.projectEndDate = moment().format("YYY-MM-DD");
+        this.projectEndDate = moment().format("YYYY-MM-DD");
       }
       if (this.clientConfirmDate === "") {
-        this.clientConfirmDate = moment().format("YYY-MM-DD");
+        this.clientConfirmDate = moment().format("YYYY-MM-DD");
       }
       if (this.sceneConfirmDate === "") {
-        this.sceneConfirmDate = moment().format("YYY-MM-DD");
+        this.sceneConfirmDate = moment().format("YYYY-MM-DD");
       }
+      console.log("start", this.projectStartDate);
+      console.log("end", this.projectEndDate);
     },
     staffPicker(value) {
       this.mappingStaffGroup = value;

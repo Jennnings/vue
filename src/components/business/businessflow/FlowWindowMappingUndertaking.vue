@@ -146,8 +146,8 @@ const columns = [
   },
   {
     title: "派件时间",
-    key: "hopeToEnterTime",
-    dataIndex: "hopeToEnterTime",
+    key: "pjtjsj",
+    dataIndex: "pjtjsj",
     width: 100,
   },
   {
