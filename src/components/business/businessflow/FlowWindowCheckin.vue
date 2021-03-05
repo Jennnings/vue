@@ -218,7 +218,7 @@ export default {
     },
     parentFn() {
       this.createModalVisible = false;
-      this.queryClicked();
+      this.clickrequest();
     },
     async queryClicked() {
       console.log(
@@ -267,7 +267,7 @@ export default {
               .then((res) => {
                 if (res.data === "修改成功") {
                   that.$message.success("删除成功");
-                  that.queryClicked();
+                  that.clickrequest();
                 }
               });
           }
@@ -293,7 +293,7 @@ export default {
       axios.post(GLOBAL.env + "/cxch/toNextStep", postParams).then((res) => {
         if (res.data === "修改成功") {
           that.$message.success("提交成功");
-          that.queryClicked();
+          that.clickrequest();
         }
       });
     },
