@@ -17,7 +17,7 @@
           <span>项目登记号:</span>
           <a-auto-complete
             style="width: 200px;margin-left:10px"
-            placeholder="项目名称"
+            placeholder="项目登记号"
             v-model="queryProjectsn"
           />
         </div>
@@ -84,10 +84,26 @@
         </span>
       </a-table>
     </div>
+    <a-modal
+      v-model="expenseOpinionVisible"
+      title="成果审批"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ExpenseOpinion
+        v-bind:projectInfo="selectProjectInfo"
+        @closemodal="parentCloseModal"
+      />
+      <!-- 
+         -->
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
+import ExpenseOpinion from "./FlowWinfowCalculateExpense/ExpenseOpinion";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -160,6 +176,9 @@ const pagination_setting = {
   defaultPageSize: 10,
 };
 export default {
+  components: {
+    ExpenseOpinion,
+  },
   data() {
     return {
       data: null,
@@ -168,6 +187,11 @@ export default {
       queryProjectsn: "",
       queryProjectName: "",
       queryProjectClient: "",
+      sDate: "",
+      eDate: "",
+      expenseOpinionVisible: false,
+      selectProjectInfo: "",
+      distoryThis: true,
     };
   },
   methods: {
@@ -175,12 +199,35 @@ export default {
       const tmp_data = await request.get("/calculateexpense/initProject/");
       this.data = tmp_data.data;
     },
-    onstartDateChange() {},
-    onendDateChange() {},
-    queryClicked() {},
+    async queryClicked() {
+      const tmp_data = await request.get("/calculateexpense/queryProject/", {
+        params: {
+          projectsn: this.queryProjectsn,
+          projectname: this.queryProjectName,
+          projectClient: this.queryProjectClient,
+          sDate: this.sDate,
+          eDate: this.eDate,
+        },
+      });
+      console.log(tmp_data.data);
+      this.data = tmp_data.data;
+    },
+    onstartDateChange(date, dateString) {
+      this.sDate = dateString;
+    },
+    onendDateChange(date, dateString) {
+      this.eDate = dateString;
+    },
+    tonextstep(item) {
+      this.expenseOpinionVisible = true;
+      this.selectProjectInfo = item;
+    },
+    parentCloseModal() {
+      this.expenseOpinionVisible = false;
+      this.getInitData();
+    },
   },
   mounted: function() {
-    console.log("ths");
     this.getInitData();
   },
 };

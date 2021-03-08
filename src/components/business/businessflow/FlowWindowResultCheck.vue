@@ -17,7 +17,7 @@
           <span>项目登记号:</span>
           <a-auto-complete
             style="width: 200px;margin-left:10px"
-            placeholder="项目名称"
+            placeholder="项目登记号"
             v-model="queryProjectsn"
           />
         </div>
