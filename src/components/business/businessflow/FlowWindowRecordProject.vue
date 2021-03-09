@@ -71,10 +71,22 @@
         >
       </a-table>
     </div>
+    <a-modal
+      v-model="recordProjectVisible"
+      title="项目归档"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+      rowKey="id"
+    >
+      <RecordProject v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
+import RecordProject from "./FlowWindowRecordProject/RecordProjectOpinion";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -140,6 +152,9 @@ const pagination_setting = {
   defaultPageSize: 10,
 };
 export default {
+  components: {
+    RecordProject,
+  },
   data() {
     return {
       columns,
@@ -150,11 +165,15 @@ export default {
       queryProjectClient: "",
       sDate: "",
       eDate: "",
+      recordProjectVisible: false,
+      selectProjectInfo: "",
+      distoryThis: true,
     };
   },
   methods: {
     async getProject() {
       const tmp_data = await request.get("recordproject/getproject");
+
       this.data = tmp_data.data;
     },
     onstartDateChange(date, dateString) {
@@ -176,7 +195,10 @@ export default {
       this.data = tmp_data.data;
     },
     viewdetail(item) {},
-    tonextstep(item) {},
+    tonextstep(item) {
+      this.selectProjectInfo = item;
+      this.recordProjectVisible = true;
+    },
   },
   mounted: function() {
     this.getProject();

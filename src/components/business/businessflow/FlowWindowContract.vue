@@ -24,6 +24,7 @@
           :columns="innerColumns"
           :data-source="innerData"
           :pagination="false"
+          rowKey="id"
         >
           <span slot="status"> <a-badge status="success" />Finished </span>
           <span slot="operation" class="table-operation">
