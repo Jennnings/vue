@@ -16,6 +16,7 @@
         :columns="columns"
         :data-source="data"
         class="components-table-demo-nested"
+        rowKey="id"
       >
         <a slot="operation">Publish</a>
         <a-table

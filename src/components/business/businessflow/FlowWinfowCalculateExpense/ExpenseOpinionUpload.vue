@@ -34,6 +34,7 @@
           :data-source="groupDataGCLTable"
           style="margin-top:10px"
           bordered
+          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
@@ -512,7 +513,63 @@ export default {
       }
       this.totalPrice = this.totalPrice.toFixed(2);
     },
-    uploadProject() {},
+    uploadProject() {
+      console.log("tmpsaveProject");
+      let remarkStr = "";
+      let isRemainCost;
+      // let postGetCost = this.getCost;
+      // let postTotalPrice = this.totalPrice;
+      if (this.groupDataGCLTable.length) {
+        for (let i = 0; i < this.groupDataGCLTable.length; i++) {
+          let tmpdata = this.groupDataGCLTable[i];
+          let perPrice = tmpdata.perPrice;
+          let totalPrice = tmpdata.totalPrice;
+          if (!perPrice) {
+            perPrice = 0;
+          }
+          if (!totalPrice) {
+            totalPrice = 0;
+          }
+          remarkStr +=
+            tmpdata.gcl +
+            "," +
+            tmpdata.unit +
+            "," +
+            perPrice +
+            "," +
+            totalPrice +
+            "," +
+            tmpdata.type +
+            ";";
+        }
+      }
+      if (this.isRemainChecked) {
+        isRemainCost = 1;
+      } else {
+        isRemainCost = 0;
+      }
+      console.log(remarkStr);
+      let postParams = new URLSearchParams();
+      postParams.append(
+        "sfmanuserid",
+        JSON.parse(sessionStorage.getItem("userToken")).UserID
+      );
+      postParams.append("projectsn", this.projectInfo);
+      postParams.append("sfrequest", remarkStr);
+      postParams.append("totalcost", this.totalPrice);
+      postParams.append("getcost", this.getCost);
+      postParams.append("isremain", isRemainCost);
+      postParams.append("sfOpinion", this.expenseOpinionStr);
+      axios
+        .post(GLOBAL.env + "/calculateexpense/uploadproject", postParams)
+        .then((res) => {
+          console.log(res);
+          if (res.data == "success") {
+            this.$message.success("项目提交成功");
+            this.$emit("updateSuccess");
+          }
+        });
+    },
     tmpSaveProject() {
       console.log("tmpsaveProject");
       let remarkStr = "";

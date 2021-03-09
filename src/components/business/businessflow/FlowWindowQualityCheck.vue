@@ -60,6 +60,7 @@
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        rowKey="id"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text

@@ -20,6 +20,7 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
+          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
@@ -95,6 +96,7 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
+          rowKey="id"
         >
           <template slot="userSelect" slot-scope="text, record">
             <a-select

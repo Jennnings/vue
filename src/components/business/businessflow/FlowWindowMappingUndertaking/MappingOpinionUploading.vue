@@ -73,6 +73,7 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
+          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
@@ -298,6 +299,7 @@ export default {
     //***********************文件上传结束 ******************************//
     async getchUsers() {
       const user = await request.get("/mappingundertaking/getchUsers");
+      console.log(user.data);
       this.userData = user.data;
     },
     async getUndertakingInfo() {
@@ -362,6 +364,7 @@ export default {
       console.log("end", this.projectEndDate);
     },
     staffPicker(value) {
+      console.log(value);
       this.mappingStaffGroup = value;
     },
     //* 动态添加任务 *//
