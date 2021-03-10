@@ -87,7 +87,7 @@
     </div>
     <a-modal
       v-model="expenseOpinionVisible"
-      title="成果审批"
+      title="核算收费"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"
@@ -269,7 +269,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
-    user-select: none;
+    //user-select: none;
   }
 }
 </style>

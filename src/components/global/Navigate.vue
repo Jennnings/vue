@@ -122,6 +122,7 @@ export default {
   created: function() {
     const arr = window.location.href.split("/");
     this.defaultSelect.push(arr[arr.length - 1]);
+    this.current = [arr[arr.length - 1]];
   },
 };
 </script>

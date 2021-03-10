@@ -325,7 +325,7 @@ export default {
 .ant-descriptions-bordered.ant-descriptions-small
   .ant-descriptions-item-content {
   padding: 4px 17px;
-  user-select: none;
+  //user-select: none;
 }
 .ant-modal-body {
   padding-top: 12px;

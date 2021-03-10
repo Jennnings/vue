@@ -75,12 +75,15 @@
       v-model="recordProjectVisible"
       title="项目归档"
       :footer="null"
-      width="1300px"
+      width="800px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
       rowKey="id"
     >
-      <RecordProject v-bind:projectInfo="selectProjectInfo" />
+      <RecordProject
+        v-bind:projectInfo="selectProjectInfo"
+        @updateSuccess="parentCloseModal"
+      />
     </a-modal>
   </div>
 </template>
@@ -199,6 +202,10 @@ export default {
       this.selectProjectInfo = item;
       this.recordProjectVisible = true;
     },
+    parentCloseModal() {
+      this.recordProjectVisible = false;
+      this.getProject();
+    },
   },
   mounted: function() {
     this.getProject();
@@ -241,7 +248,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
-    user-select: none;
+    //user-select: none;
   }
 }
 </style>
