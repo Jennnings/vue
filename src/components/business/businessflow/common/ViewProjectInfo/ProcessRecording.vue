@@ -56,7 +56,7 @@ export default {
           this.showItems.push(tmp_obj);
         }
       });
-      console.log(this.showItems);
+      // console.log(this.showItems);
     },
   },
   mounted: function() {

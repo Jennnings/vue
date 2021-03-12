@@ -156,6 +156,30 @@
                 {{ params.supportFileList }}
               </div>
             </a-descriptions-item>
+            <a-descriptions-item label="文件上传" :span="2">
+              <div class="clearfix">
+                <div class="tempFile">
+                  <a-upload
+                    :file-list="fileList"
+                    :remove="handleRemove"
+                    :before-upload="beforeUpload"
+                  >
+                    <a-button> <a-icon type="upload" /> 选择文件 </a-button>
+                  </a-upload>
+                </div>
+                <div class="tempFile">
+                  <a-button
+                    type="primary"
+                    :disabled="fileList.length === 0"
+                    :loading="uploading"
+                    style="margin-top: 16px"
+                    @click="handleUpload"
+                  >
+                    {{ uploading ? "正在上传..." : "开始上传" }}
+                  </a-button>
+                </div>
+              </div>
+            </a-descriptions-item>
           </a-descriptions>
         </div>
       </a-spin>
@@ -165,12 +189,14 @@
 <script>
 import projectdata from "./../../../../../assets/menulist/project-type.json";
 import listdata from "./../../../../../assets/menulist/other-material.json";
+import axios from "axios";
 import request from "@/utils/request";
+import GLOBAL from "./../../../../../utils/global_variable";
 const projectData = projectdata;
 const listData = listdata;
 import moment from "moment";
 export default {
-  props: ["projectInfo"],
+  props: ["projectInfo", "XMState"],
   data() {
     return {
       projectType: projectData.data,
@@ -183,6 +209,8 @@ export default {
       spinning: false,
       contractInfo: [],
       contractDefaultSelected: "",
+      fileList: [],
+      uploading: false,
     };
   },
   methods: {
@@ -215,7 +243,7 @@ export default {
     async getContractInfo() {
       const tmpdata = await request.get("/common/getcontractinfo");
       this.contractInfo = tmpdata.data;
-      console.log(this.contractInfo);
+      //console.log(this.contractInfo);
     },
     handleChangeWithID(value) {
       //console.log(`selected ${value}`);
@@ -231,6 +259,35 @@ export default {
           .toLowerCase()
           .indexOf(input.toLowerCase()) >= 0
       );
+    },
+    //文件操作
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      return false;
+    },
+    handleUpload() {
+      const { fileList } = this;
+      const formData = new FormData();
+      fileList.forEach((file) => {
+        formData.append("myfile", file);
+      });
+      this.uploading = true;
+      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
+        console.log(res);
+        if (res.data === "upload over") {
+          this.$message.success("上传成功");
+          this.fileList = [];
+        } else {
+          this.$message.error("上传失败");
+        }
+        this.uploading = false;
+      });
     },
   },
   mounted: function() {

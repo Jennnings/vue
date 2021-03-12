@@ -2,7 +2,7 @@
   <div>
     <a-tabs default-active-key="1" @change="callback">
       <a-tab-pane key="1" tab="项目信息">
-        <ProjectInfoEdit v-bind:projectInfo="projectInfo" />
+        <ProjectInfoEdit :projectInfo="projectInfo" :XMState="XMState" />
       </a-tab-pane>
       <a-tab-pane key="2" tab="处理记录" force-render>
         <ProcessRecording v-bind:projectInfo="projectInfo" />
@@ -21,14 +21,12 @@ export default {
     ProcessRecording,
     ProjectInfoEdit,
   },
-  props: ["projectInfo"],
+  props: ["projectInfo", "XMState"],
   data() {
     return {};
   },
   methods: {
-    callback(key) {
-      console.log(key);
-    },
+    callback(key) {},
   },
 };
 </script>

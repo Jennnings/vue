@@ -3,6 +3,7 @@
     <a-menu
       style="width: 200px;height:100%"
       :open-keys="openKeys"
+      :defaultSelectedKeys="current"
       mode="inline"
       @openChange="onOpenChange"
       @click="handleClick"
@@ -85,7 +86,7 @@ Vue.use(Button);
 export default {
   data() {
     return {
-      current: ["mail"],
+      current: [],
       openKeys: ["sub1"],
       rootSubmenuKeys: ["sub1", "sub2", "sub4"],
       defaultSelect: [],
@@ -116,7 +117,6 @@ export default {
     },
     async clickrequest(e) {
       const users = await request.get("/cxch/role");
-      console.log(users);
     },
   },
   created: function() {

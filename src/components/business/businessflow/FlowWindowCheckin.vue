@@ -51,7 +51,7 @@
       </div>
     </div>
     <!-- <a-spin :spinning="spinning"> -->
-    <div class="table_contianer" v-if="data">
+    <div class="table_contianer">
       <a-table
         :columns="columns"
         :data-source="data"
@@ -112,7 +112,7 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <EditProjectModal v-bind:projectInfo="selectProjectInfo" />
+      <EditProjectModal :projectInfo="selectProjectInfo" :XMState="XMState" />
     </a-modal>
   </div>
 </template>
@@ -207,6 +207,7 @@ export default {
       queryProjectName: "",
       selectProjectInfo: "",
       spinning: false,
+      XMState: 1,
     };
   },
   methods: {
