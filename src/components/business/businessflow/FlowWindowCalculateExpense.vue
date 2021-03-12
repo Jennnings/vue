@@ -55,11 +55,13 @@
         </div>
       </div>
     </div>
+    <!-- <a-spin :spinning="spinning"> -->
     <div class="table_contianer">
       <a-table
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        :loading="spinning"
         rowKey="id"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
@@ -85,6 +87,7 @@
         </span>
       </a-table>
     </div>
+    <!-- </a-spin> -->
     <a-modal
       v-model="expenseOpinionVisible"
       title="核算收费"
@@ -193,14 +196,18 @@ export default {
       expenseOpinionVisible: false,
       selectProjectInfo: "",
       distoryThis: true,
+      spinning: false,
     };
   },
   methods: {
     async getInitData() {
+      this.spinning = true;
       const tmp_data = await request.get("/calculateexpense/initProject/");
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     async queryClicked() {
+      this.spinning = true;
       const tmp_data = await request.get("/calculateexpense/queryProject/", {
         params: {
           projectsn: this.queryProjectsn,
@@ -210,8 +217,8 @@ export default {
           eDate: this.eDate,
         },
       });
-      console.log(tmp_data.data);
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;

@@ -66,12 +66,14 @@
         </div>
       </div>
     </div>
+    <!-- <a-spin :spinning="spinning"> -->
     <div class="table_contianer" v-if="data">
       <a-table
         :columns="columns"
         :data-source="data"
         class="components-table-demo-nested"
         :scroll="{ y: 800 }"
+        :loading="spinning"
         rowKey="id"
         :pagination="pagination_setting"
         @expand="expandContract"
@@ -98,6 +100,7 @@
         </a-table>
       </a-table>
     </div>
+    <!-- </a-spin> -->
     <a-modal
       v-model="createContractVisible"
       title="新建合同"
@@ -183,12 +186,15 @@ export default {
       contractAssistCompany: "",
       createContractVisible: false,
       distoryThis: true,
+      spinning: false,
     };
   },
   methods: {
     async getContract() {
+      this.spinning = true;
       const tmp_data = await request.get("/contractmanagement/getcontract");
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     //展开面板时使用 函数名称需要修改
     expandContract(item, record) {
@@ -210,12 +216,7 @@ export default {
       this.eDate = dateString;
     },
     async queryClicked() {
-      console.log("合同编号", this.contractID);
-      console.log("合同名称", this.contractName);
-      console.log("委托单位", this.contractClient);
-      console.log("代建单位", this.contractAssistCompany);
-      console.log("开始时间", this.sDate);
-      console.log("终止时间", this.eDate);
+      this.spinning = true;
       const tmp_data = await request.get("/contractmanagement/querycontract", {
         params: {
           contractnum: this.contractID,
@@ -227,6 +228,7 @@ export default {
         },
       });
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     viewItem(item) {},
     editItem(item) {},

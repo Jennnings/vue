@@ -60,6 +60,7 @@
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        :loading="spinning"
         rowKey="id"
       >
         <span slot="customTitle"><a-icon type="tags" /> 项目登记号</span>
@@ -171,13 +172,16 @@ export default {
       recordProjectVisible: false,
       selectProjectInfo: "",
       distoryThis: true,
+      spinning: false,
     };
   },
   methods: {
     async getProject() {
+      this.spinning = true;
       const tmp_data = await request.get("recordproject/getproject");
 
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
@@ -186,6 +190,7 @@ export default {
       this.eDate = dateString;
     },
     async queryClicked() {
+      this.spinning = true;
       const tmp_data = await request.get("recordproject/queryproject", {
         params: {
           projectsn: this.queryProjectsn,
@@ -196,6 +201,7 @@ export default {
         },
       });
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     viewdetail(item) {},
     tonextstep(item) {

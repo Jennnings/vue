@@ -61,6 +61,7 @@
         :data-source="data"
         :pagination="pagination_setting"
         rowKey="id"
+        :loading="spinning"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -201,14 +202,18 @@ export default {
       resultcheckOpinionVisible: false,
       selectProjectInfo: "",
       distoryThis: true,
+      spinning: false,
     };
   },
   methods: {
     async getInitData() {
+      this.spinning = true;
       const tmp_data = await request.get("resultcheck/project/");
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     async getProjectData() {
+      this.spinning = true;
       const tmp_data = await request.get("resultcheck/queryProject", {
         params: {
           projectsn: this.queryProjectsn,
@@ -219,6 +224,7 @@ export default {
         },
       });
       this.data = tmp_data.data;
+      this.spinning = false;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;

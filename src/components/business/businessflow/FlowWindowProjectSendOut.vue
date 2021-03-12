@@ -61,6 +61,7 @@
         :data-source="data"
         :pagination="pagination_setting"
         rowKey="id"
+        :loading="spinning"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -205,17 +206,20 @@ export default {
       eDate: "",
       sDate: "",
       queryProjectClient: "",
+      spinning: false,
     };
   },
   methods: {
     //初始化查询 undefined问题
     async clickrequest() {
-      const that = this;
+      this.spinning = true;
       const tmpdata = await request.get("/sendout/project");
       this.data = tmpdata.data;
+      this.spinning = false;
     },
     //点击按钮查询
     async queryClicked() {
+      this.spinning = true;
       const user = await request.get("/sendout/projectQuery", {
         params: {
           eDate: this.eDate,
@@ -227,6 +231,7 @@ export default {
       });
       console.log("user", user);
       this.data = user.data;
+      this.spinning = false;
     },
     editorClick(item) {
       this.modifyModalVisible = true;

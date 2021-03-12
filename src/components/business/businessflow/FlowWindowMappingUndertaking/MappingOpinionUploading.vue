@@ -48,12 +48,6 @@
           </a-select-option>
         </a-select>
       </div>
-      <!-- <div class="detail-item">
-        <div class="basicInfo-title">
-          工作内容
-        </div>
-        <a-textarea :rows="2" style="margin-top:5px" v-model="workingDetail" />
-      </div> -->
       <div class="detail-item">
         <div class="basicInfo-title">
           <span>工程量</span>

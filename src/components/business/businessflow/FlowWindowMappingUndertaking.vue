@@ -61,6 +61,7 @@
         :data-source="data"
         :pagination="pagination_setting"
         rowKey="id"
+        :loading="spinning"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -210,13 +211,16 @@ export default {
       selectProjectInfo: "",
       queryProjectsn: "",
       queryProjectClient: "",
+      spinning: false,
     };
   },
   methods: {
     async clickrequest() {
+      this.spinning = true;
       const user = await request.get("/mappingundertaking/project");
       this.data = user.data;
       console.log(this.data);
+      this.spinning = false;
     },
     async queryClicked() {
       console.log(
@@ -226,6 +230,7 @@ export default {
         this.queryProjectName,
         this.queryProjectsn
       );
+      this.spinning = true;
       const user = await request.get("/mappingundertaking/projectQuery", {
         params: {
           eDate: this.eDate,
@@ -237,6 +242,7 @@ export default {
       });
       console.log("user", user);
       this.data = user.data;
+      this.spinning = false;
     },
     editorClick(item) {
       this.modifyModalVisible = true;

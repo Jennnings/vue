@@ -8,7 +8,7 @@ const VUE_APP_BASE_URL = "http://127.0.0.1:8000";
 NProgress.configure({ showSpinner: true });
 const request = axios.create({
   baseURL: Global.env,
-  timeout: 12000,
+  timeout: 120000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

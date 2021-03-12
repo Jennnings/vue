@@ -50,11 +50,13 @@
         </a-button>
       </div>
     </div>
+    <!-- <a-spin :spinning="spinning"> -->
     <div class="table_contianer" v-if="data">
       <a-table
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        :loading="spinning"
         rowKey="id"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
@@ -91,6 +93,7 @@
         </span>
       </a-table>
     </div>
+    <!-- </a-spin> -->
     <a-modal
       v-model="createModalVisible"
       title="新建项目"
@@ -109,16 +112,17 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+      <EditProjectModal v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import CreateProject from "./FlowWindowCheckin/CreateProject";
-import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+// import ModifyProject from "./FlowWindowCheckin/ModifyProject";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
+import EditProjectModal from "./common/EditProject/EditProjectModal";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -186,7 +190,8 @@ const pagination_setting = {
 export default {
   components: {
     CreateProject,
-    ModifyProject,
+    //ModifyProject,
+    EditProjectModal,
   },
   data() {
     return {
@@ -201,12 +206,15 @@ export default {
       eDate: "",
       queryProjectName: "",
       selectProjectInfo: "",
+      spinning: false,
     };
   },
   methods: {
     async clickrequest() {
+      this.spinning = true;
       const user = await request.get("/cxch/project");
       this.data = user.data;
+      this.spinning = false;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
@@ -222,12 +230,7 @@ export default {
       this.clickrequest();
     },
     async queryClicked() {
-      console.log(
-        "queryClicked",
-        this.eDate,
-        this.sDate,
-        this.queryProjectName
-      );
+      this.spinning = true;
       const user = await request.get("/cxch/getQueryProject", {
         params: {
           eDate: this.eDate,
@@ -235,8 +238,8 @@ export default {
           projectName: this.queryProjectName,
         },
       });
-      console.log("user", user);
       this.data = user.data;
+      this.spinning = false;
     },
     clickforInfo(info) {
       //this.$message.success(info);
