@@ -135,7 +135,16 @@
             </a-descriptions-item>
             <a-descriptions-item label="文件列表" :span="2">
               <div class="supportMaterials">
-                {{ params.supportFileList }}
+                <a-list
+                  size="small"
+                  bordered
+                  :data-source="supportFileList"
+                  style="width:100%"
+                >
+                  <a-list-item slot="renderItem" slot-scope="item">
+                    <a @click="downloadFile(item)">{{ item }}</a>
+                  </a-list-item>
+                </a-list>
               </div>
             </a-descriptions-item>
           </a-descriptions>
@@ -150,6 +159,8 @@ import listdata from "./../../../../../assets/menulist/other-material.json";
 import request from "@/utils/request";
 const projectData = projectdata;
 const listData = listdata;
+import axios from "axios";
+import GLOBAL from "./../../../../../utils/global_variable";
 import moment from "moment";
 export default {
   props: ["projectInfo"],
@@ -162,6 +173,7 @@ export default {
       params: {},
       projectTypeSelected: [],
       supportMaterialsSelected: [],
+      supportFileList: [],
       spinning: false,
     };
   },
@@ -184,6 +196,8 @@ export default {
             that.projectTypeSelected = objGroup[k].split(",").map(Number);
           } else if (k === "supportMaterial") {
             that.supportMaterialsSelected = objGroup[k].split(",").map(Number);
+          } else if (k === "supportFileList") {
+            that.supportFileList = objGroup[k].split("/");
           } else {
             that.params[k] = objGroup[k];
           }
@@ -191,6 +205,39 @@ export default {
       });
       this.spinning = false;
       console.log(that.params);
+    },
+    async downloadFile(item) {
+      console.log(item);
+      const tmp_data = await request.get("/common/downloadfile", {
+        params: {
+          postfilename: item,
+        },
+      });
+      if (tmp_data.data === "error") {
+        this.$message.error("文件不存在");
+        return;
+      }
+      axios({
+        url: GLOBAL.env + "/common/downloadfile",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          postfilename: item,
+        },
+      }).then((response) => {
+        console.log(response);
+
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", item);
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
     },
   },
   mounted: function() {

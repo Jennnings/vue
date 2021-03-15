@@ -97,6 +97,7 @@
     <a-modal
       v-model="createModalVisible"
       title="新建项目"
+      :dialog-style="{ top: '20px' }"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"
@@ -107,6 +108,7 @@
     <a-modal
       v-model="modifyModalVisible"
       title="修改项目"
+      :dialog-style="{ top: '20px' }"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"

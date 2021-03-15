@@ -1,135 +1,215 @@
 <template>
   <div>
-    <div class="projectInfo">
-      <a-descriptions title="项目信息" bordered :column="2" size="small">
-        <a-form-item label="项目名称" :span="1">
-          <a-badge dot>
-            <a-input
-              placeholder="项目名称"
-              name="projectname"
-              v-model="params.projectName"
-              aria-required="true"
-              autocomplete="off"
+    <div>
+      <div class="projectInfo">
+        <a-descriptions :column="2" bordered size="small">
+          <a-descriptions-item label="项目名称" :span="2">
+            <a-badge dot>
+              <a-input
+                placeholder="项目名称"
+                :disabled="disableEdit"
+                v-model="params.projectName"
+              >
+                <a-tooltip slot="suffix" title="必填项目">
+                  <a-icon type="info-circle" style="color: red" />
+                </a-tooltip>
+              </a-input>
+            </a-badge>
+          </a-descriptions-item>
+          <a-descriptions-item label="合同编号">
+            <a-select
+              show-search
+              placeholder="选择合同编号"
+              option-filter-prop="children"
+              style="width:100%"
+              allow-clear
+              v-model="contractDefaultSelected"
+              :filter-option="filterOptionWithID"
+              @change="handleChangeWithID"
             >
-              <a-tooltip slot="suffix" title="必填项目">
-                <a-icon type="info-circle" style="color: red" />
-              </a-tooltip>
-            </a-input>
-          </a-badge>
-        </a-form-item>
-        <a-descriptions-item label="委托单位" :span="1">
-          <a-badge dot>
-            <a-input placeholder="委托单位" v-model="params.projectClient">
-              <a-tooltip slot="suffix" title="必填项目">
-                <a-icon type="info-circle" style="color: red" />
-              </a-tooltip>
-            </a-input>
-          </a-badge>
-        </a-descriptions-item>
-        <a-descriptions-item label="委托时间" :span="1">
-          <a-badge dot>
-            <a-date-picker style="width:100%" @change="getcreateTime" />
-          </a-badge>
-        </a-descriptions-item>
-        <a-descriptions-item label="委托单位地址" :span="1">
-          <a-input placeholder="委托单位地址" v-model="params.clientAddress" />
-        </a-descriptions-item>
-        <a-descriptions-item label="委托人" :span="1">
-          <a-input placeholder="委托人" v-model="params.client" />
-        </a-descriptions-item>
-        <a-descriptions-item label="委托人电话" :span="1">
-          <a-input placeholder="委托人电话" v-model="params.clientTelephone" />
-        </a-descriptions-item>
-        <a-descriptions-item label="联系人" :span="1">
-          <a-input placeholder="联系人" v-model="params.contactPerson" />
-        </a-descriptions-item>
-        <a-descriptions-item label="联系人电话" :span="1">
-          <a-input placeholder="联系人电话" v-model="params.contactTelephone" />
-        </a-descriptions-item>
-        <a-descriptions-item label="合同编号" :span="1">
-          <a-input placeholder="合同编号" v-model="params.aggreementID" />
-        </a-descriptions-item>
-        <a-descriptions-item label="合同名称" :span="1">
-          <a-input placeholder="合同名称" v-model="params.aggrementName" />
-        </a-descriptions-item>
-        <a-descriptions-item label="代建单位" :span="2">
-          <a-input placeholder="代建单位" v-model="params.agentConstruction" />
-        </a-descriptions-item>
-        <a-descriptions-item label="项目类型" :span="2">
-          <a-badge dot>
-            <a-checkbox-group @change="projectTypeSelection">
+              <a-select-option v-for="item in contractInfo" :key="item.index">
+                {{ item.HetongBianhao }}
+              </a-select-option>
+            </a-select>
+          </a-descriptions-item>
+          <a-descriptions-item label="合同名称">
+            <a-select
+              show-search
+              placeholder="选择合同名称"
+              option-filter-prop="children"
+              style="width:100%"
+              v-model="contractDefaultSelected"
+              :filter-option="filterOptionWithID"
+              allow-clear
+              @change="handleChangeWithName"
+            >
+              <a-select-option v-for="item in contractInfo" :key="item.index">
+                {{ item.Hetongname }}
+              </a-select-option>
+            </a-select>
+          </a-descriptions-item>
+          <a-descriptions-item label="委托单位">
+            <a-badge dot>
+              <a-input
+                placeholder="委托单位"
+                :disabled="disableEdit"
+                v-model="params.projectClient"
+              >
+                <a-tooltip slot="suffix" title="必填项目">
+                  <a-icon type="info-circle" style="color: red" />
+                </a-tooltip>
+              </a-input>
+            </a-badge>
+          </a-descriptions-item>
+          <a-descriptions-item label="代建单位">
+            <a-input
+              placeholder="代建单位"
+              :disabled="disableEdit"
+              v-model="params.agentConstruction"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="委托时间">
+            <a-badge dot>
+              <a-date-picker
+                style="width:100%"
+                :disabled="disableEdit"
+                @change="getcreateTime"
+              />
+            </a-badge>
+          </a-descriptions-item>
+          <a-descriptions-item label="委托单位地址">
+            <a-input
+              placeholder="委托单位地址"
+              :disabled="disableEdit"
+              v-model="params.clientAddress"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="委托人">
+            <a-input
+              placeholder="委托人"
+              :disabled="disableEdit"
+              v-model="params.client"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="委托人电话">
+            <a-input
+              placeholder="委托人电话"
+              :disabled="disableEdit"
+              v-model="params.clientTelephone"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="联系人">
+            <a-input
+              placeholder="联系人"
+              :disabled="disableEdit"
+              v-model="params.contactPerson"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="联系人电话">
+            <a-input
+              placeholder="联系人电话"
+              :disabled="disableEdit"
+              v-model="params.contactTelephone"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="项目类型" :span="2">
+            <a-badge dot>
+              <a-checkbox-group
+                :disabled="disableEdit"
+                :value="projectTypeSelected"
+                @change="projectTypeSelection"
+              >
+                <div class="supportMaterials">
+                  <div v-for="data in projectType" :key="data.index">
+                    <a-checkbox :value="data.index">
+                      {{ data.value }}
+                    </a-checkbox>
+                  </div>
+                </div>
+              </a-checkbox-group>
+            </a-badge>
+          </a-descriptions-item>
+          <a-descriptions-item label="现场坐落">
+            <a-input
+              placeholder="现场坐落"
+              :disabled="disableEdit"
+              v-model="params.sceneLocation"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="希望进场时间">
+            <a-badge dot>
+              <a-date-picker
+                style="width:100%"
+                :disabled="disableEdit"
+                @change="hopeToEnterTime"
+              />
+            </a-badge>
+          </a-descriptions-item>
+          <a-descriptions-item label="其他要求" :span="2">
+            <a-textarea
+              placeholder="其他要求"
+              :rows="2"
+              :disabled="disableEdit"
+              v-model="params.otherRequirement"
+            />
+          </a-descriptions-item>
+          <a-descriptions-item label="资料清单" :span="2">
+            <a-checkbox-group
+              :disabled="disableEdit"
+              :value="supportMaterialsSelected"
+              @change="supportMaterials"
+            >
               <div class="supportMaterials">
-                <div v-for="data in projectType" :key="data.index">
+                <div v-for="data in otherMaterial" :key="data.index">
                   <a-checkbox :value="data.index">
                     {{ data.value }}
                   </a-checkbox>
                 </div>
               </div>
             </a-checkbox-group>
-          </a-badge>
-        </a-descriptions-item>
-        <a-descriptions-item label="现场坐落" :span="1">
-          <a-input placeholder="现场坐落" v-model="params.sceneLocation" />
-        </a-descriptions-item>
-        <a-descriptions-item label="希望进场时间" :span="1">
-          <a-badge dot>
-            <a-date-picker style="width:100%" @change="hopeToEnterTime" />
-          </a-badge>
-        </a-descriptions-item>
-        <a-descriptions-item label="其他要求" :span="2">
-          <a-textarea
-            placeholder="其他要求"
-            :rows="3"
-            v-model="params.otherRequirement"
-          />
-        </a-descriptions-item>
-        <a-descriptions-item label="资料清单" :span="2">
-          <a-checkbox-group @change="supportMaterials">
+          </a-descriptions-item>
+          <a-descriptions-item label="文件列表" :span="2">
             <div class="supportMaterials">
-              <div v-for="data in otherMaterial" :key="data.index">
-                <a-checkbox :value="data.index">
-                  {{ data.value }}
-                </a-checkbox>
+              {{ params.supportFileList }}
+            </div>
+          </a-descriptions-item>
+          <a-descriptions-item label="文件上传" :span="2">
+            <div class="clearfix">
+              <div class="tempFile">
+                <a-upload
+                  :file-list="fileList"
+                  :remove="handleRemove"
+                  :before-upload="beforeUpload"
+                >
+                  <a-button> <a-icon type="upload" /> 选择文件 </a-button>
+                </a-upload>
+              </div>
+              <div class="tempFile">
+                <!-- <a-button
+                  type="primary"
+                  :disabled="fileList.length === 0"
+                  :loading="uploading"
+                  style="margin-top: 16px"
+                  @click="handleUpload"
+                >
+                  {{ uploading ? "正在上传..." : "开始上传" }}
+                </a-button> -->
               </div>
             </div>
-          </a-checkbox-group>
-        </a-descriptions-item>
-        <a-descriptions-item label="文件上传" :span="2">
-          <div class="clearfix">
-            <div class="tempFile">
-              <a-upload
-                :file-list="fileList"
-                :remove="handleRemove"
-                :before-upload="beforeUpload"
-              >
-                <a-button> <a-icon type="upload" /> 选择文件 </a-button>
-              </a-upload>
-            </div>
-            <div class="tempFile">
-              <a-button
-                type="primary"
-                :disabled="fileList.length === 0"
-                :loading="uploading"
-                style="margin-top: 16px"
-                @click="handleUpload"
-              >
-                {{ uploading ? "正在上传..." : "开始上传" }}
-              </a-button>
-            </div>
-          </div>
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
-    <div class="buttonGtoup">
-      <div class="singlebutton">
-        <a-button @click="cancelProjectCreate">
-          取消
-        </a-button>
+          </a-descriptions-item>
+        </a-descriptions>
       </div>
-      <div class="singlebutton">
-        <a-button type="primary" @click="confirmProjectCreate">
-          确认
-        </a-button>
+      <div class="buttonGtoup">
+        <div class="singlebutton">
+          <a-button @click="cancelProjectCreate">
+            取消
+          </a-button>
+        </div>
+        <div class="singlebutton">
+          <a-button type="primary" @click="confirmProjectCreate">
+            确认
+          </a-button>
+        </div>
       </div>
     </div>
   </div>
@@ -139,6 +219,7 @@ import listdata from "../../../../assets/menulist/other-material.json";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import axios from "axios";
 import GLOBAL from "./../../../../utils/global_variable";
+import request from "@/utils/request";
 const listData = listdata;
 const projectData = projectdata;
 export default {
@@ -153,21 +234,42 @@ export default {
         projectName: "",
         projectClient: "",
         createTime: "",
+        hopeToEnterTime: "",
       },
+      disableEdit: false,
       projectTypeSelected: [],
       supportMaterialsSelected: [],
       formLayout: "horizontal",
       form: this.$form.createForm(this, { name: "coordinated" }),
       postParams: null,
+      contractInfo: [],
+      contractDefaultSelected: "",
     };
   },
   methods: {
+    async getContractInfo() {
+      const tmpdata = await request.get("/common/getcontractinfo");
+      this.contractInfo = tmpdata.data;
+      //console.log(this.contractInfo);
+    },
+    handleChangeWithID(value) {
+      this.contractDefaultSelected = value;
+    },
+    handleChangeWithName(value) {
+      this.contractDefaultSelected = value;
+    },
+    //依据合同ID检索信息
+    filterOptionWithID(input, option) {
+      return (
+        option.componentOptions.children[0].text
+          .toLowerCase()
+          .indexOf(input.toLowerCase()) >= 0
+      );
+    },
     confirmProjectCreate() {
-      console.log("create Project");
       const that = this;
       this.params["projectTypeChecked"] = this.projectTypeSelected;
       this.params["otherMaterial"] = this.supportMaterialsSelected;
-      console.log("params", this.params);
       if (this.params.projectName == "") {
         this.$message.error("项目名称为必填");
         return;
@@ -188,9 +290,6 @@ export default {
         this.$message.error("请选择项目类型");
         return;
       }
-      this.params = JSON.parse(
-        JSON.stringify(this.params).replace("undefined", "")
-      );
       this.postParams = new URLSearchParams();
       this.postParams.append("projectName", this.params.projectName); //项目名称
       this.postParams.append("projectClient", this.params.projectClient); //委托单位名称
@@ -200,8 +299,14 @@ export default {
       this.postParams.append("clientTelephone", this.params.clientTelephone); //委托人电话
       this.postParams.append("contactPerson", this.params.contactPerson); //联系人
       this.postParams.append("contactTelephone", this.params.contactTelephone); //联系人电话
-      this.postParams.append("aggreementID", this.params.aggreementID); //合同编号
-      this.postParams.append("aggrementName", this.params.aggrementName); //合同名称
+      let selectedContractID = "";
+      if (this.contractDefaultSelected) {
+        selectedContractID = this.contractInfo.filter(
+          (item) => item.index === this.contractDefaultSelected
+        )[0].HetongBianhao;
+      }
+      this.postParams.append("aggreementID", selectedContractID); //合同编号
+      // this.postParams.append("aggrementName", this.params.aggrementName); //合同名称
       this.postParams.append(
         "agentConstruction",
         this.params.agentConstruction
@@ -218,15 +323,49 @@ export default {
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       ); //创建人信息->需要修改 直接后端判断的
+      this.postParams.append(
+        "UserName",
+        JSON.parse(sessionStorage.getItem("userToken")).UserName
+      ); //创建人信息->需要修改 直接后端判断的
       axios
         .post(GLOBAL.env + "/cxch/insertProject", this.postParams)
         .then((res) => {
-          console.log(res);
-          this.$emit("childFn");
+          if (res.data[0].result === "success") {
+            let clgcparams = new URLSearchParams();
+            clgcparams.append("UserName", res.data[0].userName);
+            clgcparams.append("Id", res.data[0].projectID);
+            axios
+              .post(GLOBAL.env + "/cxch/updateclcg", clgcparams)
+              .then((res) => {
+                if (res.data[0].result === "success") {
+                  let filenames = "";
+                  if (this.fileList.length == 0) {
+                    let fileparams = new URLSearchParams();
+                    fileparams.append("projectid", res.data[0].projectID);
+                    fileparams.append("filenames", filenames);
+                    axios
+                      .post(
+                        GLOBAL.env + "/cxch/uploadothermaterial",
+                        fileparams
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("新建项目成功");
+                          this.$emit("childFn");
+                        }
+                      });
+                  } else {
+                    this.handleUpload(res.data[0].projectID);
+                  }
+                }
+              });
+          } else {
+            this.$message.error("新建项目失败");
+          }
+          //this.$emit("childFn");
         });
     },
     cancelProjectCreate() {
-      //console.log("cancel Project");
       this.$emit("childFn");
     },
     handleRemove(file) {
@@ -252,23 +391,29 @@ export default {
       this.supportMaterialsSelected = e;
     },
     //文件上传前端
-    handleUpload() {
+    handleUpload(projectid) {
       const { fileList } = this;
       const formData = new FormData();
       fileList.forEach((file) => {
         formData.append("myfile", file);
       });
+      formData.append("projectid", projectid);
       this.uploading = true;
       axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
-        console.log(res);
+        // console.log(res);
         if (res.data === "upload over") {
           this.$message.success("上传成功");
+          this.$emit("childFn");
+          this.fileList = [];
         } else {
           this.$message.error("上传失败");
         }
         this.uploading = false;
       });
     },
+  },
+  mounted: function() {
+    this.getContractInfo();
   },
 };
 </script>
