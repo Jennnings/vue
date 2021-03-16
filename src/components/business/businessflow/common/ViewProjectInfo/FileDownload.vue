@@ -94,10 +94,10 @@ export default {
       }
     },
     async downloadFile(item) {
-      console.log(item);
+      console.log(item.filename);
       const tmp_data = await request.get("/common/downloadfile", {
         params: {
-          postfilename: item,
+          postfilename: item.filename,
         },
       });
       if (tmp_data.data === "error") {
@@ -112,7 +112,7 @@ export default {
         },
         responseType: "blob",
         params: {
-          postfilename: item,
+          postfilename: item.filename,
         },
       }).then((response) => {
         console.log(response);
@@ -120,7 +120,7 @@ export default {
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
         fileLink.href = fileUrl;
-        fileLink.setAttribute("download", item);
+        fileLink.setAttribute("download", item.filename);
         document.body.append(fileLink);
         fileLink.click();
         window.URL.revokeObjectURL(fileUrl);

@@ -2,7 +2,11 @@
   <div>
     <a-tabs default-active-key="1" @change="callback">
       <a-tab-pane key="1" tab="项目信息">
-        <ProjectInfoEdit :projectInfo="projectInfo" :XMState="XMState" />
+        <ProjectInfoEdit
+          :projectInfo="projectInfo"
+          :XMState="XMState"
+          @childFn="parentFn"
+        />
       </a-tab-pane>
       <a-tab-pane key="2" tab="处理记录" force-render>
         <ProcessRecording v-bind:projectInfo="projectInfo" />
@@ -27,6 +31,9 @@ export default {
   },
   methods: {
     callback(key) {},
+    parentFn() {
+      this.$emit("childFn");
+    },
   },
 };
 </script>

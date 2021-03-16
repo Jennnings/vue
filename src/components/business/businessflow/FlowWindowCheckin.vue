@@ -57,7 +57,7 @@
         :data-source="data"
         :pagination="pagination_setting"
         :loading="spinning"
-        rowKey="id"
+        rowKey="index"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -111,10 +111,15 @@
       :dialog-style="{ top: '20px' }"
       :footer="null"
       width="1300px"
+      @cancel="closeEdit"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <EditProjectModal :projectInfo="selectProjectInfo" :XMState="XMState" />
+      <EditProjectModal
+        :projectInfo="selectProjectInfo"
+        :XMState="XMState"
+        @childFn="parentFn"
+      />
     </a-modal>
   </div>
 </template>
@@ -230,6 +235,7 @@ export default {
     },
     parentFn() {
       this.createModalVisible = false;
+      this.modifyModalVisible = false;
       this.clickrequest();
     },
     async queryClicked() {
@@ -298,11 +304,28 @@ export default {
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       );
       axios.post(GLOBAL.env + "/cxch/toNextStep", postParams).then((res) => {
-        if (res.data === "修改成功") {
-          that.$message.success("提交成功");
-          that.clickrequest();
+        if (res.data[0].result === "success") {
+          let postParams2 = new URLSearchParams();
+          postParams2.append("beforeCLGC", res.data[0].clgc);
+          postParams2.append(
+            "UserName",
+            JSON.parse(sessionStorage.getItem("userToken")).UserName
+          );
+          postParams2.append("Projectsn", item);
+          axios
+            .post(GLOBAL.env + "/cxch/addCLGCInfo", postParams2)
+            .then((res) => {
+              if (res.data === "success") {
+                this.$message.success("提交成功");
+                that.clickrequest();
+              }
+            });
         }
       });
+    },
+    closeEdit() {
+      console.log("xxx");
+      this.clickrequest();
     },
   },
   created: function() {

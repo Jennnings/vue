@@ -5,11 +5,17 @@
         <div class="projectInfo">
           <a-descriptions :column="2" bordered size="small">
             <a-descriptions-item label="项目名称" :span="2">
-              <a-input
-                placeholder="项目名称"
-                :disabled="disableEdit"
-                v-model="params.projectName"
-              />
+              <a-badge dot>
+                <a-input
+                  placeholder="项目名称"
+                  :disabled="disableEdit"
+                  v-model="params.projectName"
+                >
+                  <a-tooltip slot="suffix" title="必填项目">
+                    <a-icon type="info-circle" style="color: red" />
+                  </a-tooltip>
+                </a-input>
+              </a-badge>
             </a-descriptions-item>
             <a-descriptions-item label="合同编号">
               <a-select
@@ -44,11 +50,17 @@
               </a-select>
             </a-descriptions-item>
             <a-descriptions-item label="委托单位">
-              <a-input
-                placeholder="委托单位"
-                :disabled="disableEdit"
-                v-model="params.clientName"
-              />
+              <a-badge dot>
+                <a-input
+                  placeholder="委托单位"
+                  :disabled="disableEdit"
+                  v-model="params.clientName"
+                >
+                  <a-tooltip slot="suffix" title="必填项目">
+                    <a-icon type="info-circle" style="color: red" />
+                  </a-tooltip>
+                </a-input>
+              </a-badge>
             </a-descriptions-item>
             <a-descriptions-item label="代建单位">
               <a-input
@@ -58,12 +70,15 @@
               />
             </a-descriptions-item>
             <a-descriptions-item label="委托时间">
-              <a-date-picker
-                style="width:100%"
-                :disabled="disableEdit"
-                v-if="params.clientDate"
-                :defaultValue="moment(params.clientDate, 'YYYY-MM-DD')"
-              />
+              <a-badge dot>
+                <a-date-picker
+                  style="width:100%"
+                  :disabled="disableEdit"
+                  v-if="params.clientDate"
+                  :defaultValue="moment(params.clientDate, 'YYYY-MM-DD')"
+                  @change="getcreateTime"
+                />
+              </a-badge>
             </a-descriptions-item>
             <a-descriptions-item label="委托单位地址">
               <a-input
@@ -101,18 +116,21 @@
               />
             </a-descriptions-item>
             <a-descriptions-item label="项目类型" :span="2">
-              <a-checkbox-group
-                :disabled="disableEdit"
-                :value="projectTypeSelected"
-              >
-                <div class="supportMaterials">
-                  <div v-for="data in projectType" :key="data.index">
-                    <a-checkbox :value="data.index">
-                      {{ data.value }}
-                    </a-checkbox>
+              <a-badge dot>
+                <a-checkbox-group
+                  :disabled="disableEdit"
+                  :value="projectTypeSelected"
+                  @change="projectTypeSelection"
+                >
+                  <div class="supportMaterials">
+                    <div v-for="data in projectType" :key="data.index">
+                      <a-checkbox :value="data.index">
+                        {{ data.value }}
+                      </a-checkbox>
+                    </div>
                   </div>
-                </div>
-              </a-checkbox-group>
+                </a-checkbox-group>
+              </a-badge>
             </a-descriptions-item>
             <a-descriptions-item label="现场坐落">
               <a-input
@@ -122,12 +140,15 @@
               />
             </a-descriptions-item>
             <a-descriptions-item label="希望进场时间">
-              <a-date-picker
-                style="width:100%"
-                :disabled="disableEdit"
-                v-if="params.approachTime"
-                :defaultValue="moment(params.approachTime, 'YYYY-MM-DD')"
-              />
+              <a-badge dot>
+                <a-date-picker
+                  style="width:100%"
+                  :disabled="disableEdit"
+                  v-if="params.approachTime"
+                  :defaultValue="moment(params.approachTime, 'YYYY-MM-DD')"
+                  @change="hopeToEnterTime"
+                />
+              </a-badge>
             </a-descriptions-item>
             <a-descriptions-item label="其他要求" :span="2">
               <a-textarea
@@ -141,6 +162,7 @@
               <a-checkbox-group
                 :disabled="disableEdit"
                 :value="supportMaterialsSelected"
+                @change="supportMaterials"
               >
                 <div class="supportMaterials">
                   <div v-for="data in otherMaterial" :key="data.index">
@@ -161,7 +183,17 @@
                 >
                   <a-list-item slot="renderItem" slot-scope="item">
                     <a @click="downloadFile(item)">{{ item }}</a>
-                    <a slot="actions" @click="deleteSelectItem(item)">删除</a>
+
+                    <div slot="actions">
+                      <a-popconfirm
+                        title="是否确认删除？"
+                        ok-text="确定"
+                        cancel-text="取消"
+                        @confirm="deleteSelectItem"
+                      >
+                        <a>删除</a>
+                      </a-popconfirm>
+                    </div>
                   </a-list-item>
                 </a-list>
               </div>
@@ -265,15 +297,12 @@ export default {
         }
       });
       this.spinning = false;
-      console.log(that.params);
     },
     async getContractInfo() {
       const tmpdata = await request.get("/common/getcontractinfo");
       this.contractInfo = tmpdata.data;
-      //console.log(this.contractInfo);
     },
     handleChangeWithID(value) {
-      //console.log(`selected ${value}`);
       this.contractDefaultSelected = value;
     },
     handleChangeWithName(value) {
@@ -304,22 +333,138 @@ export default {
       fileList.forEach((file) => {
         formData.append("myfile", file);
       });
-      this.uploading = true;
-      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
-        console.log(res);
-        if (res.data === "upload over") {
-          this.$message.success("上传成功");
-          this.fileList = [];
-        } else {
-          this.$message.error("上传失败");
+      formData.append("projectid", this.params.projectId);
+      let existedFileStr = "";
+      if (this.supportFileList.length != 0) {
+        for (let i = 0; i < this.supportFileList.length; i++) {
+          existedFileStr += this.supportFileList[i] + "\/";
         }
-        this.uploading = false;
-      });
+        existedFileStr = existedFileStr.slice(0, existedFileStr.length - 1);
+      }
+      formData.append("existedFiles", existedFileStr);
+      this.uploading = true;
+      axios
+        .post(GLOBAL.env + "/common/modifyprojectfile", formData)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("上传成功");
+            this.initProjectDetail();
+            this.fileList = [];
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
     },
-    cancelProjectCreate() {},
-    confirmProjectModify() {},
+    //取消项目更新
+    cancelProjectCreate() {
+      this.$emit("childFn");
+    },
+    //项目更新创建时间
+    getcreateTime(date, dateString) {
+      this.params.clientDate = dateString;
+    },
+    //项目更新 更新希望进场时间
+    hopeToEnterTime(date, dateString) {
+      this.params.approachTime = dateString;
+    },
+    //项目更新 更新项目类型
+    projectTypeSelection(e) {
+      this.projectTypeSelected = e;
+    },
+    //项目更新 更新资料清单
+    supportMaterials(e) {
+      this.supportMaterialsSelected = e;
+    },
+    confirmProjectModify() {
+      const that = this;
+      this.params["projectTypeChecked"] = this.projectTypeSelected;
+      this.params["otherMaterial"] = this.supportMaterialsSelected;
+      if (this.params.projectName == "") {
+        this.$message.error("项目名称为必填");
+        return;
+      }
+      if (this.params.projectClient == "") {
+        this.$message.error("委托单位为必填");
+        return;
+      }
+      if (this.params.clientDate == "") {
+        this.$message.error("委托时间为必填");
+        return;
+      }
+      if (this.params.approachTime == "") {
+        this.$message.error("希望进场时间为必填");
+        return;
+      }
+      if (this.params.projectTypeChecked.length == 0) {
+        this.$message.error("请选择项目类型");
+        return;
+      }
+      let postParams = new URLSearchParams();
+      postParams.append("Prjectsn", this.projectInfo);
+      postParams.append("projectName", this.params.projectName); // 项目名称
+      postParams.append("projectClient", this.params.clientName); // 委托单位名称
+      postParams.append("createTime", this.params.clientDate); // 委托时间
+      postParams.append("clientAddress", this.params.clientAddress); // 委托单位地址
+      postParams.append("client", this.params.clientPeople); // 委托人
+      postParams.append("clientTelephone", this.params.clientPeopleTel); // 委托人电话
+      postParams.append("contactPerson", this.params.contactPeople); // 联系人
+      postParams.append("contactTelephone", this.params.contactPeopleTel); // 联系人电话
+      // postParams.append("aggreementID", this.params.contractID); // 合同编号
+      // postParams.append("aggrementName", this.params.Hetongname); // 合同名称
+      let selectedContractID = "";
+      if (this.contractDefaultSelected) {
+        selectedContractID = this.contractInfo.filter(
+          (item) => item.index === this.contractDefaultSelected
+        )[0].HetongBianhao;
+      }
+      postParams.append("aggreementID", selectedContractID); //合同编号
+      postParams.append("agentConstruction", this.params.djUnit); // 代建单位名称
+      postParams.append("projectTypeChecked", this.params.projectTypeChecked); // 项目类型
+      postParams.append("sceneLocation", this.params.projectAddress); // 现场坐落
+      postParams.append("hopeToEnterTime", this.params.approachTime); // 希望进场时间
+      postParams.append("otherRequirement", this.params.otherInfo); // 其他要求
+      postParams.append("otherMaterial", this.params.otherMaterial); // 其他资料清单
+      postParams.append("projectid", this.params.projectId);
+      postParams.append(
+        "DjmanUserID",
+        JSON.parse(sessionStorage.getItem("userToken")).UserID
+      ); // 登记人员ID
+      axios
+        .post(GLOBAL.env + "/common/modifyproject", postParams)
+        .then((res) => {
+          if (res.data[0].result === "success") {
+            if (this.fileList.length == 0) {
+              let postParams2 = new URLSearchParams();
+              let existedFileStr = "";
+              if (this.supportFileList.length != 0) {
+                for (let i = 0; i < this.supportFileList.length; i++) {
+                  existedFileStr += this.supportFileList[i] + "\/";
+                }
+                existedFileStr = existedFileStr.slice(
+                  0,
+                  existedFileStr.length - 1
+                );
+              }
+              postParams2.append("existedFiles", existedFileStr);
+              postParams2.append("projectid", this.params.projectId);
+              axios
+                .post(GLOBAL.env + "/common/withoutnewfile", postParams2)
+                .then((res) => {
+                  if (res.data === "success") {
+                    this.$message.success("更新成功");
+                    this.initProjectDetail();
+                  }
+                });
+            } else {
+              this.handleUpload();
+            }
+          } else {
+            this.$message.error("更新失败");
+          }
+        });
+    },
     async downloadFile(item) {
-      console.log(item);
       const tmp_data = await request.get("/common/downloadfile", {
         params: {
           postfilename: item,
@@ -340,8 +485,6 @@ export default {
           postfilename: item,
         },
       }).then((response) => {
-        console.log(response);
-
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
         fileLink.href = fileUrl;
@@ -352,7 +495,10 @@ export default {
       });
     },
     deleteSelectItem(item) {
-      console.log(item);
+      const index = this.supportFileList.indexOf(item);
+      const newFileList = this.supportFileList.slice();
+      newFileList.splice(index, 1);
+      this.supportFileList = newFileList;
     },
   },
   mounted: function() {
