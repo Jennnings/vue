@@ -61,7 +61,7 @@
             style="width:110px"
             @click="queryClicked"
           >
-            项目查询
+            合同查询
           </a-button>
         </div>
       </div>
@@ -96,7 +96,38 @@
           :loading="loading"
           :pagination="pagination_setting_inner"
         >
-          <span slot="XMState"> <a-badge status="success" />Finished </span>
+          <span slot="XMState" slot-scope="XMState">
+            <a-tag v-if="XMState === '1'" color="volcano">
+              <span>登记中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '2'" color="geekblue">
+              <span>派件中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '3'" color="green">
+              <span>测绘中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '4'" color="LightSalmon">
+              <span>质检中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '5'" color="Cyan">
+              <span>审核中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '9'" color="SteelBlue">
+              <span>审批中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '6'" color="PaleVioletRed">
+              <span>收费中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '7'" color="Turquoise">
+              <span>归档中</span>
+            </a-tag>
+            <a-tag v-if="XMState === '8'" color="SandyBrown">
+              <span>已归档</span>
+            </a-tag>
+          </span>
+          <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
+            >查看</a
+          >
         </a-table>
       </a-table>
     </div>
@@ -111,6 +142,16 @@
     >
       <CreateContract @childFn="parentFn" />
     </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -119,6 +160,7 @@ import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import CreateContract from "./FlowWindowContract/CreateContract";
 import { message } from "ant-design-vue";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 const columns = [
   { title: "合同编号", dataIndex: "contractID", key: "name", with: 80 },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
@@ -156,7 +198,15 @@ const innerColumns = [
   {
     title: "项目状态",
     key: "XMState",
+    dataIndex: "XMState",
     scopedSlots: { customRender: "XMState" },
+    width: 200,
+  },
+  {
+    title: "查看",
+    key: "viewdetail",
+    dataIndex: "projectsn",
+    scopedSlots: { customRender: "viewdetail" },
     width: 200,
   },
 ];
@@ -169,6 +219,7 @@ const pagination_setting_inner = {
 export default {
   components: {
     CreateContract,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -187,6 +238,8 @@ export default {
       createContractVisible: false,
       distoryThis: true,
       spinning: false,
+      viewProjectInfoVisible: false,
+      selectProjectInfo: "",
     };
   },
   methods: {
@@ -275,6 +328,10 @@ export default {
     },
     parentFn() {
       this.createContractVisible = false;
+    },
+    viewdetail(item) {
+      this.selectProjectInfo = item;
+      this.viewProjectInfoVisible = true;
     },
   },
   mounted: function() {
