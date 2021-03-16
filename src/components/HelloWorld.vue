@@ -36,7 +36,6 @@ export default {
       this.$router.replace("/sendout");
     },
     parentFn(res) {
-      console.log("alert", res.key);
       this.$router.replace(res.key);
     },
   },

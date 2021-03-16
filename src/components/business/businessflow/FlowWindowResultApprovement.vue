@@ -99,18 +99,27 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <!-- v-bind:projectInfo="selectProjectInfo"
-        @closemodal="parentCloseModal" -->
       <ResultApprovement
         v-bind:projectInfo="selectProjectInfo"
         @closemodal="parentCloseModal"
       />
+    </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import ResultApprovement from "./FlowWindowResultApprovement/ApprovementOpinion";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 const columns = [
@@ -188,6 +197,7 @@ const pagination_setting = {
 export default {
   components: {
     ResultApprovement,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -203,6 +213,7 @@ export default {
       selectProjectInfo: "",
       distoryThis: true,
       spinning: false,
+      viewProjectInfoVisible: false,
     };
   },
   methods: {
@@ -244,7 +255,9 @@ export default {
       this.getInitData();
     },
     viewdetail(item) {
-      this.$message.info(item + "will be continued");
+      this.selectProjectInfo = item;
+      this.viewProjectInfoVisible = true;
+      // this.$message.info(item + "will be continued");
     },
   },
   created: function() {

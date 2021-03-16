@@ -103,11 +103,22 @@
       <!-- 
          -->
     </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import ExpenseOpinion from "./FlowWinfowCalculateExpense/ExpenseOpinion";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -182,6 +193,7 @@ const pagination_setting = {
 export default {
   components: {
     ExpenseOpinion,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -197,6 +209,7 @@ export default {
       selectProjectInfo: "",
       distoryThis: true,
       spinning: false,
+      viewProjectInfoVisible: false,
     };
   },
   methods: {
@@ -233,6 +246,10 @@ export default {
     parentCloseModal() {
       this.expenseOpinionVisible = false;
       this.getInitData();
+    },
+    viewdetail(item) {
+      this.selectProjectInfo = item;
+      this.viewProjectInfoVisible = true;
     },
   },
   mounted: function() {

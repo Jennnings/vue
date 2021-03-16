@@ -204,10 +204,10 @@ export default {
         }
       });
       this.spinning = false;
-      console.log(that.params);
+      //console.log(that.params);
     },
     async downloadFile(item) {
-      console.log(item);
+      //console.log(item);
       const tmp_data = await request.get("/common/downloadfile", {
         params: {
           postfilename: item,
@@ -228,7 +228,7 @@ export default {
           postfilename: item,
         },
       }).then((response) => {
-        console.log(response);
+        // console.log(response);
 
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");

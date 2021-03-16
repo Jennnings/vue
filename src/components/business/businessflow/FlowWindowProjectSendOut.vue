@@ -94,7 +94,7 @@
         </span>
       </a-table>
     </div>
-    <a-modal
+    <!-- <a-modal
       v-model="modifyModalVisible"
       title="修改项目"
       :footer="null"
@@ -103,6 +103,22 @@
       :maskClosable="false"
     >
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+    </a-modal> -->
+    <a-modal
+      v-model="modifyModalVisible"
+      title="修改项目"
+      :dialog-style="{ top: '20px' }"
+      :footer="null"
+      width="1300px"
+      @cancel="closeEdit"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <EditProjectModal
+        :projectInfo="selectProjectInfo"
+        :XMState="XMState"
+        @childFn="parentFn"
+      />
     </a-modal>
     <a-modal
       v-model="projectSendoutVisible"
@@ -121,7 +137,7 @@
 </template>
 <script>
 import request from "@/utils/request";
-import ModifyProject from "./FlowWindowSendOut/ModifyProject";
+import EditProjectModal from "./common/EditProject/EditProjectModal";
 import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
 const columns = [
   {
@@ -189,7 +205,7 @@ const pagination_setting = {
 };
 export default {
   components: {
-    ModifyProject,
+    EditProjectModal,
     ProjectSendOut,
   },
   data() {
@@ -207,6 +223,7 @@ export default {
       sDate: "",
       queryProjectClient: "",
       spinning: false,
+      XMState: 2,
     };
   },
   methods: {
@@ -246,6 +263,9 @@ export default {
     projectSendOut(item) {
       this.projectSendoutVisible = true;
       this.selectProjectInfo = item;
+    },
+    closeEdit() {
+      this.clickrequest();
     },
     parentFn() {
       this.projectSendoutVisible = false;

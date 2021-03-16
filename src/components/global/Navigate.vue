@@ -93,13 +93,10 @@ export default {
     };
   },
   watch: {
-    openKeys(val) {
-      console.log("openKeys", val);
-    },
+    openKeys(val) {},
   },
   methods: {
     handleClick(e) {
-      console.log("click", e);
       this.$emit("childFn", e);
     },
     titleClick(e) {

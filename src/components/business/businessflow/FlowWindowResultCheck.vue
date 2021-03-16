@@ -81,7 +81,7 @@
           </a-tag>
         </span>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
-          >编辑</a
+          >查看</a
         >
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
@@ -99,18 +99,27 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <!-- v-bind:projectInfo="selectProjectInfo"
-        @closemodal="parentCloseModal" -->
       <ResultCheckOpinion
         v-bind:projectInfo="selectProjectInfo"
         @closemodal="parentCloseModal"
       />
+    </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import ResultCheckOpinion from "./FlowWindowResultCheck/ResultCheckOpinion";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 const columns = [
@@ -188,6 +197,7 @@ const pagination_setting = {
 export default {
   components: {
     ResultCheckOpinion,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -203,6 +213,7 @@ export default {
       selectProjectInfo: "",
       distoryThis: true,
       spinning: false,
+      viewProjectInfoVisible: false,
     };
   },
   methods: {
@@ -242,6 +253,11 @@ export default {
     parentCloseModal() {
       this.resultcheckOpinionVisible = false;
       this.getInitData();
+    },
+    viewdetail(item) {
+      console.log("clicked");
+      this.selectProjectInfo = item;
+      this.viewProjectInfoVisible = true;
     },
   },
   created: function() {

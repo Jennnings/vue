@@ -94,7 +94,7 @@ export default {
       }
     },
     async downloadFile(item) {
-      console.log(item.filename);
+      //console.log(item.filename);
       const tmp_data = await request.get("/common/downloadfile", {
         params: {
           postfilename: item.filename,
@@ -115,7 +115,7 @@ export default {
           postfilename: item.filename,
         },
       }).then((response) => {
-        console.log(response);
+        //console.log(response);
 
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");

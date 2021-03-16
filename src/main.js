@@ -30,7 +30,7 @@ router.beforeEach((to, from, next) => {
     next();
   } else {
     let userToken = sessionStorage.getItem("userToken");
-    console.log("userToken", userToken);
+    //console.log("userToken", userToken);
     if (userToken === null || userToken === "") {
       next({ path: "/" });
     } else {
