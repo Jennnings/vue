@@ -67,6 +67,7 @@
 import request from "@/utils/request";
 import axios from "axios";
 import GLOBAL from "./../../../../utils/global_variable";
+import moment from "moment";
 export default {
   props: ["projectInfo"],
   data() {
@@ -79,6 +80,7 @@ export default {
     };
   },
   methods: {
+    moment,
     async getchUsers() {
       const user = await request.get("/sendout/getchUsers");
       this.userData = user.data;
@@ -103,8 +105,34 @@ export default {
       axios
         .post(GLOBAL.env + "/sendout/projectSendOut", this.postParams)
         .then((res) => {
-          console.log(res);
-          this.$emit("childFn");
+          let tmp_result = res.data[0];
+          if (tmp_result.result === "success") {
+            let time_str = moment().format("YYYY-MM-DD HH:mm:ss");
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",派件->测绘,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",测绘负责人:" +
+              this.userData.find((item) => item.UserID === this.sendOutUserID)
+                .UserName +
+              ",意见:" +
+              this.sendOutOpinion;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("派件成功");
+                  this.$emit("childFn");
+                }
+              });
+          } else {
+            this.$message.error("项目派件失败");
+          }
         });
       console.log("sendOut");
     },
@@ -114,8 +142,31 @@ export default {
       axios
         .post(GLOBAL.env + "/sendout/projectSendBack", this.postParams)
         .then((res) => {
-          console.log(res);
-          this.$emit("childFn");
+          let tmp_result = res.data[0];
+          if (tmp_result.result === "success") {
+            let time_str = moment().format("YYYY-MM-DD HH:mm:ss");
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",派件->登记,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.sendBackOpinion;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("退回成功");
+                  this.$emit("childFn");
+                }
+              });
+          } else {
+            this.$message.error("退回失败");
+          }
         });
     },
   },

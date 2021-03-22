@@ -72,7 +72,6 @@
         :columns="columns"
         :data-source="data"
         class="components-table-demo-nested"
-        :scroll="{ y: 800 }"
         :loading="spinning"
         rowKey="id"
         :pagination="pagination_setting"
@@ -140,7 +139,31 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <CreateContract @childFn="parentFn" />
+      <CreateContract @createSuccessChild="parentFn" />
+    </a-modal>
+    <a-modal
+      v-model="viewContractVisible"
+      title="查看合同"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewContract
+        @createSuccessChild="parentFn"
+        @childFn="parentFn"
+        :selectid="selectProjectInfo"
+      />
+    </a-modal>
+    <a-modal
+      v-model="modifyContractVisible"
+      title="修改合同"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ModifyContract :selectid="selectProjectInfo" @childFn="modifyParentFn" />
     </a-modal>
     <a-modal
       v-model="viewProjectInfoVisible"
@@ -159,6 +182,8 @@ import request from "@/utils/request";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import CreateContract from "./FlowWindowContract/CreateContract";
+import ViewContract from "./FlowWindowContract/ViewContract";
+import ModifyContract from "./FlowWindowContract/ModifyContract";
 import { message } from "ant-design-vue";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 const columns = [
@@ -169,14 +194,14 @@ const columns = [
   { title: "代建单位", dataIndex: "contractAssistCompany", key: "creator" },
   {
     title: "查看",
-    dataIndex: "contractView",
-    key: "contractView",
+    dataIndex: "Id",
+    key: "contractID",
     scopedSlots: { customRender: "contractView" },
   },
   {
     title: "编辑",
-    dataIndex: "contractEdit",
-    key: "contractEdit",
+    dataIndex: "Id",
+    key: "Id",
     scopedSlots: { customRender: "contractEdit" },
   },
   {
@@ -220,6 +245,8 @@ export default {
   components: {
     CreateContract,
     ViewProjectInfo,
+    ViewContract,
+    ModifyContract,
   },
   data() {
     return {
@@ -240,6 +267,8 @@ export default {
       spinning: false,
       viewProjectInfoVisible: false,
       selectProjectInfo: "",
+      viewContractVisible: false,
+      modifyContractVisible: false,
     };
   },
   methods: {
@@ -283,8 +312,16 @@ export default {
       this.data = tmp_data.data;
       this.spinning = false;
     },
-    viewItem(item) {},
-    editItem(item) {},
+    viewItem(item) {
+      console.log("select item", item);
+      this.viewContractVisible = true;
+      this.selectProjectInfo = item;
+    },
+    editItem(item) {
+      console.log("modify item", item);
+      this.modifyContractVisible = true;
+      this.selectProjectInfo = item;
+    },
     deleteItem(item) {
       let postParams;
       let that = this;
@@ -316,7 +353,6 @@ export default {
                 }
               });
           }
-          console.log(item);
         },
         onCancel() {
           console.log("Cancel");
@@ -328,6 +364,12 @@ export default {
     },
     parentFn() {
       this.createContractVisible = false;
+      // this.modifyContractVisible = false;
+      this.getContract();
+    },
+    modifyParentFn() {
+      this.modifyContractVisible = false;
+      this.getContract();
     },
     viewdetail(item) {
       this.selectProjectInfo = item;

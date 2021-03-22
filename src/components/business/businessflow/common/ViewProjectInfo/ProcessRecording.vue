@@ -49,14 +49,20 @@ export default {
       this.processInfo.forEach((e) => {
         if (e !== "") {
           let tmp_obj = {};
-          tmp_obj["time"] = e.split(",", 4)[0];
-          tmp_obj["option"] = e.split(",", 4)[1];
-          tmp_obj["user"] = e.split(",", 4)[2].split(":")[1];
-          tmp_obj["otherinfo"] = e.split(",", 4)[3];
+          if (e.split(",").length === 5) {
+            tmp_obj["time"] = e.split(",")[0];
+            tmp_obj["option"] = e.split(",")[1];
+            tmp_obj["user"] = e.split(",")[2].split(":")[1];
+            tmp_obj["otherinfo"] = e.split(",")[3] + "\t" + e.split(",")[4];
+          } else {
+            tmp_obj["time"] = e.split(",", 4)[0];
+            tmp_obj["option"] = e.split(",", 4)[1];
+            tmp_obj["user"] = e.split(",", 4)[2].split(":")[1];
+            tmp_obj["otherinfo"] = e.split(",", 4)[3];
+          }
           this.showItems.push(tmp_obj);
         }
       });
-      // console.log(this.showItems);
     },
   },
   mounted: function() {

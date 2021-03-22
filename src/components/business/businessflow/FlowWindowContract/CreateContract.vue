@@ -68,7 +68,7 @@
                 <a-button> <a-icon type="upload" /> 选择文件 </a-button>
               </a-upload>
             </div>
-            <div class="tempFile">
+            <!-- <div class="tempFile">
               <a-button
                 type="primary"
                 :disabled="fileList.length === 0"
@@ -78,7 +78,7 @@
               >
                 {{ uploading ? "正在上传..." : "开始上传" }}
               </a-button>
-            </div>
+            </div> -->
           </div>
         </a-descriptions-item>
       </a-descriptions>
@@ -139,9 +139,29 @@ export default {
       return false;
     },
     cancelContractCreate() {
-      this.$emit("childFn");
+      this.$emit("createSuccessChild");
     },
     confirmContractCreate() {
+      if (this.contractID === "") {
+        this.$message.error("合同编号为必填项目");
+        return;
+      }
+      if (this.contractName === "") {
+        this.$message.error("合同名称为必填项目");
+        return;
+      }
+      if (this.contractClient === "") {
+        this.$message.error("乙方(委托)单位为必填项目");
+        return;
+      }
+      if (this.contractSignDate === "") {
+        this.$message.error("合同签订时间为必填项目");
+        return;
+      }
+      if (this.contractExpense === "") {
+        this.$message.error("金额为必填项目");
+        return;
+      }
       let postParams = new URLSearchParams();
       postParams.append("contractname", this.contractName);
       postParams.append("contractclient", this.contractClient);
@@ -155,19 +175,39 @@ export default {
       axios
         .post(GLOBAL.env + "/contractmanagement/createcontract", postParams)
         .then((res) => {
-          console.log(res);
+          if (res.data[0].msg == "success") {
+            console.log(res);
+            if (this.fileList.length) {
+              this.handleUpload(res.data[0].contractid);
+            }
+            this.$emit("createSuccessChild");
+          } else {
+            this.$message.error("新建合同失败");
+          }
         });
-      // contractname=contractname,
-      //           contractclient=contractclient,
-      //           contractstartdate=contractstartdate,
-      //           contractenddate=contractenddate,
-      //           contractremark=contractremark,
-      //           contractid=contractid,
-      //           contractexpense=contractexpense,
-      //           contractsigndate=contractsigndate,
-      //           contractcompany=contractcompany
     },
-    handleUpload() {},
+    handleUpload(contractid) {
+      const { fileList } = this;
+      const formData = new FormData();
+      fileList.forEach((file) => {
+        formData.append("myfile", file);
+      });
+      formData.append("contractid", contractid);
+      this.uploading = true;
+      axios
+        .post(GLOBAL.env + "/contractmanagement/uploadcontractFile", formData)
+        .then((res) => {
+          // console.log(res);
+          if (res.data === "upload over") {
+            this.$message.success("上传成功");
+            // this.$emit("childFn");
+            this.fileList = [];
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
+    },
   },
 };
 </script>
