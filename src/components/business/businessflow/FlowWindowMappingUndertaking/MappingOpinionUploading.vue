@@ -9,26 +9,6 @@
         :rows="2"
         style="margin-top:5px"
       />
-      <div class="buttonGroup">
-        <div calss="uploadingFile">
-          <a-upload
-            :file-list="fileList"
-            :remove="handleRemove"
-            :before-upload="beforeUpload"
-          >
-            <a-button> <a-icon type="upload" /> 选择文件 </a-button>
-          </a-upload>
-        </div>
-        <a-button
-          type="primary"
-          :disabled="fileList.length === 0"
-          :loading="uploading"
-          style=" width:120px;margin-top:10px"
-          @click="handleUpload"
-        >
-          {{ uploading ? "上传中" : "开始上传" }}
-        </a-button>
-      </div>
     </div>
 
     <div class="detailInfo">
@@ -197,6 +177,49 @@
           </div>
         </div>
       </div>
+      <div class="detail-item">
+        <a-list
+          size="small"
+          bordered
+          :data-source="uploadedFileList"
+          style="width:100%"
+        >
+          <a-list-item slot="renderItem" slot-scope="item">
+            <a @click="downloadFile(item)">{{ item }}</a>
+
+            <div slot="actions">
+              <a-popconfirm
+                title="是否确认删除？"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="deleteSelectItem"
+              >
+                <a>删除</a>
+              </a-popconfirm>
+            </div>
+          </a-list-item>
+        </a-list>
+        <div class="buttonGroup" style="margin-top:10px">
+          <div calss="uploadingFile">
+            <a-upload
+              :file-list="fileList"
+              :remove="handleRemove"
+              :before-upload="beforeUpload"
+            >
+              <a-button> <a-icon type="upload" /> 选择文件 </a-button>
+            </a-upload>
+          </div>
+          <a-button
+            type="primary"
+            :disabled="fileList.length === 0"
+            :loading="uploading"
+            style=" width:120px;margin-top:10px"
+            @click="handleUpload"
+          >
+            {{ uploading ? "上传中" : "开始上传" }}
+          </a-button>
+        </div>
+      </div>
       <div class="detail-item buttonContainer">
         <a-button
           type="default"
@@ -245,6 +268,7 @@ export default {
       workingDetail: "",
       eventExplaination: "",
       postParams: null,
+      uploadedFileList: [],
       columns: [
         {
           title: "工作内容",
@@ -286,9 +310,30 @@ export default {
       const { fileList } = this;
       const formData = new FormData();
       fileList.forEach((file) => {
-        formData.append("files[]", file);
+        formData.append("myfile", file);
       });
+      formData.append("projectsn", this.projectInfo);
+      let existedFileStr = "";
+      if (this.uploadedFileList.length != 0) {
+        for (let i = 0; i < this.uploadedFileList.length; i++) {
+          existedFileStr += this.uploadedFileList[i] + "\/";
+        }
+        existedFileStr = existedFileStr.slice(0, existedFileStr.length - 1);
+      }
+      formData.append("existedFiles", existedFileStr);
       this.uploading = true;
+      axios
+        .post(GLOBAL.env + "/mappingundertaking/uploadchcg", formData)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("上传成功");
+            this.getUndertakingInfo();
+            this.fileList = [];
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
     },
     //***********************文件上传结束 ******************************//
     async getchUsers() {
@@ -308,7 +353,7 @@ export default {
       } else {
         this.uploadMaterialType = [];
       }
-      //this.mappingStaffGroup = data.data[0].dongbz.split(",");
+      this.mappingStaffGroup = [];
       if (data.data[0].dongbz != null) {
         for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
           this.mappingStaffGroup.push(
@@ -318,6 +363,7 @@ export default {
       } else {
         this.mappingStaffGroup = [];
       }
+      this.chgclAddGroup = [];
       if (data.data[0].gznr != null) {
         this.count = data.data[0].gznr.split(",").length;
         for (let j = 0; j < this.count; j++) {
@@ -337,6 +383,9 @@ export default {
       this.projectEndDate = data.data[0].timeend;
       this.clientConfirmDate = data.data[0].wtdwqrsj;
       this.sceneConfirmDate = data.data[0].chqrsj;
+      if (data.data[0].chcgfile != null) {
+        this.uploadedFileList = data.data[0].chcgfile.split("/");
+      }
       if (this.projectStartDate === "") {
         this.projectStartDate = moment().format("YYYY-MM-DD");
       }
@@ -526,8 +575,43 @@ export default {
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
                 if (res.data === "success") {
-                  this.$message.success("提交成功");
-                  this.$emit("uploadSuccess");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env +
+                          "/mappingundertaking/updatechcgwithoutnewfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("提交成功");
+                          //this.getUndertakingInfo();
+                          this.fileList = [];
+                          this.$emit("uploadSuccess");
+                        } else {
+                          this.$message.error("提交失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                    this.$emit("uploadSuccess");
+                  }
+                  //this.$emit("uploadSuccess");
                 }
               });
           } else {
@@ -578,7 +662,9 @@ export default {
               "\\n#" +
               time_str +
               ",测绘->暂存,处理人:" +
-              JSON.parse(sessionStorage.getItem("userToken")).UserName;
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.undertakingOpinion;
             let clgcPostParams = new URLSearchParams();
             clgcPostParams.append("clgc", clgc_str);
             clgcPostParams.append("projectsn", this.projectInfo);
@@ -586,13 +672,82 @@ export default {
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
                 if (res.data === "success") {
-                  this.$message.success("暂存成功");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env +
+                          "/mappingundertaking/updatechcgwithoutnewfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("暂存成功");
+                          this.getUndertakingInfo();
+                          this.fileList = [];
+                        } else {
+                          this.$message.error("暂存失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                  }
                 }
               });
           } else {
             this.$message.error("暂存失败");
           }
         });
+    },
+    async downloadFile(item) {
+      const tmp_data = await request.get("/common/downloadfile", {
+        params: {
+          postfilename: item,
+        },
+      });
+      if (tmp_data.data === "error") {
+        this.$message.error("文件不存在");
+        return;
+      }
+      axios({
+        url: GLOBAL.env + "/common/downloadfile",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          postfilename: item,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", item);
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
+    deleteSelectItem(item) {
+      const index = this.uploadedFileList.indexOf(item);
+      const newFileList = this.uploadedFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadedFileList = newFileList;
     },
   },
   created: function() {
