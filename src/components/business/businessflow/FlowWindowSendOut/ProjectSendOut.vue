@@ -107,7 +107,7 @@ export default {
         .then((res) => {
           let tmp_result = res.data[0];
           if (tmp_result.result === "success") {
-            let time_str = moment().format("YYYY-MM-DD HH:mm:ss");
+            let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
             let clgc_str =
               tmp_result.datas +
               "\\n#" +
@@ -144,7 +144,7 @@ export default {
         .then((res) => {
           let tmp_result = res.data[0];
           if (tmp_result.result === "success") {
-            let time_str = moment().format("YYYY-MM-DD HH:mm:ss");
+            let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
             let clgc_str =
               tmp_result.datas +
               "\\n#" +

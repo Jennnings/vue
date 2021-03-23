@@ -69,6 +69,7 @@
 import request from "@/utils/request";
 import axios from "axios";
 import GLOBAL from "./../../../../utils/global_variable";
+import moment from "moment";
 export default {
   props: ["projectInfo"],
   data() {
@@ -80,6 +81,7 @@ export default {
     };
   },
   methods: {
+    moment,
     async getMaxRecordIndex() {
       const tmp_data = await request.get("recordproject/getmaxrecordindex");
       console.log(tmp_data);
@@ -91,21 +93,65 @@ export default {
       axios
         .post(GLOBAL.env + "/recordproject/sendbackproject", postParams)
         .then((res) => {
-          if (res.data == "success") {
-            this.$message.success("项目退回成功");
-            this.$emit("updateSuccess");
+          //
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",归档->收费,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("退回成功");
+                  this.$emit("updateSuccess");
+                }
+              });
+          } else {
+            this.$message.error("退回失败");
           }
         });
     },
     sendOutFunction() {
       let postParams = new URLSearchParams();
+      if (this.recordindex === "" || this.recordindex < this.maxRecordIndex) {
+        this.$message.error("项目归档号有误");
+        return;
+      }
+      postParams.append("gdh", this.recordindex);
       postParams.append("projectsn", this.projectInfo);
       axios
         .post(GLOBAL.env + "/recordproject/projectupload", postParams)
         .then((res) => {
-          if (res.data == "success") {
-            this.$message.success("项目提交成功");
-            this.$emit("updateSuccess");
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",归档->已归档,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("提交成功");
+                  this.$emit("updateSuccess");
+                }
+              });
+          } else {
+            this.$message.error("提交失败");
           }
         });
     },

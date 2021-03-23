@@ -208,6 +208,7 @@ import projectdata from "../../../../assets/menulist/project-type.json";
 import ExpenseOpinionEditableTable from "./ExpenseOpinionEditableTable";
 import axios from "axios";
 import GLOBAL from "./../../../../utils/global_variable";
+import moment from "moment";
 const groupcolumns = [
   {
     title: "工作内容",
@@ -280,6 +281,7 @@ export default {
     };
   },
   methods: {
+    moment,
     async getGroupGZL() {
       const tmp_data = await request.get("/calculateexpense/getProjectGZL", {
         params: {
@@ -564,9 +566,31 @@ export default {
         .post(GLOBAL.env + "/calculateexpense/uploadproject", postParams)
         .then((res) => {
           console.log(res);
-          if (res.data == "success") {
-            this.$message.success("项目提交成功");
-            this.$emit("updateSuccess");
+          //this.$emit("updateSuccess");
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",收费->归档,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.expenseOpinionStr;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("提交成功");
+                  this.$emit("updateSuccess");
+                }
+              });
+          } else {
+            this.$message.error("提交失败");
           }
         });
     },
@@ -620,10 +644,31 @@ export default {
       axios
         .post(GLOBAL.env + "/calculateexpense/remainproject", postParams)
         .then((res) => {
-          console.log(res);
-          if (res.data == "success") {
-            this.$message.success("项目暂存成功");
-            this.$emit("updateSuccess");
+          //console.log(res);
+          //this.$emit("updateSuccess");
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",收费暂存,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.expenseOpinionStr;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("暂存成功");
+                }
+              });
+          } else {
+            this.$message.error("暂存失败");
           }
         });
     },

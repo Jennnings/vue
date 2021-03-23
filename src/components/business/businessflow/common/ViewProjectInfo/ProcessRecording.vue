@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="processContainer">
     <div v-if="processInfo">
       <a-list
         item-layout="horizontal"
@@ -70,3 +70,9 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+.processContainer {
+  max-height: 600px;
+  overflow-y: auto;
+}
+</style>

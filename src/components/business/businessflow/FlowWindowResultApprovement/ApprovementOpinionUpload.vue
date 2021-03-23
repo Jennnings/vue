@@ -155,6 +155,7 @@ import request from "@/utils/request";
 import GLOBAL from "./../../../../utils/global_variable";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import ApprovementOpinionEditableTable from "./ApprovementOpinionEditableTable";
+import moment from "moment";
 import axios from "axios";
 const projectData = projectdata;
 export default {
@@ -217,6 +218,7 @@ export default {
     };
   },
   methods: {
+    moment,
     //初始化表单模态框
     async getProjectInfo() {
       const data = await request.get(
@@ -507,9 +509,31 @@ export default {
         .post(GLOBAL.env + "/resultapprovement/projectSendOut", params)
         .then((res) => {
           //console.log(res);
-          if (res.data == "success") {
-            this.$message.success("项目提交成功");
-            this.$emit("updateSuccess");
+          //
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",审批->收费,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.qualitycheckOpinion;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("提交成功");
+                  this.$emit("updateSuccess");
+                }
+              });
+          } else {
+            this.$message.error("提交失败");
           }
         });
     },

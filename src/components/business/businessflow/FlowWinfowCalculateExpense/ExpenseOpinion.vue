@@ -22,7 +22,11 @@
             <span>退回意见：</span>
           </div>
           <div class="contentContainer">
-            <a-textarea placeholder="退回意见" :rows="4" />
+            <a-textarea
+              placeholder="退回意见"
+              :rows="4"
+              v-model="sendBackOpinion"
+            />
           </div>
           <div class="buttonContainer">
             <a-button type="danger" @click="sendBack">
@@ -38,6 +42,7 @@
 import GLOBAL from "./../../../../utils/global_variable";
 import axios from "axios";
 import ExpenseOpinionUpload from "./ExpenseOpinionUpload";
+import moment from "moment";
 export default {
   props: ["projectInfo"],
   components: { ExpenseOpinionUpload },
@@ -55,9 +60,11 @@ export default {
       ],
       noTitleKey: "expensecheck",
       postParams: null,
+      sendBackOpinion: "",
     };
   },
   methods: {
+    moment,
     onTabChange(key, type) {
       this[type] = key;
     },
@@ -68,9 +75,31 @@ export default {
       axios
         .post(GLOBAL.env + "/calculateexpense/projectSendBack", this.postParams)
         .then((res) => {
-          if (res.data == "success") {
-            this.$message.success("退回成功");
-            this.$emit("closemodal");
+          //this.$emit("closemodal");
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",收费->审批,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.sendBackOpinion;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("退回成功");
+                  this.$emit("closemodal");
+                }
+              });
+          } else {
+            this.$message.error("退回失败");
           }
         });
     },
