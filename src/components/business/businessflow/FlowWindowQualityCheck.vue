@@ -17,7 +17,7 @@
           <span>项目登记号:</span>
           <a-auto-complete
             style="width: 200px;margin-left:10px"
-            placeholder="项目名称"
+            placeholder="项目登记号"
             v-model="queryProjectsn"
           />
         </div>
@@ -60,6 +60,8 @@
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        :loading="spinning"
+        rowKey="id"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -79,7 +81,7 @@
           </a-tag>
         </span>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
-          >编辑</a
+          >查看</a
         >
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
@@ -90,14 +92,14 @@
       </a-table>
     </div>
     <a-modal
-      v-model="modifyModalVisible"
-      title="修改项目"
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
     <a-modal
       v-model="qualityCheckOpinionVisible"
@@ -116,7 +118,7 @@
 </template>
 <script>
 import request from "@/utils/request";
-import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import QualityCheck from "./FlowWindowQualityCheck/QualityCheckOpinion";
 const columns = [
   {
@@ -160,8 +162,8 @@ const columns = [
   },
   {
     title: "测绘提交",
-    key: "clComfirmTime",
-    dataIndex: "clComfirmTime",
+    key: "cltjsj",
+    dataIndex: "cltjsj",
     width: 100,
   },
   //TODO 查看模态框取消编辑状态
@@ -185,7 +187,7 @@ const pagination_setting = {
 };
 export default {
   components: {
-    ModifyProject,
+    ViewProjectInfo,
     QualityCheck,
   },
   data() {
@@ -194,7 +196,7 @@ export default {
       columns,
       pagination_setting,
       createModalVisible: false,
-      modifyModalVisible: false,
+      viewProjectInfoVisible: false,
       distoryThis: true,
       params: null,
       sDate: "",
@@ -203,17 +205,20 @@ export default {
       queryProjectClient: "",
       selectProjectInfo: "",
       queryProjectsn: "",
-      spinning: true,
+      spinning: false,
       qualityCheckOpinionVisible: false,
     };
   },
   methods: {
     async clickrequest() {
+      this.spinning = true;
       const user = await request.get("/qualitycheck/project");
       this.data = user.data;
+      this.spinning = false;
     },
     async queryClicked() {
       console.log("queryClicked");
+      this.spinning = true;
       const data = await request.get("qualitycheck/projectquery", {
         params: {
           projectsn: this.queryProjectsn,
@@ -224,9 +229,10 @@ export default {
         },
       });
       this.data = data.data;
+      this.spinning = false;
     },
     viewdetail(item) {
-      this.modifyModalVisible = true;
+      this.viewProjectInfoVisible = true;
       this.selectProjectInfo = item;
     },
     onendDateChange(date, dateString) {
@@ -286,7 +292,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
-    user-select: none;
+    //user-select: none;
   }
 }
 </style>

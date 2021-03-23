@@ -1,24 +1,15 @@
-<!--弃用-->
 <template>
   <div>
     <div class="projectInfo">
       <a-descriptions title="项目信息" bordered :column="2" size="small">
-        <a-form-item label="项目名称" :span="1">
-          <a-badge dot>
-            <a-input
-              placeholder="项目名称"
-              name="projectname"
-              v-model="params.projectName"
-              aria-required="true"
-              autocomplete="off"
-            >
-              <a-tooltip slot="suffix" title="必填项目">
-                <a-icon type="info-circle" style="color: red" />
-              </a-tooltip>
-            </a-input>
-          </a-badge>
-        </a-form-item>
-        <a-descriptions-item label="委托单位" :span="1">
+        <a-descriptions-item label="项目名称" :span="2">
+          <a-input
+            placeholder="项目名称"
+            :disabled="disableEdit"
+            v-model="params.projectName"
+          />
+        </a-descriptions-item>
+        <a-descriptions-item label="委托单位">
           <a-badge dot>
             <a-input placeholder="委托单位" v-model="params.projectClient">
               <a-tooltip slot="suffix" title="必填项目">
@@ -27,14 +18,9 @@
             </a-input>
           </a-badge>
         </a-descriptions-item>
-        <a-descriptions-item label="委托时间" :span="1">
+        <a-descriptions-item label="委托时间">
           <a-badge dot>
-            <a-date-picker
-              style="width:100%"
-              @change="getcreateTime"
-              v-if="params.createTime"
-              :defaultValue="moment(params.createTime, 'YYYY-MM-DD')"
-            />
+            <a-date-picker style="width:100%" @change="getcreateTime" />
           </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="委托单位地址" :span="1">
@@ -61,12 +47,9 @@
         <a-descriptions-item label="代建单位" :span="2">
           <a-input placeholder="代建单位" v-model="params.agentConstruction" />
         </a-descriptions-item>
-        <a-descriptions-item label="项目类型" :span="2">
+        <a-descriptions-item label="项目类型" :span="1">
           <a-badge dot>
-            <a-checkbox-group
-              @change="projectTypeSelection"
-              :value="projectTypeSelected"
-            >
+            <a-checkbox-group @change="projectTypeSelection">
               <div class="supportMaterials">
                 <div v-for="data in projectType" :key="data.index">
                   <a-checkbox :value="data.index">
@@ -81,12 +64,9 @@
           <a-input placeholder="现场坐落" v-model="params.sceneLocation" />
         </a-descriptions-item>
         <a-descriptions-item label="希望进场时间" :span="1">
-          <a-date-picker
-            style="width:100%"
-            @change="hopeToEnterTime"
-            v-if="params.createTime"
-            :defaultValue="moment(params.hopeToEnterTime, 'YYYY-MM-DD')"
-          />
+          <a-badge dot>
+            <a-date-picker style="width:100%" @change="hopeToEnterTime" />
+          </a-badge>
         </a-descriptions-item>
         <a-descriptions-item label="其他要求" :span="2">
           <a-textarea
@@ -96,10 +76,7 @@
           />
         </a-descriptions-item>
         <a-descriptions-item label="资料清单" :span="2">
-          <a-checkbox-group
-            @change="supportMaterials"
-            :value="supportMaterialsSelected"
-          >
+          <a-checkbox-group @change="supportMaterials">
             <div class="supportMaterials">
               <div v-for="data in otherMaterial" :key="data.index">
                 <a-checkbox :value="data.index">
@@ -142,7 +119,7 @@
         </a-button>
       </div>
       <div class="singlebutton">
-        <a-button type="primary" @click="confirmProjectModify">
+        <a-button type="primary" @click="confirmProjectCreate">
           确认
         </a-button>
       </div>
@@ -153,14 +130,11 @@
 import listdata from "../../../../assets/menulist/other-material.json";
 import projectdata from "../../../../assets/menulist/project-type.json";
 import axios from "axios";
+import GLOBAL from "./../../../../utils/global_variable";
 const listData = listdata;
 const projectData = projectdata;
-import request from "@/utils/request";
-import moment from "moment";
-import GLOBAL from "./../../../../utils/global_variable";
 export default {
-  name: "mofify-project",
-  props: ["projectInfo"],
+  name: "create-project",
   data() {
     return {
       fileList: [],
@@ -172,7 +146,6 @@ export default {
         projectClient: "",
         createTime: "",
       },
-
       projectTypeSelected: [],
       supportMaterialsSelected: [],
       formLayout: "horizontal",
@@ -181,35 +154,9 @@ export default {
     };
   },
   methods: {
-    async getProjectInfo() {
-      const that = this;
-      const tmpdata = await request("/cxch/modifyProjectInfoQuery", {
-        params: {
-          Projectsn: this.projectInfo,
-        },
-      });
-      Object.keys(tmpdata.data[0]).forEach(function(k) {
-        if (tmpdata.data[0][k] === "undefined") {
-          that.params[k] = "";
-        } else {
-          if (k === "projectTypeSelected") {
-            that.projectTypeSelected = tmpdata.data[0][k]
-              .split(",")
-              .map(Number);
-          } else if (k === "otherMaterial") {
-            that.supportMaterialsSelected = tmpdata.data[0][k]
-              .split(",")
-              .map(Number);
-          } else {
-            that.params[k] = tmpdata.data[0][k];
-          }
-        }
-      });
-      console.log("modify data", tmpdata.data[0], this.params);
-    },
-    moment,
-    confirmProjectModify() {
+    confirmProjectCreate() {
       console.log("create Project");
+      const that = this;
       this.params["projectTypeChecked"] = this.projectTypeSelected;
       this.params["otherMaterial"] = this.supportMaterialsSelected;
       console.log("params", this.params);
@@ -225,11 +172,17 @@ export default {
         this.$message.error("委托时间为必填");
         return;
       }
+      if (this.params.hopeToEnterTime == "") {
+        this.$message.error("希望进场时间为必填");
+        return;
+      }
       if (this.params.projectTypeChecked.length == 0) {
         this.$message.error("请选择项目类型");
         return;
       }
-      this.$message.loading({ content: "更新中...", key: "updating" });
+      this.params = JSON.parse(
+        JSON.stringify(this.params).replace("undefined", "")
+      );
       this.postParams = new URLSearchParams();
       this.postParams.append("projectName", this.params.projectName); //项目名称
       this.postParams.append("projectClient", this.params.projectClient); //委托单位名称
@@ -257,21 +210,15 @@ export default {
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       ); //创建人信息->需要修改 直接后端判断的
-      this.postParams.append("Prjectsn", this.projectInfo);
       axios
-        .post(GLOBAL.env + "/cxch/modifyProject", this.postParams)
+        .post(GLOBAL.env + "/cxch/insertProject", this.postParams)
         .then((res) => {
           console.log(res);
-          this.$message.success({
-            content: "更新成功!",
-            key: "updating",
-            duration: 2,
-          });
-          //this.$emit("childFn");
+          this.$emit("childFn");
         });
     },
     cancelProjectCreate() {
-      console.log("cancel Project");
+      //console.log("cancel Project");
       this.$emit("childFn");
     },
     handleRemove(file) {
@@ -308,16 +255,12 @@ export default {
         console.log(res);
         if (res.data === "upload over") {
           this.$message.success("上传成功");
-          this.fileList = [];
         } else {
           this.$message.error("上传失败");
         }
         this.uploading = false;
       });
     },
-  },
-  created: function() {
-    this.getProjectInfo();
   },
 };
 </script>

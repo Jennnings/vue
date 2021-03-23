@@ -60,6 +60,8 @@
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        rowKey="id"
+        :loading="spinning"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -86,9 +88,13 @@
         >
           <a>办理</a>
         </span>
+        <span slot="sceneLocation" slot-scope="text">
+          <span v-if="text === 'undefined'"></span>
+          <span v-else>{{ text }}</span>
+        </span>
       </a-table>
     </div>
-    <a-modal
+    <!-- <a-modal
       v-model="modifyModalVisible"
       title="修改项目"
       :footer="null"
@@ -97,6 +103,22 @@
       :maskClosable="false"
     >
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+    </a-modal> -->
+    <a-modal
+      v-model="modifyModalVisible"
+      title="修改项目"
+      :dialog-style="{ top: '20px' }"
+      :footer="null"
+      width="1300px"
+      @cancel="closeEdit"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <EditProjectModal
+        :projectInfo="selectProjectInfo"
+        :XMState="XMState"
+        @childFn="parentFn"
+      />
     </a-modal>
     <a-modal
       v-model="projectSendoutVisible"
@@ -115,7 +137,7 @@
 </template>
 <script>
 import request from "@/utils/request";
-import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+import EditProjectModal from "./common/EditProject/EditProjectModal";
 import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
 const columns = [
   {
@@ -141,6 +163,7 @@ const columns = [
     title: "坐落",
     key: "sceneLocation",
     dataIndex: "sceneLocation",
+    scopedSlots: { customRender: "sceneLocation" },
     width: 150,
   },
   {
@@ -182,7 +205,7 @@ const pagination_setting = {
 };
 export default {
   components: {
-    ModifyProject,
+    EditProjectModal,
     ProjectSendOut,
   },
   data() {
@@ -199,21 +222,21 @@ export default {
       eDate: "",
       sDate: "",
       queryProjectClient: "",
+      spinning: false,
+      XMState: 2,
     };
   },
   methods: {
+    //初始化查询 undefined问题
     async clickrequest() {
-      const user = await request.get("/sendout/project");
-      this.data = user.data;
+      this.spinning = true;
+      const tmpdata = await request.get("/sendout/project");
+      this.data = tmpdata.data;
+      this.spinning = false;
     },
+    //点击按钮查询
     async queryClicked() {
-      console.log(
-        "queryClicked",
-        this.eDate,
-        this.sDate,
-        this.queryProjectName,
-        this.queryProjectsn
-      );
+      this.spinning = true;
       const user = await request.get("/sendout/projectQuery", {
         params: {
           eDate: this.eDate,
@@ -225,6 +248,7 @@ export default {
       });
       console.log("user", user);
       this.data = user.data;
+      this.spinning = false;
     },
     editorClick(item) {
       this.modifyModalVisible = true;
@@ -239,6 +263,9 @@ export default {
     projectSendOut(item) {
       this.projectSendoutVisible = true;
       this.selectProjectInfo = item;
+    },
+    closeEdit() {
+      this.clickrequest();
     },
     parentFn() {
       this.projectSendoutVisible = false;
@@ -286,7 +313,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
-    user-select: none;
+    //user-select: none;
   }
 }
 </style>

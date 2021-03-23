@@ -2,9 +2,10 @@
   <div class="container">
     <a-menu
       style="width: 200px;height:100%"
-      :default-selected-keys="defaultSelect"
-      :open-keys.sync="openKeys"
+      :open-keys="openKeys"
+      :defaultSelectedKeys="current"
       mode="inline"
+      @openChange="onOpenChange"
       @click="handleClick"
     >
       <a-sub-menu key="sub1" @titleClick="titleClick">
@@ -38,39 +39,39 @@
         </a-menu-item>
       </a-sub-menu>
       <a-sub-menu key="sub2" @titleClick="titleClick">
-        <span slot="title"
-          ><a-icon type="appstore" /><span>Navigation Two</span></span
-        >
+        <span slot="title"><a-icon type="appstore" /><span>查询</span></span>
         <a-menu-item key="5">
-          Option 5
+          综合查询
         </a-menu-item>
         <a-menu-item key="6">
-          Option 6
+          项目统计
         </a-menu-item>
-        <a-sub-menu key="sub3" title="Submenu">
-          <a-menu-item key="7">
-            Option 7
-          </a-menu-item>
-          <a-menu-item key="8">
-            Option 8
-          </a-menu-item>
-        </a-sub-menu>
+        <a-menu-item key="7">
+          机构管理
+        </a-menu-item>
+        <a-menu-item key="22">
+          财务统计
+        </a-menu-item>
       </a-sub-menu>
       <a-sub-menu key="sub4">
-        <span slot="title"
-          ><a-icon type="setting" /><span>Navigation Three</span></span
-        >
+        <span slot="title"><a-icon type="setting" /><span>设置</span></span>
         <a-menu-item key="9">
-          Option 9
+          机构管理
         </a-menu-item>
         <a-menu-item key="10">
-          Option 10
+          角色管理
         </a-menu-item>
         <a-menu-item key="11">
-          Option 11
+          用户管理
         </a-menu-item>
         <a-menu-item key="12">
-          Option 12
+          菜单管理
+        </a-menu-item>
+        <a-menu-item key="13">
+          操作列表
+        </a-menu-item>
+        <a-menu-item key="14">
+          系统日志
         </a-menu-item>
       </a-sub-menu>
     </a-menu>
@@ -85,32 +86,40 @@ Vue.use(Button);
 export default {
   data() {
     return {
-      current: ["mail"],
+      current: [],
       openKeys: ["sub1"],
+      rootSubmenuKeys: ["sub1", "sub2", "sub4"],
       defaultSelect: [],
     };
   },
   watch: {
-    openKeys(val) {
-      console.log("openKeys", val);
-    },
+    openKeys(val) {},
   },
   methods: {
     handleClick(e) {
-      console.log("click", e);
       this.$emit("childFn", e);
     },
     titleClick(e) {
-      console.log("titleClick", e);
+      console.log(this.openKeys);
+    },
+    onOpenChange(openKeys) {
+      const latestOpenKey = openKeys.find(
+        (key) => this.openKeys.indexOf(key) === -1
+      );
+      if (this.rootSubmenuKeys.indexOf(latestOpenKey) === -1) {
+        this.openKeys = openKeys;
+      } else {
+        this.openKeys = latestOpenKey ? [latestOpenKey] : [];
+      }
     },
     async clickrequest(e) {
       const users = await request.get("/cxch/role");
-      console.log(users);
     },
   },
   created: function() {
     const arr = window.location.href.split("/");
     this.defaultSelect.push(arr[arr.length - 1]);
+    this.current = [arr[arr.length - 1]];
   },
 };
 </script>

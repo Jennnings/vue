@@ -11,13 +11,14 @@ import HelloWorld from "@/components/HelloWorld.vue";
 export default {
   name: "Home",
   components: {
-    HelloWorld
-  }
+    HelloWorld,
+  },
 };
 </script>
 <style lang="scss">
 .home {
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 </style>

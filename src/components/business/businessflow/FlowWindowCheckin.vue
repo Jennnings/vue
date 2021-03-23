@@ -50,11 +50,14 @@
         </a-button>
       </div>
     </div>
-    <div class="table_contianer" v-if="data">
+    <!-- <a-spin :spinning="spinning"> -->
+    <div class="table_contianer">
       <a-table
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        :loading="spinning"
+        rowKey="index"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -90,9 +93,11 @@
         </span>
       </a-table>
     </div>
+    <!-- </a-spin> -->
     <a-modal
       v-model="createModalVisible"
       title="新建项目"
+      :dialog-style="{ top: '20px' }"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"
@@ -103,21 +108,28 @@
     <a-modal
       v-model="modifyModalVisible"
       title="修改项目"
+      :dialog-style="{ top: '20px' }"
       :footer="null"
       width="1300px"
+      @cancel="closeEdit"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+      <EditProjectModal
+        :projectInfo="selectProjectInfo"
+        :XMState="XMState"
+        @childFn="parentFn"
+      />
     </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import CreateProject from "./FlowWindowCheckin/CreateProject";
-import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+// import ModifyProject from "./FlowWindowCheckin/ModifyProject";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
+import EditProjectModal from "./common/EditProject/EditProjectModal";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -185,7 +197,8 @@ const pagination_setting = {
 export default {
   components: {
     CreateProject,
-    ModifyProject,
+    //ModifyProject,
+    EditProjectModal,
   },
   data() {
     return {
@@ -200,12 +213,16 @@ export default {
       eDate: "",
       queryProjectName: "",
       selectProjectInfo: "",
+      spinning: false,
+      XMState: 1,
     };
   },
   methods: {
     async clickrequest() {
+      this.spinning = true;
       const user = await request.get("/cxch/project");
       this.data = user.data;
+      this.spinning = false;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
@@ -218,15 +235,11 @@ export default {
     },
     parentFn() {
       this.createModalVisible = false;
-      this.queryClicked();
+      this.modifyModalVisible = false;
+      this.clickrequest();
     },
     async queryClicked() {
-      console.log(
-        "queryClicked",
-        this.eDate,
-        this.sDate,
-        this.queryProjectName
-      );
+      this.spinning = true;
       const user = await request.get("/cxch/getQueryProject", {
         params: {
           eDate: this.eDate,
@@ -234,8 +247,8 @@ export default {
           projectName: this.queryProjectName,
         },
       });
-      console.log("user", user);
       this.data = user.data;
+      this.spinning = false;
     },
     clickforInfo(info) {
       //this.$message.success(info);
@@ -267,7 +280,7 @@ export default {
               .then((res) => {
                 if (res.data === "修改成功") {
                   that.$message.success("删除成功");
-                  that.queryClicked();
+                  that.clickrequest();
                 }
               });
           }
@@ -286,12 +299,33 @@ export default {
       let that = this;
       postParams = new URLSearchParams();
       postParams.append("Projectsn", item);
+      postParams.append(
+        "djmanuserid",
+        JSON.parse(sessionStorage.getItem("userToken")).UserID
+      );
       axios.post(GLOBAL.env + "/cxch/toNextStep", postParams).then((res) => {
-        if (res.data === "修改成功") {
-          that.$message.success("提交成功");
-          that.queryClicked();
+        if (res.data[0].result === "success") {
+          let postParams2 = new URLSearchParams();
+          postParams2.append("beforeCLGC", res.data[0].clgc);
+          postParams2.append(
+            "UserName",
+            JSON.parse(sessionStorage.getItem("userToken")).UserName
+          );
+          postParams2.append("Projectsn", item);
+          axios
+            .post(GLOBAL.env + "/cxch/addCLGCInfo", postParams2)
+            .then((res) => {
+              if (res.data === "success") {
+                this.$message.success("提交成功");
+                that.clickrequest();
+              }
+            });
         }
       });
+    },
+    closeEdit() {
+      console.log("xxx");
+      this.clickrequest();
     },
   },
   created: function() {
@@ -335,7 +369,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
-    user-select: none;
+    //user-select: none;
   }
 }
 </style>

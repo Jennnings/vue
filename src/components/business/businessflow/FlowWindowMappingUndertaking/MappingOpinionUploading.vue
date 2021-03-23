@@ -48,12 +48,6 @@
           </a-select-option>
         </a-select>
       </div>
-      <!-- <div class="detail-item">
-        <div class="basicInfo-title">
-          工作内容
-        </div>
-        <a-textarea :rows="2" style="margin-top:5px" v-model="workingDetail" />
-      </div> -->
       <div class="detail-item">
         <div class="basicInfo-title">
           <span>工程量</span>
@@ -73,6 +67,7 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
+          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
@@ -308,17 +303,12 @@ export default {
       this.eventExplaination = data.data[0].smsx;
       this.sceneClientCharge = data.data[0].wtdwxcfzr;
       this.sceneChargePerson = data.data[0].chxcfzr;
-      this.projectStartDate = data.data[0].timebegin;
-      this.clientConfirmDate = data.data[0].wtdwqrsj;
-      this.sceneConfirmDate = data.data[0].chqrsj;
       if (data.data[0].tjzllist != null) {
         this.uploadMaterialType = data.data[0].tjzllist.split(",");
       } else {
         this.uploadMaterialType = [];
       }
       //this.mappingStaffGroup = data.data[0].dongbz.split(",");
-      console.log(data.data[0].gznr);
-      console.log(data.data[0].gcl);
       if (data.data[0].dongbz != null) {
         for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
           this.mappingStaffGroup.push(
@@ -337,25 +327,27 @@ export default {
             number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
             unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
           };
-          console.log(newData);
           this.chgclAddGroup.push(newData);
         }
       } else {
         this.count = 0;
         this.chgclAddGroup = [];
       }
+      this.projectStartDate = data.data[0].timebegin;
+      this.projectEndDate = data.data[0].timeend;
+      this.clientConfirmDate = data.data[0].wtdwqrsj;
+      this.sceneConfirmDate = data.data[0].chqrsj;
       if (this.projectStartDate === "") {
         this.projectStartDate = moment().format("YYYY-MM-DD");
       }
-      this.projectEndDate = data.data[0].timeend;
       if (this.projectEndDate === "") {
-        this.projectEndDate = moment().format("YYY-MM-DD");
+        this.projectEndDate = moment().format("YYYY-MM-DD");
       }
       if (this.clientConfirmDate === "") {
-        this.clientConfirmDate = moment().format("YYY-MM-DD");
+        this.clientConfirmDate = moment().format("YYYY-MM-DD");
       }
       if (this.sceneConfirmDate === "") {
-        this.sceneConfirmDate = moment().format("YYY-MM-DD");
+        this.sceneConfirmDate = moment().format("YYYY-MM-DD");
       }
     },
     staffPicker(value) {
@@ -443,7 +435,6 @@ export default {
     },
     onCellChange(key, dataIndex, value) {
       const chgclAddGroup = [...this.chgclAddGroup];
-      //this.postParams.append(key, dataIndex, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
         target[dataIndex] = value;
@@ -451,7 +442,6 @@ export default {
       }
     },
     onDelete(key) {
-      // this.postParams.append(key);
       const chgclAddGroup = [...this.chgclAddGroup];
       this.chgclAddGroup = chgclAddGroup.filter((item) => item.key !== key);
     },
@@ -518,14 +508,34 @@ export default {
           this.postParams
         )
         .then((res) => {
-          if (res.data == "success") {
-            this.$message.success("提交成功");
-            this.$emit("uploadSuccess");
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",测绘->质检,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.undertakingOpinion;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("提交成功");
+                  this.$emit("uploadSuccess");
+                }
+              });
+          } else {
+            this.$message.error("提交失败");
           }
         });
     },
     temporarySave() {
-      console.log("暂存");
       this.postParams = new URLSearchParams();
       this.postParams.append("projectsn", this.projectInfo);
       let staff_str = "";
@@ -560,8 +570,27 @@ export default {
           this.postParams
         )
         .then((res) => {
-          if (res.data == "success") {
-            this.$message.success("修改成功");
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",测绘->暂存,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("暂存成功");
+                }
+              });
+          } else {
+            this.$message.error("暂存失败");
           }
         });
     },

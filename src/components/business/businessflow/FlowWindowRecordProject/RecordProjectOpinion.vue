@@ -3,48 +3,50 @@
     <div class="itemcontainer itemcontainer_top">
       <div class="item-title">
         <span>
-          分配意见
+          项目归档
         </span>
       </div>
       <div class="item-content">
         <div>
-          测绘承办人:
-          <a-select
-            style="width: 120px"
-            @change="selectChUserChange"
-            size="small"
-            v-if="userData"
-          >
-            <a-select-option v-for="user in userData" :key="user.UserID">
-              {{ user.UserName }}
-            </a-select-option>
-          </a-select>
-        </div>
-        <div>
-          意见如下:
-        </div>
-        <div>
-          <a-textarea
-            :rows="3"
-            style="width: 350px;"
-            v-model="sendOutOpinion"
+          <span>归档顺序号:</span>
+          <br />
+          <a-input
+            placeholder="项目归档号"
+            v-model="recordindex"
+            style="width:250px;margin-top:15px"
           />
+          <br />
+          <div style="margin-top:10px">
+            <span style="margin-top:15px"
+              >本年度已有最大顺序号：<span style="color:red">{{
+                maxRecordIndex
+              }}</span></span
+            >
+          </div>
+          <!-- <br />
+          <span>页码数:</span>
+          <br />
+          <a-input
+            placeholder="页码数"
+            v-model="pageNumber"
+            style="width:250px;margin-top:15px"
+          /> -->
         </div>
       </div>
       <div class="item-option">
         <a-button type="primary" @click="sendOutFunction">
-          分配
+          提交归档
         </a-button>
       </div>
     </div>
     <div class="itemcontainer">
       <div class="item-title">
         <span>
-          退回意见
+          退回收费
         </span>
       </div>
       <div class="item-content">
-        <div>
+        <!-- <div>
           意见如下:
         </div>
         <div>
@@ -53,11 +55,11 @@
             style="width: 350px;"
             v-model="sendBackOpinion"
           />
-        </div>
+        </div> -->
       </div>
       <div class="item-option">
         <a-button type="danger" @click="sendBack">
-          退回
+          退回收费
         </a-button>
       </div>
     </div>
@@ -72,87 +74,35 @@ export default {
   props: ["projectInfo"],
   data() {
     return {
-      userData: null,
-      sendOutOpinion: "请按照作业规范执行。",
+      maxRecordIndex: "",
       sendBackOpinion: "",
-      sendOutUserID: "",
-      postParams: null,
+      recordindex: "",
+      pageNumber: "",
     };
   },
   methods: {
     moment,
-    async getchUsers() {
-      const user = await request.get("/sendout/getchUsers");
-      this.userData = user.data;
-    },
-    selectChUserChange(value) {
-      console.log(`selected ${value}`);
-      this.sendOutUserID = value;
-    },
-    sendOutFunction() {
-      if (this.sendOutUserID === "") {
-        this.$message.warn("请选择测绘承办人");
-        return;
-      }
-      this.postParams = new URLSearchParams();
-      this.postParams.append("projectSn", this.projectInfo);
-      this.postParams.append("clmanUserID", this.sendOutUserID);
-      this.postParams.append("clyj", this.sendOutOpinion);
-      this.postParams.append(
-        "pjmanuserid",
-        JSON.parse(sessionStorage.getItem("userToken")).UserID
-      );
-      axios
-        .post(GLOBAL.env + "/sendout/projectSendOut", this.postParams)
-        .then((res) => {
-          let tmp_result = res.data[0];
-          if (tmp_result.result === "success") {
-            let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
-            let clgc_str =
-              tmp_result.datas +
-              "\\n#" +
-              time_str +
-              ",派件->测绘,处理人:" +
-              JSON.parse(sessionStorage.getItem("userToken")).UserName +
-              ",测绘负责人:" +
-              this.userData.find((item) => item.UserID === this.sendOutUserID)
-                .UserName +
-              ",意见:" +
-              this.sendOutOpinion;
-            let clgcPostParams = new URLSearchParams();
-            clgcPostParams.append("clgc", clgc_str);
-            clgcPostParams.append("projectsn", this.projectInfo);
-            axios
-              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
-              .then((res) => {
-                if (res.data === "success") {
-                  this.$message.success("派件成功");
-                  this.$emit("childFn");
-                }
-              });
-          } else {
-            this.$message.error("项目派件失败");
-          }
-        });
-      console.log("sendOut");
+    async getMaxRecordIndex() {
+      const tmp_data = await request.get("recordproject/getmaxrecordindex");
+      console.log(tmp_data);
+      this.maxRecordIndex = tmp_data.data;
     },
     sendBack() {
-      this.postParams = new URLSearchParams();
-      this.postParams.append("projectsn", this.projectInfo);
+      let postParams = new URLSearchParams();
+      postParams.append("projectsn", this.projectInfo);
       axios
-        .post(GLOBAL.env + "/sendout/projectSendBack", this.postParams)
+        .post(GLOBAL.env + "/recordproject/sendbackproject", postParams)
         .then((res) => {
+          //
           let tmp_result = res.data[0];
-          if (tmp_result.result === "success") {
-            let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
             let clgc_str =
               tmp_result.datas +
               "\\n#" +
               time_str +
-              ",派件->登记,处理人:" +
-              JSON.parse(sessionStorage.getItem("userToken")).UserName +
-              ",意见:" +
-              this.sendBackOpinion;
+              ",归档->收费,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName;
             let clgcPostParams = new URLSearchParams();
             clgcPostParams.append("clgc", clgc_str);
             clgcPostParams.append("projectsn", this.projectInfo);
@@ -161,7 +111,7 @@ export default {
               .then((res) => {
                 if (res.data === "success") {
                   this.$message.success("退回成功");
-                  this.$emit("childFn");
+                  this.$emit("updateSuccess");
                 }
               });
           } else {
@@ -169,9 +119,45 @@ export default {
           }
         });
     },
+    sendOutFunction() {
+      let postParams = new URLSearchParams();
+      if (this.recordindex === "" || this.recordindex < this.maxRecordIndex) {
+        this.$message.error("项目归档号有误");
+        return;
+      }
+      postParams.append("gdh", this.recordindex);
+      postParams.append("projectsn", this.projectInfo);
+      axios
+        .post(GLOBAL.env + "/recordproject/projectupload", postParams)
+        .then((res) => {
+          let tmp_result = res.data[0];
+          let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
+          if (tmp_result.result == "success") {
+            let clgc_str =
+              tmp_result.datas +
+              "\\n#" +
+              time_str +
+              ",归档->已归档,处理人:" +
+              JSON.parse(sessionStorage.getItem("userToken")).UserName;
+            let clgcPostParams = new URLSearchParams();
+            clgcPostParams.append("clgc", clgc_str);
+            clgcPostParams.append("projectsn", this.projectInfo);
+            axios
+              .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
+              .then((res) => {
+                if (res.data === "success") {
+                  this.$message.success("提交成功");
+                  this.$emit("updateSuccess");
+                }
+              });
+          } else {
+            this.$message.error("提交失败");
+          }
+        });
+    },
   },
-  created: function() {
-    this.getchUsers();
+  mounted: function() {
+    this.getMaxRecordIndex();
   },
 };
 </script>
@@ -180,7 +166,7 @@ export default {
   width: 100%;
   height: 300px;
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1.5fr 0.5fr;
   border: 1px #0c0c0c46 solid;
   border-radius: 3px;
   .itemcontainer {

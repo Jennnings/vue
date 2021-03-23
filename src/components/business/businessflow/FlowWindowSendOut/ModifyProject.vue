@@ -1,4 +1,3 @@
-<!--弃用-->
 <template>
   <div>
     <div class="projectInfo">
@@ -259,7 +258,7 @@ export default {
       ); //创建人信息->需要修改 直接后端判断的
       this.postParams.append("Prjectsn", this.projectInfo);
       axios
-        .post(GLOBAL.env + "/cxch/modifyProject", this.postParams)
+        .post(GLOBAL.env + "/sendout/modifyProject", this.postParams)
         .then((res) => {
           console.log(res);
           this.$message.success({

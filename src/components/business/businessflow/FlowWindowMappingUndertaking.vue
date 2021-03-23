@@ -60,6 +60,8 @@
         :columns="columns"
         :data-source="data"
         :pagination="pagination_setting"
+        rowKey="id"
+        :loading="spinning"
       >
         <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
           text
@@ -87,7 +89,7 @@
         </span>
       </a-table>
     </div>
-    <a-modal
+    <!-- <a-modal
       v-model="modifyModalVisible"
       title="修改项目"
       :footer="null"
@@ -96,6 +98,22 @@
       :maskClosable="false"
     >
       <ModifyProject v-bind:projectInfo="selectProjectInfo" />
+    </a-modal> -->
+    <a-modal
+      v-model="modifyModalVisible"
+      title="修改项目"
+      :dialog-style="{ top: '20px' }"
+      :footer="null"
+      width="1300px"
+      @cancel="closeEdit"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <EditProjectModal
+        :projectInfo="selectProjectInfo"
+        :XMState="XMState"
+        @childFn="parentFn"
+      />
     </a-modal>
     <a-modal
       v-model="mappingOpinionVisible"
@@ -114,10 +132,11 @@
 </template>
 <script>
 import request from "@/utils/request";
-import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import MappingOpinionModal from "./FlowWindowMappingUndertaking/MappingOpinionModal";
+import EditProjectModal from "./common/EditProject/EditProjectModal";
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -146,8 +165,8 @@ const columns = [
   },
   {
     title: "派件时间",
-    key: "hopeToEnterTime",
-    dataIndex: "hopeToEnterTime",
+    key: "pjtjsj",
+    dataIndex: "pjtjsj",
     width: 100,
   },
   {
@@ -190,7 +209,7 @@ const pagination_setting = {
 };
 export default {
   components: {
-    ModifyProject,
+    EditProjectModal,
     MappingOpinionModal,
   },
   data() {
@@ -209,13 +228,17 @@ export default {
       selectProjectInfo: "",
       queryProjectsn: "",
       queryProjectClient: "",
+      spinning: false,
+      XMState: 3,
     };
   },
   methods: {
     async clickrequest() {
+      this.spinning = true;
       const user = await request.get("/mappingundertaking/project");
       this.data = user.data;
-      console.log(this.data);
+      //console.log(this.data);
+      this.spinning = false;
     },
     async queryClicked() {
       console.log(
@@ -225,6 +248,7 @@ export default {
         this.queryProjectName,
         this.queryProjectsn
       );
+      this.spinning = true;
       const user = await request.get("/mappingundertaking/projectQuery", {
         params: {
           eDate: this.eDate,
@@ -236,6 +260,7 @@ export default {
       });
       console.log("user", user);
       this.data = user.data;
+      this.spinning = false;
     },
     editorClick(item) {
       this.modifyModalVisible = true;
@@ -257,7 +282,6 @@ export default {
         okType: "danger",
         cancelText: "取消",
         onOk() {
-          console.log("OK");
           //执行删除操作
           if (item) {
             postParams = new URLSearchParams();
@@ -274,27 +298,33 @@ export default {
                 }
               });
           }
-          console.log(item);
+          // console.log(item);
         },
         onCancel() {
-          console.log("Cancel");
+          //console.log("Cancel");
         },
       });
     },
     tonextstep(item) {
       this.mappingOpinionVisible = true;
       this.selectProjectInfo = item;
-      console.log("to next step", item);
+      //console.log("to next step", item);
     },
     postSuccessParent() {
       console.log("要删除这个窗口");
       this.mappingOpinionVisible = false;
       this.clickrequest();
     },
+    closeEdit() {
+      this.clickrequest();
+    },
+    parentFn() {
+      // this.projectSendoutVisible = false;
+      // this.clickrequest();
+    },
   },
   created: function() {
     this.clickrequest();
-    console.log(this.data);
   },
 };
 </script>
@@ -334,7 +364,7 @@ export default {
     height: 100%;
     width: 100%;
     margin-top: 5px;
-    user-select: none;
+    //user-select: none;
   }
 }
 </style>

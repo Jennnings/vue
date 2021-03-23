@@ -6,7 +6,7 @@
           昆山城乡房产测量有限公司 项目测绘信息管理系统
         </span>
       </div>
-      <userInfo /> 
+      <userInfo />
     </div>
     <div class="container">
       <div class="nav">
@@ -29,14 +29,13 @@ export default {
   name: "helloworld",
   components: {
     Navigate,
-    userInfo
+    userInfo,
   },
   methods: {
     clickrequest(e) {
       this.$router.replace("/sendout");
     },
     parentFn(res) {
-      console.log("alert", res.key);
       this.$router.replace(res.key);
     },
   },
@@ -54,12 +53,12 @@ export default {
   .header {
     height: 60px;
     width: 100%;
-    background-color: rgb(10, 87, 228);
+    background-color: #1890ff;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    .title{
+    .title {
       color: white;
       font-size: 25px;
       font-weight: bold;
@@ -81,6 +80,7 @@ export default {
     .routeContainer {
       height: 100%;
       width: 100%;
+      overflow-y: auto;
     }
   }
 }

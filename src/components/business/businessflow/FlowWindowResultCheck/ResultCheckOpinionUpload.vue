@@ -45,7 +45,7 @@
             </a-popconfirm>
           </template>
           <template slot="projectNumber" slot-scope="text, record">
-            <QualityCheckOpinionEditableTable
+            <ResultCheckOpinionEditable
               :text="text"
               @change="onGCLChange(record.key, 'number', $event)"
             />
@@ -68,7 +68,7 @@
       </div>
       <div class="itemContainer">
         <a-textarea
-          v-model="qualitycheckOpinion"
+          v-model="resultcheckOpinion"
           :rows="2"
           style="margin-top:5px"
         />
@@ -121,7 +121,7 @@
             </a-popconfirm>
           </template>
           <template slot="gzl" slot-scope="text, record">
-            <QualityCheckOpinionEditableTable
+            <ResultCheckOpinionEditable
               :text="text"
               @change="onStaffChange(record.key, 'gzl', $event)"
             />
@@ -154,18 +154,18 @@
 import request from "@/utils/request";
 import GLOBAL from "./../../../../utils/global_variable";
 import projectdata from "../../../../assets/menulist/project-type.json";
-import QualityCheckOpinionEditableTable from "./QualityCheckOpinionEditableTable";
+import ResultCheckOpinionEditable from "./ResultCheckOpinionEditableTable";
 import axios from "axios";
 import moment from "moment";
 const projectData = projectdata;
 export default {
   props: ["projectInfo"],
   components: {
-    QualityCheckOpinionEditableTable,
+    ResultCheckOpinionEditable,
   },
   data() {
     return {
-      qualitycheckOpinion: "项目质检合格，现提交审核。",
+      resultcheckOpinion: "项目审核合格，现提交审批。",
       gclcolumns: [
         {
           title: "工作内容",
@@ -502,13 +502,14 @@ export default {
       let params = new URLSearchParams();
       params.append("projectsn", this.projectInfo);
       params.append(
-        "jcmanuserid",
+        "shmanuserid",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       );
       axios
-        .post(GLOBAL.env + "/qualitycheck/projectSendOut", params)
+        .post(GLOBAL.env + "/resultcheck/projectSendOut", params)
         .then((res) => {
           //console.log(res);
+          //this.$emit("updateSuccess");
           let tmp_result = res.data[0];
           let time_str = moment().format("YYYY/MM/DD HH:mm:ss");
           if (tmp_result.result == "success") {
@@ -516,10 +517,10 @@ export default {
               tmp_result.datas +
               "\\n#" +
               time_str +
-              ",质检->审核,处理人:" +
+              ",审核->审批,处理人:" +
               JSON.parse(sessionStorage.getItem("userToken")).UserName +
               ",意见:" +
-              this.qualitycheckOpinion;
+              this.resultcheckOpinion;
             let clgcPostParams = new URLSearchParams();
             clgcPostParams.append("clgc", clgc_str);
             clgcPostParams.append("projectsn", this.projectInfo);
