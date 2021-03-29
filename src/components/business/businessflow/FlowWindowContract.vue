@@ -11,6 +11,14 @@
           >
             新建合同</a-button
           >
+          <a-button
+            type="primary"
+            icon="file-add"
+            style="width:110px;margin-right: 40px;background: #1890ff;"
+            @click="viewReceipt"
+          >
+            查看发票</a-button
+          >
         </template>
       </a-page-header>
     </div>
@@ -82,6 +90,9 @@
         </span>
         <span slot="contractEdit" slot-scope="item" @click="editItem(item)">
           <a>编辑</a>
+        </span>
+        <span slot="receiptEdit" slot-scope="item" @click="receiptEdit(item)">
+          <a>关联</a>
         </span>
         <span slot="contractDelete" slot-scope="item" @click="deleteItem(item)">
           <a>删除</a>
@@ -175,6 +186,28 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <a-modal
+      v-model="viewReceiptVisible"
+      title="发票查看"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewReceiptModal></ViewReceiptModal>
+    </a-modal>
+    <a-modal
+      v-model="viewReceiptForContractVisible"
+      title="关联发票"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewContractModalForContract
+        :contractinfo="selectedContractInfo"
+      ></ViewContractModalForContract>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -186,6 +219,8 @@ import ViewContract from "./FlowWindowContract/ViewContract";
 import ModifyContract from "./FlowWindowContract/ModifyContract";
 import { message } from "ant-design-vue";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
+import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptModal";
+import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
 const columns = [
   { title: "合同编号", dataIndex: "contractID", key: "name", with: 80 },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
@@ -198,11 +233,18 @@ const columns = [
     key: "contractID",
     scopedSlots: { customRender: "contractView" },
   },
+  //receiptEdit
   {
     title: "编辑",
     dataIndex: "Id",
     key: "Id",
     scopedSlots: { customRender: "contractEdit" },
+  },
+  {
+    title: "关联发票",
+    dataIndex: "Id",
+    key: "receiptEdit",
+    scopedSlots: { customRender: "receiptEdit" },
   },
   {
     title: "删除",
@@ -247,6 +289,8 @@ export default {
     ViewProjectInfo,
     ViewContract,
     ModifyContract,
+    ViewReceiptModal,
+    ViewContractModalForContract,
   },
   data() {
     return {
@@ -269,6 +313,9 @@ export default {
       selectProjectInfo: "",
       viewContractVisible: false,
       modifyContractVisible: false,
+      viewReceiptVisible: false,
+      viewReceiptForContractVisible: false,
+      selectedContractInfo: "",
     };
   },
   methods: {
@@ -374,6 +421,13 @@ export default {
     viewdetail(item) {
       this.selectProjectInfo = item;
       this.viewProjectInfoVisible = true;
+    },
+    viewReceipt() {
+      this.viewReceiptVisible = true;
+    },
+    receiptEdit(item) {
+      this.viewReceiptForContractVisible = true;
+      this.selectedContractInfo = item;
     },
   },
   mounted: function() {

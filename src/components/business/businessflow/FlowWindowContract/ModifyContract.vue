@@ -115,7 +115,7 @@
                       title="是否确认删除？"
                       ok-text="确定"
                       cancel-text="取消"
-                      @confirm="deleteSelectItem"
+                      @confirm="deleteSelectItem(item)"
                     >
                       <a>删除</a>
                     </a-popconfirm>
@@ -318,7 +318,7 @@ export default {
           console.log(res);
           if (res.data[0].result === "success") {
             this.$message.success("合同修改成功");
-            if (this.fileList.length == -0) {
+            if (this.fileList.length == 0) {
               let postParams2 = new URLSearchParams();
               let existedFileStr = "";
               if (this.savedFileList.length != 0) {

@@ -53,6 +53,16 @@
             项目查询
           </a-button>
         </div>
+        <!-- <div class="itemName">
+          <a-button
+            type="primary"
+            icon="account-book"
+            style="width:110px"
+            @click="viewReceipt"
+          >
+            发票查看
+          </a-button>
+        </div> -->
       </div>
     </div>
     <!-- <a-spin :spinning="spinning"> -->
@@ -113,6 +123,16 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <!-- <a-modal
+      v-model="viewReceiptVisible"
+      title="发票查看"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewReceiptModal></ViewReceiptModal>
+    </a-modal> -->
   </div>
 </template>
 <script>
@@ -210,6 +230,7 @@ export default {
       distoryThis: true,
       spinning: false,
       viewProjectInfoVisible: false,
+      viewReceiptVisible: false,
     };
   },
   methods: {
@@ -250,6 +271,9 @@ export default {
     viewdetail(item) {
       this.selectProjectInfo = item;
       this.viewProjectInfoVisible = true;
+    },
+    viewReceipt() {
+      this.viewReceiptVisible = true;
     },
   },
   mounted: function() {

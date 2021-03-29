@@ -193,6 +193,7 @@ export default {
         formData.append("myfile", file);
       });
       formData.append("contractid", contractid);
+      formData.append("existedFiles", "");
       this.uploading = true;
       axios
         .post(GLOBAL.env + "/contractmanagement/uploadcontractFile", formData)

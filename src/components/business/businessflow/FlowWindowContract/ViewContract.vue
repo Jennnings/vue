@@ -87,8 +87,7 @@
             <a-date-picker
               style="width:100%"
               @change="getContractEndDate"
-              v-if="contractEndDate"
-              :defaultValue="moment(contractEndDate, 'YYYY-MM-DD')"
+              :value="contractEndDate"
               :disabled="disableEdit"
             />
           </a-descriptions-item>
@@ -167,9 +166,16 @@ export default {
       if (datas.contractFileList) {
         this.savedFileList = datas.contractFileList.split("\/");
       }
-      this.contractEndDate = datas.contractEndDate;
-      if (!this.contractEndDate) {
-        this.contractEndDate = "0001-01-01";
+      // this.contractEndDate = datas.contractEndDate;
+      // if (!this.contractEndDate) {
+      //   this.contractEndDate = "0001-01-01";
+      // }
+      console.log(datas.contractEndDate);
+      if (datas.contractEndDate !== "1990-01-01") {
+        this.contractEndDate = moment(datas.contractEndDate, "YYYY-MM-DD");
+      } else {
+        console.log("xxx");
+        this.contractEndDate = "";
       }
       this.contractSignDate = datas.contractSignDate;
       if (!this.contractSignDate) {

@@ -192,7 +192,7 @@
                 title="是否确认删除？"
                 ok-text="确定"
                 cancel-text="取消"
-                @confirm="deleteSelectItem"
+                @confirm="deleteSelectItem(item)"
               >
                 <a>删除</a>
               </a-popconfirm>
