@@ -221,6 +221,7 @@ import { message } from "ant-design-vue";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptModal";
 import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
+const ModuleID = 42;
 const columns = [
   { title: "合同编号", dataIndex: "contractID", key: "name", with: 80 },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
@@ -294,6 +295,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       innerColumns,
@@ -324,6 +326,20 @@ export default {
       const tmp_data = await request.get("/contractmanagement/getcontract");
       this.data = tmp_data.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     //展开面板时使用 函数名称需要修改
     expandContract(item, record) {
@@ -432,6 +448,7 @@ export default {
   },
   mounted: function() {
     this.getContract();
+    this.getAuthority();
   },
 };
 </script>

@@ -147,6 +147,11 @@ export default {
       selectedReceipt: "",
       receiptDetailVisible: false,
       receiptEditVisible: false,
+      authorith_Add: false,
+      authorith_Browse: false,
+      authorith_Delete: false,
+      authorith_Edit: false,
+      authorith_Grant: false,
     };
   },
   methods: {

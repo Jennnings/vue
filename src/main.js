@@ -13,7 +13,6 @@ import moment from "moment";
 Vue.config.productionTip = false;
 Vue.prototype.$moment = moment;
 Vue.use(Antd);
-
 // Vue.use(ElementUI);
 const VueRouterPush = VueRouter.prototype.push;
 VueRouter.prototype.push = function push(to) {
@@ -40,6 +39,6 @@ router.beforeEach((to, from, next) => {
 });
 new Vue({
   router,
-  store,
+  store: store,
   render: (h) => h(App),
 }).$mount("#app");

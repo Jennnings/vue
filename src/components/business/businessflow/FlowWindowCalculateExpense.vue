@@ -139,6 +139,7 @@
 import request from "@/utils/request";
 import ExpenseOpinion from "./FlowWinfowCalculateExpense/ExpenseOpinion";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
+const ModuleID = 36;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -217,6 +218,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       pagination_setting,
@@ -231,6 +233,11 @@ export default {
       spinning: false,
       viewProjectInfoVisible: false,
       viewReceiptVisible: false,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -239,6 +246,20 @@ export default {
       const tmp_data = await request.get("/calculateexpense/initProject/");
       this.data = tmp_data.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     async queryClicked() {
       this.spinning = true;
@@ -278,6 +299,7 @@ export default {
   },
   mounted: function() {
     this.getInitData();
+    this.getAuthority();
   },
 };
 </script>

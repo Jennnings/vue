@@ -102,6 +102,7 @@
 import request from "@/utils/request";
 import RecordProject from "./FlowWindowRecordProject/RecordProjectOpinion";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
+const ModuleID = 37;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -173,6 +174,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       columns,
       pagination_setting,
       data: null,
@@ -186,6 +188,11 @@ export default {
       distoryThis: true,
       spinning: false,
       viewProjectInfoVisible: false,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -195,6 +202,20 @@ export default {
 
       this.data = tmp_data.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
@@ -231,6 +252,7 @@ export default {
   },
   mounted: function() {
     this.getProject();
+    this.getAuthority();
   },
 };
 </script>
