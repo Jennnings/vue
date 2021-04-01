@@ -80,7 +80,13 @@
             <span v-if="tag !== '1' && tag !== '2'">结算中</span>
           </a-tag>
         </span>
-        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <a
+          slot="editor"
+          slot-scope="item"
+          @click="editorClick(item)"
+          :disabled="!authority_Edit"
+          >编辑</a
+        >
         <span
           slot="projectsendout"
           slot-scope="item"

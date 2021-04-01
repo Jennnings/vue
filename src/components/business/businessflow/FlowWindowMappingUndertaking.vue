@@ -80,11 +80,22 @@
             <span v-if="tag !== '1' && tag !== '2'">测绘中</span>
           </a-tag>
         </span>
-        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <a
+          slot="editor"
+          slot-scope="item"
+          @click="editorClick(item)"
+          :disabled="!authority_Edit"
+          >编辑</a
+        >
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
         >
-        <span slot="delete" slot-scope="item" @click="deleteClick(item)">
+        <span
+          slot="delete"
+          slot-scope="item"
+          @click="deleteClick(item)"
+          :disabled="!authority_Delete"
+        >
           <a>删除</a>
         </span>
       </a-table>

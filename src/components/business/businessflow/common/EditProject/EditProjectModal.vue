@@ -11,19 +11,21 @@
       <a-tab-pane key="2" tab="处理记录" force-render>
         <ProcessRecording v-bind:projectInfo="projectInfo" />
       </a-tab-pane>
-      <!-- <a-tab-pane key="3" tab="文件下载">
-        <FileDownload v-bind:projectInfo="projectInfo" />
-      </a-tab-pane> -->
+      <a-tab-pane key="3" tab="流程文件">
+        <FlowFilesDownload :projectInfo="projectInfo" />
+      </a-tab-pane>
     </a-tabs>
   </div>
 </template>
 <script>
 import ProcessRecording from "./../ViewProjectInfo/ProcessRecording";
 import ProjectInfoEdit from "./ProjectInfoEdit";
+import FlowFilesDownload from "./../ViewProjectInfo/FlowFilesDownload";
 export default {
   components: {
     ProcessRecording,
     ProjectInfoEdit,
+    FlowFilesDownload,
   },
   props: ["projectInfo", "XMState"],
   data() {

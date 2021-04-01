@@ -112,7 +112,7 @@ export default {
     return {
       current: [],
       openKeys: [20],
-      rootSubmenuKeys: ["sub1", "sub2", "sub4"],
+      rootSubmenuKeys: [],
       defaultSelect: [],
       menu: [],
       spinning: false,
@@ -135,18 +135,26 @@ export default {
       }
       tmp_menu.data.forEach((element) => {
         element.children = element.children.sort(sortChildIndex);
+        this.rootSubmenuKeys.push(element.order);
       });
       this.menu = tmp_menu.data;
       this.$store.state.menuAuthority = tmp_menu.data;
+
       this.spinning = false;
     },
     handleClick(e) {
-      this.$emit("childFn", e);
+      console.log(e);
+      if (e.key.indexOf("aspx") == -1) {
+        this.$emit("childFn", e);
+      } else {
+        this.$message.warning("即将上线");
+      }
     },
     titleClick(e) {
       //console.log(this.openKeys);
     },
     onOpenChange(openKeys) {
+      console.log(openKeys);
       const latestOpenKey = openKeys.find(
         (key) => this.openKeys.indexOf(key) === -1
       );
