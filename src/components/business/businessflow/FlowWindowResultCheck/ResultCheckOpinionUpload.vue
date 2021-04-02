@@ -20,7 +20,6 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
-          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
@@ -33,6 +32,43 @@
               <a-select-option v-for="item in projectType" :key="item.indexs">
                 {{ item.value }}
               </a-select-option>
+              <div slot="dropdownRender" slot-scope="menu">
+                <v-nodes :vnodes="menu" />
+                <a-divider style="margin: 4px 0;" />
+                <div
+                  style="padding: 4px 8px; cursor: pointer;"
+                  @mousedown="(e) => e.preventDefault()"
+                  @click="addCustomerProjecttItem"
+                >
+                  <a-icon type="plus" />
+                  自定义项目
+                </div>
+              </div>
+            </a-select>
+          </template>
+          <template slot="projectUnit" slot-scope="text, record">
+            <a-select
+              style="width: 200px"
+              placeholder="选择项目单位"
+              @change="selectUnitType(record.key, $event)"
+              v-if="unitType"
+              v-model="record.unit"
+            >
+              <a-select-option v-for="item in unitType" :key="item.indexs">
+                {{ item.value }}
+              </a-select-option>
+              <div slot="dropdownRender" slot-scope="menu">
+                <v-nodes :vnodes="menu" />
+                <a-divider style="margin: 4px 0;" />
+                <div
+                  style="padding: 4px 8px; cursor: pointer;"
+                  @mousedown="(e) => e.preventDefault()"
+                  @click="addCustomerUnitItem"
+                >
+                  <a-icon type="plus" />
+                  自定义项目
+                </div>
+              </div>
             </a-select>
           </template>
           <template slot="operation" slot-scope="text, record">
@@ -96,7 +132,6 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
-          rowKey="id"
         >
           <template slot="userSelect" slot-scope="text, record">
             <a-select
@@ -104,7 +139,7 @@
               placeholder="选择人员"
               @change="selectStaff(record.key, $event)"
               v-if="userData"
-              :default-value="record.UserName"
+              v-model="record.UserName"
             >
               <a-select-option v-for="item in userData" :key="item.UserName">
                 {{ item.UserName }}
@@ -148,20 +183,44 @@
         提交
       </a-button>
     </div>
+    <a-modal
+      v-model="addProjectModalVisible"
+      title="添加自定义工作内容"
+      @ok="handleOk"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <a-input v-model="projectTypeCustomer"> </a-input>
+    </a-modal>
+    <a-modal
+      v-model="addUnitModalVisible"
+      title="添加自定义单位信息"
+      @ok="handleUnitOk"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <a-input v-model="unitTypeCustomer"> </a-input>
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import GLOBAL from "./../../../../utils/global_variable";
 import projectdata from "../../../../assets/menulist/project-type.json";
+import unitdata from "../../../../assets/menulist/project-unit.json";
 import ResultCheckOpinionEditable from "./ResultCheckOpinionEditableTable";
 import axios from "axios";
 import moment from "moment";
+const unitData = unitdata;
 const projectData = projectdata;
 export default {
   props: ["projectInfo"],
   components: {
     ResultCheckOpinionEditable,
+    VNodes: {
+      functional: true,
+      render: (h, ctx) => ctx.props.vnodes,
+    },
   },
   data() {
     return {
@@ -181,6 +240,7 @@ export default {
         {
           title: "单位",
           dataIndex: "unit",
+          scopedSlots: { customRender: "projectUnit" },
         },
         {
           title: "操作",
@@ -213,8 +273,14 @@ export default {
       mappingStaffGroup: [],
       mappingStaffGroupCount: 0,
       projectType: projectData.data,
+      unitType: unitData.data,
       userData: null,
       postParams: null,
+      addProjectModalVisible: false,
+      distoryThis: true,
+      projectTypeCustomer: "",
+      addUnitModalVisible: false,
+      unitTypeCustomer: "",
     };
   },
   methods: {
@@ -324,79 +390,26 @@ export default {
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
-        switch (value) {
-          case "1":
-            target.type = "面积预测";
-            target.unit = "平方米";
-            break;
-          case "2":
-            target.type = "面积实测";
-            target.unit = "平方米";
-            break;
-          case "3":
-            target.type = "人防预测";
-            target.unit = "平方米";
-            break;
-          case "4":
-            target.type = "人防实测";
-            target.unit = "栋";
-            break;
-          case "5":
-            target.type = "施工放样";
-            target.unit = "栋";
-            break;
-          case "6":
-            target.type = "竣工测量";
-            target.unit = "栋";
-            break;
-          case "7":
-            target.type = "控制测量";
-            target.unit = "个";
-            break;
-          case "8":
-            target.type = "日照测量";
-            target.unit = "栋";
-            break;
-          case "9":
-            target.type = "管线测量";
-            target.unit = "公里";
-            break;
-          case "10":
-            target.type = "土方测量";
-            target.unit = "平方米";
-            break;
-          case "11":
-            target.type = "断面测量";
-            target.unit = "公里";
-            break;
-          case "12":
-            target.type = "地形测量";
-            target.unit = "平方米";
-            break;
-          case "13":
-            target.type = "变形测量";
-            target.unit = "点";
-            break;
-          case "14":
-            target.type = "宗地调查";
-            target.unit = "平方米";
-            break;
-          case "15":
-            target.type = "其他测量";
-            target.unit = "棵";
-            break;
-          case "16":
-            target.type = "分户调查";
-            target.unit = "户";
-            break;
-          case "17":
-            target.type = "土地分割";
-            target.unit = "平方米";
-            break;
-        }
+        const selectedvalue = this.projectType.find(
+          (item) => item.indexs == value
+        );
+        target.type = selectedvalue.value;
         this.chgclAddGroup = chgclAddGroup;
       }
       // this.postParams.append(this.chgclAddGroup);
+    },
+    selectUnitType(key, value) {
+      console.log(value);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      // this.postParams.append(key, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
+      if (target) {
+        const selectedvalue = this.unitType.find(
+          (item) => item.indexs == value
+        );
+        target.unit = selectedvalue.value;
+        this.chgclAddGroup = chgclAddGroup;
+      }
     },
     //选择工程人员
     selectStaff(key, value) {
@@ -547,6 +560,45 @@ export default {
       this.mappingStaffGroup = mappingStaffGroup.filter(
         (item) => item.key !== key
       );
+    },
+    addCustomerProjecttItem() {
+      this.addProjectModalVisible = true;
+    },
+    addCustomerUnitItem() {
+      this.addUnitModalVisible = true;
+    },
+    handleOk() {
+      if (!this.projectTypeCustomer) {
+        this.addProjectModalVisible = false;
+        return;
+      }
+      this.addProjectModalVisible = false;
+      const initDataLength = this.projectType.length + 1;
+      let tmp_obj = {
+        index: initDataLength,
+        indexs: initDataLength.toString(),
+        key: initDataLength.toString(),
+        value: this.projectTypeCustomer,
+      };
+      this.projectType.push(tmp_obj);
+      this.projectTypeCustomer = "";
+      console.log(initDataLength);
+    },
+    handleUnitOk() {
+      if (!this.unitTypeCustomer) {
+        this.addUnitModalVisible = false;
+        return;
+      }
+      this.addUnitModalVisible = false;
+      const initDataLength = this.unitType.length + 1;
+      let tmp_obj = {
+        index: initDataLength,
+        indexs: initDataLength.toString(),
+        key: initDataLength.toString(),
+        value: this.unitTypeCustomer,
+      };
+      this.unitType.push(tmp_obj);
+      this.unitTypeCustomer = "";
     },
   },
   created: function() {
