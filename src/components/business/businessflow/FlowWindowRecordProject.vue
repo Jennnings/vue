@@ -243,8 +243,8 @@ export default {
     },
     tonextstep(item) {
       //暂时规避，文件夹未生成
-      this.$message.warning("功能尚未完全完成");
-      return;
+      // this.$message.warning("功能尚未完全完成");
+      // return;
       this.selectProjectInfo = item;
       this.recordProjectVisible = true;
     },

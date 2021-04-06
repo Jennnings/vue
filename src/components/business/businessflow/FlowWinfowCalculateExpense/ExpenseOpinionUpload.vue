@@ -648,9 +648,45 @@ export default {
             axios
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
+                // if (res.data === "success") {
+                //   this.$message.success("提交成功");
+                //   this.$emit("updateSuccess");
+                // }
                 if (res.data === "success") {
-                  this.$message.success("提交成功");
-                  this.$emit("updateSuccess");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env + "/calculateexpense/withoutnewjkdfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("提交成功");
+                          this.fileList = [];
+                          this.$emit("updateSuccess");
+                        } else {
+                          this.$message.error("提交失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                    this.$emit("updateSuccess");
+                  }
                 }
               });
           } else {
@@ -728,7 +764,39 @@ export default {
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
                 if (res.data === "success") {
-                  this.$message.success("暂存成功");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env + "/calculateexpense/withoutnewjkdfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("暂存成功");
+                          this.getGroupGZL();
+                          this.fileList = [];
+                        } else {
+                          this.$message.error("暂存失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                  }
                 }
               });
           } else {
