@@ -91,6 +91,14 @@ const routes = [
         component: () =>
           import("../components/business/businessflow/FlowWindowContract.vue"),
       },
+      {
+        path: "comprehensiveinquery",
+        name: "ComprehensiveInquery",
+        component: () =>
+          import(
+            "../components/business/businessquery/ComprehensiveInquery.vue"
+          ),
+      },
     ],
   },
   {
