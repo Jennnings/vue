@@ -80,11 +80,22 @@
             <span v-if="tag !== '1' && tag !== '2'">测绘中</span>
           </a-tag>
         </span>
-        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <a
+          slot="editor"
+          slot-scope="item"
+          @click="editorClick(item)"
+          :disabled="!authority_Edit"
+          >编辑</a
+        >
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
         >
-        <span slot="delete" slot-scope="item" @click="deleteClick(item)">
+        <span
+          slot="delete"
+          slot-scope="item"
+          @click="deleteClick(item)"
+          :disabled="!authority_Delete"
+        >
           <a>删除</a>
         </span>
       </a-table>
@@ -137,6 +148,7 @@ import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import MappingOpinionModal from "./FlowWindowMappingUndertaking/MappingOpinionModal";
 import EditProjectModal from "./common/EditProject/EditProjectModal";
+const ModuleID = 33;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -214,6 +226,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       pagination_setting,
@@ -230,15 +243,38 @@ export default {
       queryProjectClient: "",
       spinning: false,
       XMState: 3,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
     async clickrequest() {
       this.spinning = true;
-      const user = await request.get("/mappingundertaking/project");
+      const user = await request.get("/mappingundertaking/project", {
+        params: {
+          userID: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+        },
+      });
       this.data = user.data;
       //console.log(this.data);
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     async queryClicked() {
       console.log(
@@ -325,6 +361,7 @@ export default {
   },
   created: function() {
     this.clickrequest();
+    this.getAuthority();
   },
 };
 </script>

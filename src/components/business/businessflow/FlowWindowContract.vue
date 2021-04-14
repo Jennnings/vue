@@ -11,6 +11,14 @@
           >
             新建合同</a-button
           >
+          <a-button
+            type="primary"
+            icon="file-add"
+            style="width:110px;margin-right: 40px;background: #1890ff;"
+            @click="viewReceipt"
+          >
+            查看发票</a-button
+          >
         </template>
       </a-page-header>
     </div>
@@ -82,6 +90,9 @@
         </span>
         <span slot="contractEdit" slot-scope="item" @click="editItem(item)">
           <a>编辑</a>
+        </span>
+        <span slot="receiptEdit" slot-scope="item" @click="receiptEdit(item)">
+          <a>关联</a>
         </span>
         <span slot="contractDelete" slot-scope="item" @click="deleteItem(item)">
           <a>删除</a>
@@ -162,6 +173,7 @@
       width="1300px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
+      @cancel="closeContractModify"
     >
       <ModifyContract :selectid="selectProjectInfo" @childFn="modifyParentFn" />
     </a-modal>
@@ -175,6 +187,28 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <a-modal
+      v-model="viewReceiptVisible"
+      title="发票查看"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewReceiptModal></ViewReceiptModal>
+    </a-modal>
+    <a-modal
+      v-model="viewReceiptForContractVisible"
+      title="关联发票"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewContractModalForContract
+        :contractinfo="selectedContractInfo"
+      ></ViewContractModalForContract>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -184,8 +218,10 @@ import GLOBAL from "./../../../utils/global_variable";
 import CreateContract from "./FlowWindowContract/CreateContract";
 import ViewContract from "./FlowWindowContract/ViewContract";
 import ModifyContract from "./FlowWindowContract/ModifyContract";
-import { message } from "ant-design-vue";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
+import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptModal";
+import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
+const ModuleID = 42;
 const columns = [
   { title: "合同编号", dataIndex: "contractID", key: "name", with: 80 },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
@@ -198,11 +234,18 @@ const columns = [
     key: "contractID",
     scopedSlots: { customRender: "contractView" },
   },
+  //receiptEdit
   {
     title: "编辑",
     dataIndex: "Id",
     key: "Id",
     scopedSlots: { customRender: "contractEdit" },
+  },
+  {
+    title: "关联发票",
+    dataIndex: "Id",
+    key: "receiptEdit",
+    scopedSlots: { customRender: "receiptEdit" },
   },
   {
     title: "删除",
@@ -247,9 +290,12 @@ export default {
     ViewProjectInfo,
     ViewContract,
     ModifyContract,
+    ViewReceiptModal,
+    ViewContractModalForContract,
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       innerColumns,
@@ -269,6 +315,9 @@ export default {
       selectProjectInfo: "",
       viewContractVisible: false,
       modifyContractVisible: false,
+      viewReceiptVisible: false,
+      viewReceiptForContractVisible: false,
+      selectedContractInfo: "",
     };
   },
   methods: {
@@ -277,6 +326,20 @@ export default {
       const tmp_data = await request.get("/contractmanagement/getcontract");
       this.data = tmp_data.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     //展开面板时使用 函数名称需要修改
     expandContract(item, record) {
@@ -349,7 +412,7 @@ export default {
                   that.getContract();
                 }
                 if (res.data === "error has project") {
-                  that.$message.error("合同包含子项目，无法删除");
+                  that.$message.error("合同包含子项目或发票，无法删除");
                 }
               });
           }
@@ -375,9 +438,20 @@ export default {
       this.selectProjectInfo = item;
       this.viewProjectInfoVisible = true;
     },
+    viewReceipt() {
+      this.viewReceiptVisible = true;
+    },
+    receiptEdit(item) {
+      this.viewReceiptForContractVisible = true;
+      this.selectedContractInfo = item;
+    },
+    closeContractModify() {
+      this.getContract();
+    },
   },
   mounted: function() {
     this.getContract();
+    this.getAuthority();
   },
 };
 </script>

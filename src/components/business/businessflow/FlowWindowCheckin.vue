@@ -45,6 +45,7 @@
           icon="file-add"
           style="width:110px"
           @click="newProject"
+          :disabled="!authority_Add"
         >
           新增项目
         </a-button>
@@ -76,7 +77,13 @@
             <span v-if="tag !== '1' && tag !== '2'">结算中</span>
           </a-tag>
         </span>
-        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <a
+          slot="editor"
+          slot-scope="item"
+          @click="editorClick(item)"
+          :disabled="!authority_Edit"
+          >编辑</a
+        >
         <a-popconfirm
           title="确认提交"
           ok-text="确定"
@@ -89,7 +96,7 @@
           <a>提交派件</a>
         </a-popconfirm>
         <span slot="delete" slot-scope="item" @click="deleteClick(item)">
-          <a>删除</a>
+          <a :disabled="!authority_Delete">删除</a>
         </span>
       </a-table>
     </div>
@@ -130,6 +137,7 @@ import CreateProject from "./FlowWindowCheckin/CreateProject";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import EditProjectModal from "./common/EditProject/EditProjectModal";
+const ModuleID = 1;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -202,6 +210,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       pagination_setting,
@@ -215,6 +224,11 @@ export default {
       selectProjectInfo: "",
       spinning: false,
       XMState: 1,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -223,6 +237,20 @@ export default {
       const user = await request.get("/cxch/project");
       this.data = user.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
@@ -330,6 +358,9 @@ export default {
   },
   created: function() {
     this.clickrequest();
+  },
+  mounted: function() {
+    this.getAuthority();
   },
 };
 </script>

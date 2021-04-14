@@ -1,14 +1,37 @@
 <template>
   <div class="container">
-    <a-menu
-      style="width: 200px;height:100%"
-      :open-keys="openKeys"
-      :defaultSelectedKeys="current"
-      mode="inline"
-      @openChange="onOpenChange"
-      @click="handleClick"
-    >
-      <a-sub-menu key="sub1" @titleClick="titleClick">
+    <a-spin :spinning="spinning">
+      <a-menu
+        style="width: 200px;height:100%"
+        :open-keys="openKeys"
+        :defaultSelectedKeys="current"
+        mode="inline"
+        @openChange="onOpenChange"
+        @click="handleClick"
+      >
+        <a-menu-item key="guidepage">
+          <a-icon type="home" />
+          <span>首页</span>
+        </a-menu-item>
+        <a-sub-menu
+          v-for="items in menu"
+          :key="items.order"
+          @titleClick="titleClick"
+        >
+          <span slot="title" v-if="items.index == 19">
+            <a-icon type="mail" /><span>{{ items.name }}</span>
+          </span>
+          <span slot="title" v-if="items.index == 2">
+            <a-icon type="appstore" /><span>{{ items.name }}</span>
+          </span>
+          <span slot="title" v-if="items.index == 1">
+            <a-icon type="setting" /><span>{{ items.name }}</span>
+          </span>
+          <a-menu-item v-for="submenu in items.children" :key="submenu.url">
+            {{ submenu.name }}
+          </a-menu-item>
+        </a-sub-menu>
+        <!-- <a-sub-menu key="sub1" @titleClick="titleClick">
         <span slot="title"><a-icon type="mail" /><span>流程</span></span>
         <a-menu-item key="checkin">
           窗口登记
@@ -38,7 +61,7 @@
           合同管理
         </a-menu-item>
       </a-sub-menu>
-      <a-sub-menu key="sub2" @titleClick="titleClick">
+      <a-sub-menu key="sub2">
         <span slot="title"><a-icon type="appstore" /><span>查询</span></span>
         <a-menu-item key="5">
           综合查询
@@ -73,8 +96,9 @@
         <a-menu-item key="14">
           系统日志
         </a-menu-item>
-      </a-sub-menu>
-    </a-menu>
+      </a-sub-menu> -->
+      </a-menu>
+    </a-spin>
   </div>
 </template>
 
@@ -87,22 +111,50 @@ export default {
   data() {
     return {
       current: [],
-      openKeys: ["sub1"],
-      rootSubmenuKeys: ["sub1", "sub2", "sub4"],
+      openKeys: [20],
+      rootSubmenuKeys: [],
       defaultSelect: [],
+      menu: [],
+      spinning: false,
     };
   },
   watch: {
     openKeys(val) {},
   },
   methods: {
+    async getMenuList() {
+      this.spinning = true;
+      const tmp_menu = await request("/common/getmenulist", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+        },
+      });
+      console.log(tmp_menu);
+      function sortChildIndex(a, b) {
+        return a.childIndex - b.childIndex;
+      }
+      tmp_menu.data.forEach((element) => {
+        element.children = element.children.sort(sortChildIndex);
+        this.rootSubmenuKeys.push(element.order);
+      });
+      this.menu = tmp_menu.data;
+      this.$store.state.menuAuthority = tmp_menu.data;
+
+      this.spinning = false;
+    },
     handleClick(e) {
-      this.$emit("childFn", e);
+      console.log(e);
+      if (e.key.indexOf("aspx") == -1) {
+        this.$emit("childFn", e);
+      } else {
+        this.$message.warning("即将上线");
+      }
     },
     titleClick(e) {
-      console.log(this.openKeys);
+      //console.log(this.openKeys);
     },
     onOpenChange(openKeys) {
+      console.log(openKeys);
       const latestOpenKey = openKeys.find(
         (key) => this.openKeys.indexOf(key) === -1
       );
@@ -115,6 +167,9 @@ export default {
     async clickrequest(e) {
       const users = await request.get("/cxch/role");
     },
+  },
+  mounted: function() {
+    this.getMenuList();
   },
   created: function() {
     const arr = window.location.href.split("/");

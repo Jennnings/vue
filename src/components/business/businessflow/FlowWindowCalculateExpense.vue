@@ -53,6 +53,16 @@
             项目查询
           </a-button>
         </div>
+        <!-- <div class="itemName">
+          <a-button
+            type="primary"
+            icon="account-book"
+            style="width:110px"
+            @click="viewReceipt"
+          >
+            发票查看
+          </a-button>
+        </div> -->
       </div>
     </div>
     <!-- <a-spin :spinning="spinning"> -->
@@ -113,12 +123,23 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <!-- <a-modal
+      v-model="viewReceiptVisible"
+      title="发票查看"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewReceiptModal></ViewReceiptModal>
+    </a-modal> -->
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import ExpenseOpinion from "./FlowWinfowCalculateExpense/ExpenseOpinion";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
+const ModuleID = 36;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -197,6 +218,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       pagination_setting,
@@ -210,6 +232,12 @@ export default {
       distoryThis: true,
       spinning: false,
       viewProjectInfoVisible: false,
+      viewReceiptVisible: false,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -218,6 +246,20 @@ export default {
       const tmp_data = await request.get("/calculateexpense/initProject/");
       this.data = tmp_data.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     async queryClicked() {
       this.spinning = true;
@@ -251,9 +293,13 @@ export default {
       this.selectProjectInfo = item;
       this.viewProjectInfoVisible = true;
     },
+    viewReceipt() {
+      this.viewReceiptVisible = true;
+    },
   },
   mounted: function() {
     this.getInitData();
+    this.getAuthority();
   },
 };
 </script>

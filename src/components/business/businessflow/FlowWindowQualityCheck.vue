@@ -120,6 +120,7 @@
 import request from "@/utils/request";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import QualityCheck from "./FlowWindowQualityCheck/QualityCheckOpinion";
+const ModuleID = 34;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -192,6 +193,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       data: null,
       columns,
       pagination_setting,
@@ -207,6 +209,11 @@ export default {
       queryProjectsn: "",
       spinning: false,
       qualityCheckOpinionVisible: false,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -215,6 +222,20 @@ export default {
       const user = await request.get("/qualitycheck/project");
       this.data = user.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     async queryClicked() {
       console.log("queryClicked");
@@ -253,6 +274,7 @@ export default {
   },
   created: function() {
     this.clickrequest();
+    this.getAuthority();
   },
 };
 </script>

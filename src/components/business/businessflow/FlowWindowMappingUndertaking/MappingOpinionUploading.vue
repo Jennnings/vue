@@ -9,26 +9,6 @@
         :rows="2"
         style="margin-top:5px"
       />
-      <div class="buttonGroup">
-        <div calss="uploadingFile">
-          <a-upload
-            :file-list="fileList"
-            :remove="handleRemove"
-            :before-upload="beforeUpload"
-          >
-            <a-button> <a-icon type="upload" /> 选择文件 </a-button>
-          </a-upload>
-        </div>
-        <a-button
-          type="primary"
-          :disabled="fileList.length === 0"
-          :loading="uploading"
-          style=" width:120px;margin-top:10px"
-          @click="handleUpload"
-        >
-          {{ uploading ? "上传中" : "开始上传" }}
-        </a-button>
-      </div>
     </div>
 
     <div class="detailInfo">
@@ -41,7 +21,7 @@
           mode="tags"
           style="width: 80%"
           @change="staffPicker"
-          :default-value="mappingStaffGroup"
+          v-model="mappingStaffGroup"
         >
           <a-select-option v-for="user in userData" :key="user.UserName">
             {{ user.UserName }}
@@ -67,7 +47,6 @@
           size="small"
           style="margin-top:10px"
           :pagination="false"
-          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
@@ -75,11 +54,23 @@
               placeholder="选择项目类型"
               @change="selectprojectType(record.key, $event)"
               v-if="projectType"
-              :default-value="record.type"
+              v-model="record.type"
             >
               <a-select-option v-for="item in projectType" :key="item.indexs">
                 {{ item.value }}
               </a-select-option>
+              <div slot="dropdownRender" slot-scope="menu">
+                <v-nodes :vnodes="menu" />
+                <a-divider style="margin: 4px 0;" />
+                <div
+                  style="padding: 4px 8px; cursor: pointer;"
+                  @mousedown="(e) => e.preventDefault()"
+                  @click="addCustomerProjecttItem"
+                >
+                  <a-icon type="plus" />
+                  自定义项目
+                </div>
+              </div>
             </a-select>
           </template>
           <template slot="projectNumber" slot-scope="text, record">
@@ -87,6 +78,31 @@
               :text="text"
               @change="onCellChange(record.key, 'number', $event)"
             />
+          </template>
+          <template slot="projectUnit" slot-scope="text, record">
+            <a-select
+              style="width: 200px"
+              placeholder="选择项目单位"
+              @change="selectUnitType(record.key, $event)"
+              v-if="unitType"
+              v-model="record.unit"
+            >
+              <a-select-option v-for="item in unitType" :key="item.indexs">
+                {{ item.value }}
+              </a-select-option>
+              <div slot="dropdownRender" slot-scope="menu">
+                <v-nodes :vnodes="menu" />
+                <a-divider style="margin: 4px 0;" />
+                <div
+                  style="padding: 4px 8px; cursor: pointer;"
+                  @mousedown="(e) => e.preventDefault()"
+                  @click="addCustomerUnitItem"
+                >
+                  <a-icon type="plus" />
+                  自定义项目
+                </div>
+              </div>
+            </a-select>
           </template>
           <template slot="operation" slot-scope="text, record">
             <a-popconfirm
@@ -197,6 +213,48 @@
           </div>
         </div>
       </div>
+      <div class="detail-item">
+        <a-list
+          size="small"
+          bordered
+          :data-source="uploadedFileList"
+          style="width:100%"
+        >
+          <a-list-item slot="renderItem" slot-scope="item">
+            <a @click="downloadFile(item)">{{ item }}</a>
+            <div slot="actions">
+              <a-popconfirm
+                title="是否确认删除？"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="deleteSelectItem(item)"
+              >
+                <a>删除</a>
+              </a-popconfirm>
+            </div>
+          </a-list-item>
+        </a-list>
+        <div class="buttonGroup" style="margin-top:10px">
+          <div calss="uploadingFile">
+            <a-upload
+              :file-list="fileList"
+              :remove="handleRemove"
+              :before-upload="beforeUpload"
+            >
+              <a-button> <a-icon type="upload" /> 选择文件 </a-button>
+            </a-upload>
+          </div>
+          <a-button
+            type="primary"
+            :disabled="fileList.length === 0"
+            :loading="uploading"
+            style=" width:120px;margin-top:10px"
+            @click="handleUpload"
+          >
+            {{ uploading ? "上传中" : "开始上传" }}
+          </a-button>
+        </div>
+      </div>
       <div class="detail-item buttonContainer">
         <a-button
           type="default"
@@ -210,20 +268,45 @@
         </a-button>
       </div>
     </div>
+
+    <a-modal
+      v-model="addProjectModalVisible"
+      title="添加自定义工作内容"
+      @ok="handleOk"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <a-input v-model="projectTypeCustomer"> </a-input>
+    </a-modal>
+    <a-modal
+      v-model="addUnitModalVisible"
+      title="添加自定义单位信息"
+      @ok="handleUnitOk"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <a-input v-model="unitTypeCustomer"> </a-input>
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import MappingOpinionEditableTable from "./MappingOpinionEditableTable";
 import projectdata from "../../../../assets/menulist/project-type.json";
+import unitdata from "../../../../assets/menulist/project-unit.json";
 import moment from "moment";
 const projectData = projectdata;
+const unitData = unitdata;
 import axios from "axios";
 import GLOBAL from "./../../../../utils/global_variable";
 export default {
   props: ["projectInfo"],
   components: {
     MappingOpinionEditableTable,
+    VNodes: {
+      functional: true,
+      render: (h, ctx) => ctx.props.vnodes,
+    },
   },
   data() {
     return {
@@ -234,6 +317,7 @@ export default {
       chgclAddGroup: [],
       count: 1,
       projectType: projectData.data,
+      unitType: unitData.data,
       projectStartDate: "",
       projectEndDate: "",
       clientConfirmDate: "",
@@ -245,6 +329,7 @@ export default {
       workingDetail: "",
       eventExplaination: "",
       postParams: null,
+      uploadedFileList: [],
       columns: [
         {
           title: "工作内容",
@@ -260,6 +345,7 @@ export default {
         {
           title: "单位",
           dataIndex: "unit",
+          scopedSlots: { customRender: "projectUnit" },
         },
         {
           title: "操作",
@@ -267,6 +353,11 @@ export default {
           scopedSlots: { customRender: "operation" },
         },
       ],
+      addProjectModalVisible: false,
+      distoryThis: true,
+      projectTypeCustomer: "",
+      addUnitModalVisible: false,
+      unitTypeCustomer: "",
     };
   },
   methods: {
@@ -286,9 +377,30 @@ export default {
       const { fileList } = this;
       const formData = new FormData();
       fileList.forEach((file) => {
-        formData.append("files[]", file);
+        formData.append("myfile", file);
       });
+      formData.append("projectsn", this.projectInfo);
+      let existedFileStr = "";
+      if (this.uploadedFileList.length != 0) {
+        for (let i = 0; i < this.uploadedFileList.length; i++) {
+          existedFileStr += this.uploadedFileList[i] + "\/";
+        }
+        existedFileStr = existedFileStr.slice(0, existedFileStr.length - 1);
+      }
+      formData.append("existedFiles", existedFileStr);
       this.uploading = true;
+      axios
+        .post(GLOBAL.env + "/mappingundertaking/uploadchcg", formData)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("上传成功");
+            this.getUndertakingInfo();
+            this.fileList = [];
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
     },
     //***********************文件上传结束 ******************************//
     async getchUsers() {
@@ -308,7 +420,7 @@ export default {
       } else {
         this.uploadMaterialType = [];
       }
-      //this.mappingStaffGroup = data.data[0].dongbz.split(",");
+      this.mappingStaffGroup = [];
       if (data.data[0].dongbz != null) {
         for (let j = 0; j < data.data[0].dongbz.split(";").length - 1; j++) {
           this.mappingStaffGroup.push(
@@ -318,6 +430,8 @@ export default {
       } else {
         this.mappingStaffGroup = [];
       }
+      console.log(this.mappingStaffGroup);
+      this.chgclAddGroup = [];
       if (data.data[0].gznr != null) {
         this.count = data.data[0].gznr.split(",").length;
         for (let j = 0; j < this.count; j++) {
@@ -329,6 +443,8 @@ export default {
           };
           this.chgclAddGroup.push(newData);
         }
+        console.log(this.count);
+        console.log(this.chgclAddGroup);
       } else {
         this.count = 0;
         this.chgclAddGroup = [];
@@ -337,6 +453,9 @@ export default {
       this.projectEndDate = data.data[0].timeend;
       this.clientConfirmDate = data.data[0].wtdwqrsj;
       this.sceneConfirmDate = data.data[0].chqrsj;
+      if (data.data[0].chcgfile != null) {
+        this.uploadedFileList = data.data[0].chcgfile.split("/");
+      }
       if (this.projectStartDate === "") {
         this.projectStartDate = moment().format("YYYY-MM-DD");
       }
@@ -359,79 +478,26 @@ export default {
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
-        switch (value) {
-          case "1":
-            target.type = "面积预测";
-            target.unit = "平方米";
-            break;
-          case "2":
-            target.type = "面积实测";
-            target.unit = "平方米";
-            break;
-          case "3":
-            target.type = "人防预测";
-            target.unit = "平方米";
-            break;
-          case "4":
-            target.type = "人防实测";
-            target.unit = "栋";
-            break;
-          case "5":
-            target.type = "施工放样";
-            target.unit = "栋";
-            break;
-          case "6":
-            target.type = "竣工测量";
-            target.unit = "栋";
-            break;
-          case "7":
-            target.type = "控制测量";
-            target.unit = "个";
-            break;
-          case "8":
-            target.type = "日照测量";
-            target.unit = "栋";
-            break;
-          case "9":
-            target.type = "管线测量";
-            target.unit = "公里";
-            break;
-          case "10":
-            target.type = "土方测量";
-            target.unit = "平方米";
-            break;
-          case "11":
-            target.type = "断面测量";
-            target.unit = "公里";
-            break;
-          case "12":
-            target.type = "地形测量";
-            target.unit = "平方米";
-            break;
-          case "13":
-            target.type = "变形测量";
-            target.unit = "点";
-            break;
-          case "14":
-            target.type = "宗地调查";
-            target.unit = "平方米";
-            break;
-          case "15":
-            target.type = "其他测量";
-            target.unit = "棵";
-            break;
-          case "16":
-            target.type = "分户调查";
-            target.unit = "户";
-            break;
-          case "17":
-            target.type = "土地分割";
-            target.unit = "平方米";
-            break;
-        }
+        const selectedvalue = this.projectType.find(
+          (item) => item.indexs == value
+        );
+        target.type = selectedvalue.value;
         this.chgclAddGroup = chgclAddGroup;
       }
       // this.postParams.append(this.chgclAddGroup);
+    },
+    selectUnitType(key, value) {
+      console.log(value);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      // this.postParams.append(key, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
+      if (target) {
+        const selectedvalue = this.unitType.find(
+          (item) => item.indexs == value
+        );
+        target.unit = selectedvalue.value;
+        this.chgclAddGroup = chgclAddGroup;
+      }
     },
     onCellChange(key, dataIndex, value) {
       const chgclAddGroup = [...this.chgclAddGroup];
@@ -442,13 +508,16 @@ export default {
       }
     },
     onDelete(key) {
-      const chgclAddGroup = [...this.chgclAddGroup];
-      this.chgclAddGroup = chgclAddGroup.filter((item) => item.key !== key);
+      console.log(key);
+      console.log(this.chgclAddGroup);
+      const chgclAddGroupx = [...this.chgclAddGroup];
+      this.chgclAddGroup = chgclAddGroupx.filter((item) => item.key !== key);
+      console.log(this.chgclAddGroup);
     },
     handleAdd() {
       const { count, chgclAddGroup } = this;
       const newData = {
-        key: this.count,
+        key: this.count + 1,
         type: "",
         number: "",
         unit: "",
@@ -473,7 +542,6 @@ export default {
       this.uploadMaterialType = checkedValues;
     },
     upLoadMappingResult() {
-      console.log("提交");
       this.postParams = new URLSearchParams();
       this.postParams.append("projectsn", this.projectInfo);
       let staff_str = "";
@@ -526,8 +594,43 @@ export default {
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
                 if (res.data === "success") {
-                  this.$message.success("提交成功");
-                  this.$emit("uploadSuccess");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env +
+                          "/mappingundertaking/updatechcgwithoutnewfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("提交成功");
+                          //this.getUndertakingInfo();
+                          this.fileList = [];
+                          this.$emit("uploadSuccess");
+                        } else {
+                          this.$message.error("提交失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                    this.$emit("uploadSuccess");
+                  }
+                  //this.$emit("uploadSuccess");
                 }
               });
           } else {
@@ -545,11 +648,13 @@ export default {
       this.postParams.append("dongbz", staff_str); //  测绘参与全部人员
       let project_type_str = "";
       let project_num_str = "";
+      console.log("check", this.chgclAddGroup.length);
       for (let j = 0; j < this.chgclAddGroup.length; j++) {
         project_type_str += this.chgclAddGroup[j].type + ",";
         project_num_str +=
           this.chgclAddGroup[j].number + this.chgclAddGroup[j].unit + ";";
       }
+      console.log(project_type_str);
       project_type_str = project_type_str.substring(
         0,
         project_type_str.length - 1
@@ -578,7 +683,9 @@ export default {
               "\\n#" +
               time_str +
               ",测绘->暂存,处理人:" +
-              JSON.parse(sessionStorage.getItem("userToken")).UserName;
+              JSON.parse(sessionStorage.getItem("userToken")).UserName +
+              ",意见:" +
+              this.undertakingOpinion;
             let clgcPostParams = new URLSearchParams();
             clgcPostParams.append("clgc", clgc_str);
             clgcPostParams.append("projectsn", this.projectInfo);
@@ -586,13 +693,121 @@ export default {
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
                 if (res.data === "success") {
-                  this.$message.success("暂存成功");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env +
+                          "/mappingundertaking/updatechcgwithoutnewfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("暂存成功");
+                          this.getUndertakingInfo();
+                          this.fileList = [];
+                        } else {
+                          this.$message.error("暂存失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                  }
                 }
               });
           } else {
             this.$message.error("暂存失败");
           }
         });
+    },
+    async downloadFile(item) {
+      const tmp_data = await request.get("/common/downloadfile", {
+        params: {
+          postfilename: item,
+        },
+      });
+      if (tmp_data.data === "error") {
+        this.$message.error("文件不存在");
+        return;
+      }
+      axios({
+        url: GLOBAL.env + "/common/downloadfile",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          postfilename: item,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", item);
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
+    deleteSelectItem(item) {
+      const index = this.uploadedFileList.indexOf(item);
+      const newFileList = this.uploadedFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadedFileList = newFileList;
+    },
+    addCustomerProjecttItem() {
+      this.addProjectModalVisible = true;
+    },
+    addCustomerUnitItem() {
+      this.addUnitModalVisible = true;
+    },
+    handleOk() {
+      if (!this.projectTypeCustomer) {
+        this.addProjectModalVisible = false;
+        return;
+      }
+      this.addProjectModalVisible = false;
+      const initDataLength = this.projectType.length + 1;
+      let tmp_obj = {
+        index: initDataLength,
+        indexs: initDataLength.toString(),
+        key: initDataLength.toString(),
+        value: this.projectTypeCustomer,
+      };
+      this.projectType.push(tmp_obj);
+      this.projectTypeCustomer = "";
+      console.log(initDataLength);
+    },
+    handleUnitOk() {
+      if (!this.unitTypeCustomer) {
+        this.addUnitModalVisible = false;
+        return;
+      }
+      this.addUnitModalVisible = false;
+      const initDataLength = this.unitType.length + 1;
+      let tmp_obj = {
+        index: initDataLength,
+        indexs: initDataLength.toString(),
+        key: initDataLength.toString(),
+        value: this.unitTypeCustomer,
+      };
+      this.unitType.push(tmp_obj);
+      this.unitTypeCustomer = "";
     },
   },
   created: function() {

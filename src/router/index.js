@@ -13,8 +13,16 @@ const routes = [
     path: "/home",
     name: "Home",
     component: Home,
-    redirect: "home/checkin",
+    redirect: "home/guidepage",
     children: [
+      {
+        path: "guidepage",
+        name: "guidepage",
+        component: () =>
+          import(
+            "../components/business/businessflow/common/GuidePage/GuidePage.vue"
+          ),
+      },
       {
         path: "checkin",
         name: "FlowCheckIn",
@@ -82,6 +90,14 @@ const routes = [
         name: "FlowWindowContract",
         component: () =>
           import("../components/business/businessflow/FlowWindowContract.vue"),
+      },
+      {
+        path: "comprehensiveinquery",
+        name: "ComprehensiveInquery",
+        component: () =>
+          import(
+            "../components/business/businessquery/ComprehensiveInquery.vue"
+          ),
       },
     ],
   },

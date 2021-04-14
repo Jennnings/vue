@@ -34,19 +34,55 @@
           :data-source="groupDataGCLTable"
           style="margin-top:10px"
           bordered
-          rowKey="id"
         >
           <template slot="projectType" slot-scope="text, record">
             <a-select
-              style="width: 100px"
+              style="width: 150px"
               placeholder="选择项目类型"
               @change="selectprojectType(record.key, $event)"
               v-if="projectType"
-              :default-value="record.type"
+              v-model="record.type"
             >
+              <div slot="dropdownRender" slot-scope="menu">
+                <v-nodes :vnodes="menu" />
+                <a-divider style="margin: 4px 0;" />
+                <div
+                  style="padding: 4px 8px; cursor: pointer;"
+                  @mousedown="(e) => e.preventDefault()"
+                  @click="addCustomerProjecttItem"
+                >
+                  <a-icon type="plus" />
+                  自定义项目
+                </div>
+              </div>
               <a-select-option v-for="item in projectType" :key="item.indexs">
                 {{ item.value }}
               </a-select-option>
+            </a-select>
+          </template>
+          <template slot="projectUnit" slot-scope="text, record">
+            <a-select
+              style="width: 200px"
+              placeholder="选择项目单位"
+              @change="selectUnitType(record.key, $event)"
+              v-if="unitType"
+              v-model="record.unit"
+            >
+              <a-select-option v-for="item in unitType" :key="item.indexs">
+                {{ item.value }}
+              </a-select-option>
+              <div slot="dropdownRender" slot-scope="menu">
+                <v-nodes :vnodes="menu" />
+                <a-divider style="margin: 4px 0;" />
+                <div
+                  style="padding: 4px 8px; cursor: pointer;"
+                  @mousedown="(e) => e.preventDefault()"
+                  @click="addCustomerUnitItem"
+                >
+                  <a-icon type="plus" />
+                  自定义项目
+                </div>
+              </div>
             </a-select>
           </template>
           <template slot="userOperation" slot-scope="text, record">
@@ -149,7 +185,27 @@
         </span>
       </div>
       <div class="itemContainer">
-        <div class="smallItem">
+        <a-list
+          size="small"
+          bordered
+          :data-source="uploadedFileList"
+          style="width:100%"
+        >
+          <a-list-item slot="renderItem" slot-scope="item">
+            <a @click="downloadFile(item)">{{ item }}</a>
+            <div slot="actions">
+              <a-popconfirm
+                title="是否确认删除？"
+                ok-text="确定"
+                cancel-text="取消"
+                @confirm="deleteSelectItem(item)"
+              >
+                <a>删除</a>
+              </a-popconfirm>
+            </div>
+          </a-list-item>
+        </a-list>
+        <div class="smallItem" style="margin-top:10px">
           <div>
             <a-upload
               :file-list="fileList"
@@ -183,6 +239,7 @@
         />
       </div>
     </div>
+
     <div class="itemupload">
       <div class="splitLine"></div>
       <a-button
@@ -200,11 +257,30 @@
         暂存
       </a-button>
     </div>
+    <a-modal
+      v-model="addProjectModalVisible"
+      title="添加自定义工作内容"
+      @ok="handleOk"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <a-input v-model="projectTypeCustomer"> </a-input>
+    </a-modal>
+    <a-modal
+      v-model="addUnitModalVisible"
+      title="添加自定义单位信息"
+      @ok="handleUnitOk"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <a-input v-model="unitTypeCustomer"> </a-input>
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import projectdata from "../../../../assets/menulist/project-type.json";
+import unitdata from "../../../../assets/menulist/project-unit.json";
 import ExpenseOpinionEditableTable from "./ExpenseOpinionEditableTable";
 import axios from "axios";
 import GLOBAL from "./../../../../utils/global_variable";
@@ -213,7 +289,7 @@ const groupcolumns = [
   {
     title: "工作内容",
     dataIndex: "projectType",
-    width: "10%",
+    width: "15%",
     scopedSlots: { customRender: "projectType" },
   },
   {
@@ -232,6 +308,7 @@ const groupcolumns = [
     title: "单位",
     width: "10%",
     dataIndex: "unit",
+    scopedSlots: { customRender: "projectUnit" },
   },
   {
     title: "单价",
@@ -241,7 +318,7 @@ const groupcolumns = [
   },
   {
     title: "总价",
-    width: "15%",
+    width: "10%",
     dataIndex: "totalPrice",
     scopedSlots: { customRender: "totalPrice" },
   },
@@ -258,11 +335,16 @@ const groupcolumns = [
     scopedSlots: { customRender: "userOperation" },
   },
 ];
+const unitData = unitdata;
 const projectData = projectdata;
 export default {
   props: ["projectInfo"],
   components: {
     ExpenseOpinionEditableTable,
+    VNodes: {
+      functional: true,
+      render: (h, ctx) => ctx.props.vnodes,
+    },
   },
   data() {
     return {
@@ -272,12 +354,19 @@ export default {
       groupDataGCLTable: [],
       groupDataGCLTableCount: 0,
       projectType: projectData.data,
+      unitType: unitData.data,
       isRemainChecked: false,
       fileList: [],
       uploading: false,
       expenseOpinionStr: "",
       totalPrice: 0,
       getCost: 0,
+      addProjectModalVisible: false,
+      distoryThis: true,
+      projectTypeCustomer: "",
+      addUnitModalVisible: false,
+      unitTypeCustomer: "",
+      uploadedFileList: [],
     };
   },
   methods: {
@@ -289,8 +378,12 @@ export default {
         },
       });
       this.groupdata = tmp_data.data[0].gznr + "\n" + tmp_data.data[0].gcl;
-      this.getCost = tmp_data.data[0].getcost;
-      this.totalPrice = tmp_data.data[0].totalcost;
+      if (tmp_data.data[0].getcost !== "null") {
+        this.getCost = tmp_data.data[0].getcost;
+      }
+      if (tmp_data.data[0].totalPrice !== "null") {
+        this.totalPrice = tmp_data.data[0].totalcost;
+      }
       this.expenseOpinionStr = tmp_data.data[0].sfOpinion;
       if (tmp_data.data[0].isremain) {
         this.isRemainChecked = true;
@@ -338,6 +431,9 @@ export default {
           this.groupDataGCLTableCount++;
         }
       }
+      if (tmp_data.data[0].filelist) {
+        this.uploadedFileList = tmp_data.data[0].filelist.split("/");
+      }
     },
     onDeleteDataGCL(key) {
       const groupDataGCLTable = [...this.groupDataGCLTable];
@@ -362,83 +458,30 @@ export default {
     },
     //选择项目/工作类型
     selectprojectType(key, value) {
-      const groupDataGCLTable = [...this.groupDataGCLTable];
+      const chgclAddGroup = [...this.chgclAddGroup];
       // this.postParams.append(key, value, chgclAddGroup);
-      const target = groupDataGCLTable.find((item) => item.key === key);
+      const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
-        switch (value) {
-          case "1":
-            target.type = "面积预测";
-            target.unit = "平方米";
-            break;
-          case "2":
-            target.type = "面积实测";
-            target.unit = "平方米";
-            break;
-          case "3":
-            target.type = "人防预测";
-            target.unit = "平方米";
-            break;
-          case "4":
-            target.type = "人防实测";
-            target.unit = "栋";
-            break;
-          case "5":
-            target.type = "施工放样";
-            target.unit = "栋";
-            break;
-          case "6":
-            target.type = "竣工测量";
-            target.unit = "栋";
-            break;
-          case "7":
-            target.type = "控制测量";
-            target.unit = "个";
-            break;
-          case "8":
-            target.type = "日照测量";
-            target.unit = "栋";
-            break;
-          case "9":
-            target.type = "管线测量";
-            target.unit = "公里";
-            break;
-          case "10":
-            target.type = "土方测量";
-            target.unit = "平方米";
-            break;
-          case "11":
-            target.type = "断面测量";
-            target.unit = "公里";
-            break;
-          case "12":
-            target.type = "地形测量";
-            target.unit = "平方米";
-            break;
-          case "13":
-            target.type = "变形测量";
-            target.unit = "点";
-            break;
-          case "14":
-            target.type = "宗地调查";
-            target.unit = "平方米";
-            break;
-          case "15":
-            target.type = "其他测量";
-            target.unit = "棵";
-            break;
-          case "16":
-            target.type = "分户调查";
-            target.unit = "户";
-            break;
-          case "17":
-            target.type = "土地分割";
-            target.unit = "平方米";
-            break;
-        }
-        this.groupDataGCLTable = groupDataGCLTable;
+        const selectedvalue = this.projectType.find(
+          (item) => item.indexs == value
+        );
+        target.type = selectedvalue.value;
+        this.chgclAddGroup = chgclAddGroup;
       }
       // this.postParams.append(this.chgclAddGroup);
+    },
+    selectUnitType(key, value) {
+      console.log(value);
+      const chgclAddGroup = [...this.chgclAddGroup];
+      // this.postParams.append(key, value, chgclAddGroup);
+      const target = chgclAddGroup.find((item) => item.key === key);
+      if (target) {
+        const selectedvalue = this.unitType.find(
+          (item) => item.indexs == value
+        );
+        target.unit = selectedvalue.value;
+        this.chgclAddGroup = chgclAddGroup;
+      }
     },
     onGZLDataChange(key, dataIndex, value) {
       const groupDataGCLTable = [...this.groupDataGCLTable];
@@ -496,9 +539,30 @@ export default {
       const { fileList } = this;
       const formData = new FormData();
       fileList.forEach((file) => {
-        formData.append("files[]", file);
+        formData.append("myfile", file);
       });
+      formData.append("projectsn", this.projectInfo);
+      let existedFileStr = "";
+      if (this.uploadedFileList.length != 0) {
+        for (let i = 0; i < this.uploadedFileList.length; i++) {
+          existedFileStr += this.uploadedFileList[i] + "\/";
+        }
+        existedFileStr = existedFileStr.slice(0, existedFileStr.length - 1);
+      }
+      formData.append("existedFiles", existedFileStr);
       this.uploading = true;
+      axios
+        .post(GLOBAL.env + "/calculateexpense/jkdfileupload", formData)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("上传成功");
+            this.getGroupGZL();
+            this.fileList = [];
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
     },
     totalPriceCount() {
       if (this.groupDataGCLTable.length === 0) {
@@ -584,9 +648,45 @@ export default {
             axios
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
+                // if (res.data === "success") {
+                //   this.$message.success("提交成功");
+                //   this.$emit("updateSuccess");
+                // }
                 if (res.data === "success") {
-                  this.$message.success("提交成功");
-                  this.$emit("updateSuccess");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env + "/calculateexpense/withoutnewjkdfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("提交成功");
+                          this.fileList = [];
+                          this.$emit("updateSuccess");
+                        } else {
+                          this.$message.error("提交失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                    this.$emit("updateSuccess");
+                  }
                 }
               });
           } else {
@@ -664,13 +764,120 @@ export default {
               .post(GLOBAL.env + "/common/updateclgc", clgcPostParams)
               .then((res) => {
                 if (res.data === "success") {
-                  this.$message.success("暂存成功");
+                  if (this.fileList.length == 0) {
+                    let updatefile = new URLSearchParams();
+                    updatefile.append("projectsn", this.projectInfo);
+                    let existedFileStr = "";
+                    if (this.uploadedFileList.length != 0) {
+                      for (let i = 0; i < this.uploadedFileList.length; i++) {
+                        existedFileStr += this.uploadedFileList[i] + "\/";
+                      }
+                      existedFileStr = existedFileStr.slice(
+                        0,
+                        existedFileStr.length - 1
+                      );
+                    }
+                    updatefile.append("existedFiles", existedFileStr);
+                    this.uploading = true;
+                    axios
+                      .post(
+                        GLOBAL.env + "/calculateexpense/withoutnewjkdfile",
+                        updatefile
+                      )
+                      .then((res) => {
+                        if (res.data === "success") {
+                          this.$message.success("暂存成功");
+                          this.getGroupGZL();
+                          this.fileList = [];
+                        } else {
+                          this.$message.error("暂存失败");
+                        }
+                        this.uploading = false;
+                      });
+                  } else {
+                    this.handleUpload();
+                  }
                 }
               });
           } else {
             this.$message.error("暂存失败");
           }
         });
+    },
+    addCustomerProjecttItem() {
+      this.addProjectModalVisible = true;
+    },
+    addCustomerUnitItem() {
+      this.addUnitModalVisible = true;
+    },
+    handleOk() {
+      if (!this.projectTypeCustomer) {
+        this.addProjectModalVisible = false;
+        return;
+      }
+      this.addProjectModalVisible = false;
+      const initDataLength = this.projectType.length + 1;
+      let tmp_obj = {
+        index: initDataLength,
+        indexs: initDataLength.toString(),
+        key: initDataLength.toString(),
+        value: this.projectTypeCustomer,
+      };
+      this.projectType.push(tmp_obj);
+      this.projectTypeCustomer = "";
+      console.log(initDataLength);
+    },
+    handleUnitOk() {
+      if (!this.unitTypeCustomer) {
+        this.addUnitModalVisible = false;
+        return;
+      }
+      this.addUnitModalVisible = false;
+      const initDataLength = this.unitType.length + 1;
+      let tmp_obj = {
+        index: initDataLength,
+        indexs: initDataLength.toString(),
+        key: initDataLength.toString(),
+        value: this.unitTypeCustomer,
+      };
+      this.unitType.push(tmp_obj);
+      this.unitTypeCustomer = "";
+    },
+    async downloadFile(item) {
+      const tmp_data = await request.get("/common/downloadfile", {
+        params: {
+          postfilename: item,
+        },
+      });
+      if (tmp_data.data === "error") {
+        this.$message.error("文件不存在");
+        return;
+      }
+      axios({
+        url: GLOBAL.env + "/common/downloadfile",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          postfilename: item,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", item);
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
+    deleteSelectItem(item) {
+      const index = this.uploadedFileList.indexOf(item);
+      const newFileList = this.uploadedFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadedFileList = newFileList;
     },
   },
   created: function() {

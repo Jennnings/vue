@@ -80,7 +80,13 @@
             <span v-if="tag !== '1' && tag !== '2'">结算中</span>
           </a-tag>
         </span>
-        <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
+        <a
+          slot="editor"
+          slot-scope="item"
+          @click="editorClick(item)"
+          :disabled="!authority_Edit"
+          >编辑</a
+        >
         <span
           slot="projectsendout"
           slot-scope="item"
@@ -139,6 +145,7 @@
 import request from "@/utils/request";
 import EditProjectModal from "./common/EditProject/EditProjectModal";
 import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
+const ModuleID = 32;
 const columns = [
   {
     dataIndex: "Projectsn",
@@ -210,6 +217,7 @@ export default {
   },
   data() {
     return {
+      ModuleID,
       queryProjectName: "",
       queryProjectsn: "",
       data: null,
@@ -224,6 +232,11 @@ export default {
       queryProjectClient: "",
       spinning: false,
       XMState: 2,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -233,6 +246,20 @@ export default {
       const tmpdata = await request.get("/sendout/project");
       this.data = tmpdata.data;
       this.spinning = false;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     //点击按钮查询
     async queryClicked() {
@@ -274,6 +301,7 @@ export default {
   },
   created: function() {
     this.clickrequest();
+    this.getAuthority();
   },
 };
 </script>
