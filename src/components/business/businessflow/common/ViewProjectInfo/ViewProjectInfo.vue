@@ -10,7 +10,7 @@
       <a-tab-pane key="3" tab="流程文件">
         <FlowFilesDownload v-bind:projectInfo="projectInfo" />
       </a-tab-pane>
-      <a-tab-pane key="4" tab="文件下载">
+      <a-tab-pane key="4" tab="测绘成果">
         <FileDownload v-bind:projectInfo="projectInfo" />
       </a-tab-pane>
     </a-tabs>

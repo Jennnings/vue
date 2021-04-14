@@ -173,6 +173,7 @@
       width="1300px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
+      @cancel="closeContractModify"
     >
       <ModifyContract :selectid="selectProjectInfo" @childFn="modifyParentFn" />
     </a-modal>
@@ -217,7 +218,6 @@ import GLOBAL from "./../../../utils/global_variable";
 import CreateContract from "./FlowWindowContract/CreateContract";
 import ViewContract from "./FlowWindowContract/ViewContract";
 import ModifyContract from "./FlowWindowContract/ModifyContract";
-import { message } from "ant-design-vue";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptModal";
 import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
@@ -412,7 +412,7 @@ export default {
                   that.getContract();
                 }
                 if (res.data === "error has project") {
-                  that.$message.error("合同包含子项目，无法删除");
+                  that.$message.error("合同包含子项目或发票，无法删除");
                 }
               });
           }
@@ -444,6 +444,9 @@ export default {
     receiptEdit(item) {
       this.viewReceiptForContractVisible = true;
       this.selectedContractInfo = item;
+    },
+    closeContractModify() {
+      this.getContract();
     },
   },
   mounted: function() {

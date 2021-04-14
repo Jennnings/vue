@@ -150,9 +150,8 @@
         :data-source="data"
         :pagination="pagination_setting"
         :loading="spinning"
-        rowKey="id"
       >
-        <span slot="customTitle"><a-icon type="tags" /> 项目登记号</span>
+        <span slot="customTitle"> 项目登记号</span>
         <a slot="name" slot-scope="text">{{ text }}</a>
         <span slot="XMState" slot-scope="XMState">
           <a-tag v-if="XMState === '1'" color="volcano">
@@ -203,6 +202,14 @@
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
         >
+        <span slot="contractRepeat" slot-scope="isRepeated">
+          <a-tag v-if="isRepeated" color="red">
+            <span>未登记</span>
+          </a-tag>
+          <a-tag v-if="!isRepeated" color="#52c41a">
+            <span>已登记</span>
+          </a-tag>
+        </span>
       </a-table>
     </div>
     <a-modal
@@ -292,6 +299,13 @@ const columns = [
     key: "tonextstep",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "tonextstep" },
+    width: 100,
+  },
+  {
+    title: "合同情况",
+    key: "contractrepeat",
+    dataIndex: "isRepeat",
+    scopedSlots: { customRender: "contractRepeat" },
     width: 100,
   },
 ];
@@ -389,7 +403,9 @@ export default {
         this.queryProjectState = "";
       }
     },
-    tonextstep(item) {},
+    tonextstep(item) {
+      this.$message.warning("即将上线");
+    },
   },
   mounted: function() {
     this.getInitProject();
