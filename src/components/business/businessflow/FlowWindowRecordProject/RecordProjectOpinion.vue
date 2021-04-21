@@ -124,7 +124,8 @@ export default {
       // this.$message.warning("功能尚未完全完成");
       // return;
       let postParams = new URLSearchParams();
-      if (this.recordindex === "" || this.recordindex < this.maxRecordIndex) {
+      //|| this.recordindex < this.maxRecordIndex
+      if (this.recordindex === "") {
         this.$message.error("项目归档号有误");
         return;
       }

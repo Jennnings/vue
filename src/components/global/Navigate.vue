@@ -1,12 +1,11 @@
 <template>
   <div class="container">
     <a-spin :spinning="spinning">
+      <!--:open-keys="openKeys" @openChange="onOpenChange"-->
       <a-menu
         style="width: 200px;height:100%"
-        :open-keys="openKeys"
         :defaultSelectedKeys="current"
         mode="inline"
-        @openChange="onOpenChange"
         @click="handleClick"
       >
         <a-menu-item key="guidepage">

@@ -292,6 +292,7 @@ export default {
           projectName: this.queryProjectName,
           projectSn: this.queryProjectsn,
           projectClient: this.queryProjectClient,
+          userID: JSON.parse(sessionStorage.getItem("userToken")).UserID,
         },
       });
       console.log("user", user);

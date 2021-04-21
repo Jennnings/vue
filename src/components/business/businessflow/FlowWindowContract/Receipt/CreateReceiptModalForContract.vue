@@ -317,7 +317,8 @@ export default {
         .then((res) => {
           if (res.data[0].result === "success") {
             this.$message.success("新建发票成功");
-            if (this.fileList.length) {
+            if (this.fileList.length != 0) {
+              console.log(this.fileList.length);
               this.handleUpload(res.data[0].Id);
             } else {
               this.$emit("closeThis");

@@ -251,7 +251,7 @@ export default {
     },
     handleUpload() {},
     async downloadFile(item) {
-      const tmp_data = await request.get("/common/downloadfile", {
+      const tmp_data = await request.get("/common/getcontract", {
         params: {
           postfilename: item,
         },
@@ -261,7 +261,7 @@ export default {
         return;
       }
       axios({
-        url: GLOBAL.env + "/common/downloadfile",
+        url: GLOBAL.env + "/common/getcontract",
         method: "GET",
         header: {
           contentType: "application/x-www-form-urlencoded; charset=utf-8",

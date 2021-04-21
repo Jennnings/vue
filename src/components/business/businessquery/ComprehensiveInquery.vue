@@ -118,7 +118,7 @@
           <a-auto-complete
             style="width: 150px;margin-left:10px"
             placeholder="合同编号"
-            v-model="queryPeojectRecordNum"
+            v-model="queryContractID"
           />
         </div>
       </div>
@@ -222,6 +222,16 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <a-modal
+      v-model="viewCalculateExpenseVisible"
+      title="核算收费"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ExpenseOpinion v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -230,6 +240,7 @@ import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import moment from "moment";
 import ViewProjectInfo from "./../businessflow/common/ViewProjectInfo/ViewProjectInfo";
+import ExpenseOpinion from "./../businessflow/FlowWinfowCalculateExpense/ExpenseOpinion";
 import projectdata from "./../../../assets/menulist/project-type.json";
 import project_state from "./../../../assets/menulist/project-state.json";
 const projectData = projectdata;
@@ -240,7 +251,7 @@ const columns = [
     key: "Projectsn",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
-    width: 100,
+    width: 120,
   },
   {
     title: "项目名称",
@@ -252,7 +263,7 @@ const columns = [
     title: "委托单位",
     dataIndex: "projectClient",
     key: "projectClient",
-    width: 250,
+    width: 230,
   },
   {
     title: "项目状态",
@@ -284,7 +295,13 @@ const columns = [
     key: "isReceipted",
     dataIndex: "isReceipted",
     scopedSlots: { customRender: "isReceipted" },
-    width: 100,
+    width: 85,
+  },
+  {
+    title: "归档号",
+    key: "projcetRecordNum",
+    dataIndex: "projcetRecordNum",
+    width: 85,
   },
   //TODO 查看模态框取消编辑状态
   {
@@ -292,14 +309,14 @@ const columns = [
     key: "viewdetail",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "viewdetail" },
-    width: 100,
+    width: 80,
   },
   {
     title: "办理",
     key: "tonextstep",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "tonextstep" },
-    width: 100,
+    width: 80,
   },
   {
     title: "合同情况",
@@ -315,6 +332,7 @@ const pagination_setting = {
 export default {
   components: {
     ViewProjectInfo,
+    ExpenseOpinion,
   },
   data() {
     return {
@@ -323,6 +341,7 @@ export default {
       pagination_setting,
       spinning: false,
       viewProjectInfoVisible: false,
+      viewCalculateExpenseVisible: false,
       distoryThis: true,
       selectProjectInfo: "",
       queryProjectsn: "",
@@ -404,7 +423,9 @@ export default {
       }
     },
     tonextstep(item) {
-      this.$message.warning("即将上线");
+      this.selectProjectInfo = item;
+      this.viewCalculateExpenseVisible = true;
+      //this.$message.warning("即将上线");
     },
   },
   mounted: function() {

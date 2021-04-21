@@ -385,6 +385,9 @@ export default {
         this.totalPrice = tmp_data.data[0].totalcost;
       }
       this.expenseOpinionStr = tmp_data.data[0].sfOpinion;
+      if (this.expenseOpinionStr === "null") {
+        this.expenseOpinionStr = "";
+      }
       if (tmp_data.data[0].isremain) {
         this.isRemainChecked = true;
       } else {
@@ -431,7 +434,7 @@ export default {
           this.groupDataGCLTableCount++;
         }
       }
-      if (tmp_data.data[0].filelist) {
+      if (tmp_data.data[0].filelist && tmp_data.data[0].filelist != "No") {
         this.uploadedFileList = tmp_data.data[0].filelist.split("/");
       }
     },
@@ -458,29 +461,33 @@ export default {
     },
     //选择项目/工作类型
     selectprojectType(key, value) {
-      const chgclAddGroup = [...this.chgclAddGroup];
+      const chgclAddGroup = [...this.groupDataGCLTable];
+      // console.log(groupDataGCLTable);
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
+      const tmp_projecttype = [...this.projectType];
       if (target) {
-        const selectedvalue = this.projectType.find(
+        const selectedvalue = tmp_projecttype.find(
           (item) => item.indexs == value
         );
+        console.log(selectedvalue);
         target.type = selectedvalue.value;
-        this.chgclAddGroup = chgclAddGroup;
+        this.groupDataGCLTable = chgclAddGroup;
       }
       // this.postParams.append(this.chgclAddGroup);
     },
     selectUnitType(key, value) {
       console.log(value);
-      const chgclAddGroup = [...this.chgclAddGroup];
+      const chgclAddGroup = [...this.groupDataGCLTable];
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
         const selectedvalue = this.unitType.find(
           (item) => item.indexs == value
         );
+        console.log(target);
         target.unit = selectedvalue.value;
-        this.chgclAddGroup = chgclAddGroup;
+        this.groupDataGCLTable = chgclAddGroup;
       }
     },
     onGZLDataChange(key, dataIndex, value) {
@@ -787,6 +794,7 @@ export default {
                       .then((res) => {
                         if (res.data === "success") {
                           this.$message.success("暂存成功");
+                          this.groupDataGCLTable = [];
                           this.getGroupGZL();
                           this.fileList = [];
                         } else {
@@ -823,7 +831,7 @@ export default {
         key: initDataLength.toString(),
         value: this.projectTypeCustomer,
       };
-      this.projectType.push(tmp_obj);
+      this.projectType = push(tmp_obj);
       this.projectTypeCustomer = "";
       console.log(initDataLength);
     },
