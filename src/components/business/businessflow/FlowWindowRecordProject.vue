@@ -96,7 +96,7 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
-    <a-modal
+    <!-- <a-modal
       v-model="viewProjectInfoVisible"
       title="查看项目"
       :footer="null"
@@ -105,7 +105,7 @@
       :maskClosable="false"
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
-    </a-modal>
+    </a-modal> -->
   </div>
 </template>
 <script>

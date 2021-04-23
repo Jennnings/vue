@@ -161,6 +161,15 @@
               v-model="getCost"
             ></a-input>
           </div>
+          <div class="itembox">
+            <a-button
+              type="primary"
+              style="margin-left:10px"
+              @click="downLoadJKD"
+            >
+              缴款单下载
+            </a-button>
+          </div>
         </div>
       </div>
     </div>
@@ -246,6 +255,7 @@
         type="primary"
         style="float:right;margin-right:10px;margin-top:10px"
         @click="uploadProject"
+        v-if="!fromComprehensiveInquery"
       >
         提交
       </a-button>
@@ -338,7 +348,7 @@ const groupcolumns = [
 const unitData = unitdata;
 const projectData = projectdata;
 export default {
-  props: ["projectInfo"],
+  props: ["projectInfo", "fromComprehensiveInquery"],
   components: {
     ExpenseOpinionEditableTable,
     VNodes: {
@@ -887,6 +897,28 @@ export default {
       newFileList.splice(index, 1);
       this.uploadedFileList = newFileList;
     },
+    async downLoadJKD() {
+      axios({
+        url: GLOBAL.env + "/relatedfiles/" + "jkd",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          projectsn: this.projectInfo,
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "JKD" + ".xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
   },
   created: function() {
     this.getGroupGZL();
@@ -908,7 +940,7 @@ export default {
       .smallItem {
         width: 100%;
         display: grid;
-        grid-template-columns: 45% 45%;
+        grid-template-columns: 45% 25% 25%;
         .itembox {
           display: flex;
           flex-direction: row;

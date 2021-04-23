@@ -108,6 +108,7 @@
     >
       <ExpenseOpinion
         v-bind:projectInfo="selectProjectInfo"
+        :isFromComprehensiveInquery="false"
         @closemodal="parentCloseModal"
       />
       <!-- 

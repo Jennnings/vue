@@ -9,6 +9,7 @@
       <div v-if="noTitleKey === 'expensecheck'">
         <ExpenseOpinionUpload
           v-bind:projectInfo="projectInfo"
+          :fromComprehensiveInquery="isFromComprehensiveInquery"
           @updateSuccess="updateSuccess"
         />
         <!-- <ResultCheckOpinionUpload
@@ -44,7 +45,7 @@ import axios from "axios";
 import ExpenseOpinionUpload from "./ExpenseOpinionUpload";
 import moment from "moment";
 export default {
-  props: ["projectInfo"],
+  props: ["projectInfo", "isFromComprehensiveInquery"],
   components: { ExpenseOpinionUpload },
   data() {
     return {

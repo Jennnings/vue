@@ -202,6 +202,9 @@
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
         >
+        <a slot="tocopystep" slot-scope="item" @click="copyProject(item)"
+          >复制</a
+        >
         <span slot="contractRepeat" slot-scope="isRepeated">
           <a-tag v-if="isRepeated" color="red">
             <span>未登记</span>
@@ -230,7 +233,23 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ExpenseOpinion v-bind:projectInfo="selectProjectInfo" />
+      <ExpenseOpinion
+        v-bind:projectInfo="selectProjectInfo"
+        :isFromComprehensiveInquery="true"
+      />
+    </a-modal>
+    <a-modal
+      v-model="comprehensiveInqueryCopyVisible"
+      title="复制项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ComprehensiveInqueryCopy
+        v-bind:projectInfo="selectProjectInfo"
+        @childFn="closeCopyFn"
+      />
     </a-modal>
   </div>
 </template>
@@ -240,6 +259,7 @@ import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import moment from "moment";
 import ViewProjectInfo from "./../businessflow/common/ViewProjectInfo/ViewProjectInfo";
+import ComprehensiveInqueryCopy from "./ComprehensiveInqueryCopy/ComprehensiveInqueryCopy";
 import ExpenseOpinion from "./../businessflow/FlowWinfowCalculateExpense/ExpenseOpinion";
 import projectdata from "./../../../assets/menulist/project-type.json";
 import project_state from "./../../../assets/menulist/project-state.json";
@@ -319,6 +339,13 @@ const columns = [
     width: 80,
   },
   {
+    title: "复制",
+    key: "tocopystep",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "tocopystep" },
+    width: 80,
+  },
+  {
     title: "合同情况",
     key: "contractrepeat",
     dataIndex: "isRepeat",
@@ -333,6 +360,7 @@ export default {
   components: {
     ViewProjectInfo,
     ExpenseOpinion,
+    ComprehensiveInqueryCopy,
   },
   data() {
     return {
@@ -359,6 +387,12 @@ export default {
       userData: [],
       projectType: projectData.data,
       projectState: projectStateData.data,
+      comprehensiveInqueryCopyVisible: false,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -425,7 +459,14 @@ export default {
     tonextstep(item) {
       this.selectProjectInfo = item;
       this.viewCalculateExpenseVisible = true;
-      //this.$message.warning("即将上线");
+    },
+    copyProject(item) {
+      this.comprehensiveInqueryCopyVisible = true;
+      this.selectProjectInfo = item;
+    },
+    closeCopyFn() {
+      this.comprehensiveInqueryCopyVisible = false;
+      this.getInitProject();
     },
   },
   mounted: function() {
