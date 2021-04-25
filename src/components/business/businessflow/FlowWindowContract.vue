@@ -271,6 +271,18 @@ const innerColumns = [
     width: 200,
   },
   {
+    title: "应收费用",
+    dataIndex: "cost",
+    key: "cost",
+    width: 200,
+  },
+  {
+    title: "已收费用",
+    dataIndex: "getCost",
+    key: "getCost",
+    width: 200,
+  },
+  {
     title: "查看",
     key: "viewdetail",
     dataIndex: "projectsn",
