@@ -85,6 +85,9 @@
         :pagination="pagination_setting"
         @expand="expandContract"
       >
+        <!-- <a slot="contractname" slot-scope="text" @click="viewItem(text)">{{
+          text
+        }}</a> -->
         <span slot="contractView" slot-scope="item" @click="viewItem(item)">
           <a>查看</a>
         </span>
@@ -106,6 +109,9 @@
           :loading="loading"
           :pagination="pagination_setting_inner"
         >
+          <a slot="name" slot-scope="text" @click="viewdetail(text)">{{
+            text
+          }}</a>
           <span slot="XMState" slot-scope="XMState">
             <a-tag v-if="XMState === '1'" color="volcano">
               <span>登记中</span>
@@ -223,11 +229,16 @@ import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptMo
 import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
 const ModuleID = 42;
 const columns = [
-  { title: "合同编号", dataIndex: "contractID", key: "name", with: 80 },
+  {
+    title: "合同编号",
+    dataIndex: "contractID",
+    key: "ID",
+    with: 80,
+    // scopedSlots: { customRender: "contractname" },
+  },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
   { title: "合同签订时间", dataIndex: "contractSignTime", key: "version" },
   { title: "乙方（委托）单位", dataIndex: "contractClient", key: "upgradeNum" },
-  { title: "代建单位", dataIndex: "contractAssistCompany", key: "creator" },
   {
     title: "查看",
     dataIndex: "Id",
@@ -253,10 +264,17 @@ const columns = [
     key: "contractDelete",
     scopedSlots: { customRender: "contractDelete" },
   },
+  { title: "代建单位", dataIndex: "contractAssistCompany", key: "creator" },
 ];
 
 const innerColumns = [
-  { title: "项目登记号", dataIndex: "projectsn", key: "projectsn", width: 200 },
+  {
+    title: "项目登记号",
+    dataIndex: "projectsn",
+    key: "projectsn",
+    width: 200,
+    scopedSlots: { customRender: "name" },
+  },
   {
     title: "项目名称",
     dataIndex: "projectname",
@@ -282,13 +300,13 @@ const innerColumns = [
     key: "getCost",
     width: 200,
   },
-  {
-    title: "查看",
-    key: "viewdetail",
-    dataIndex: "projectsn",
-    scopedSlots: { customRender: "viewdetail" },
-    width: 200,
-  },
+  // {
+  //   title: "查看",
+  //   key: "viewdetail",
+  //   dataIndex: "projectsn",
+  //   scopedSlots: { customRender: "viewdetail" },
+  //   width: 200,
+  // },
 ];
 const pagination_setting = {
   defaultPageSize: 8,

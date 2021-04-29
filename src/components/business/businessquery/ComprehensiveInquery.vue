@@ -145,11 +145,19 @@
         <div class="itemName" style="margin-right:30px">
           <a-button
             type="primary"
-            icon="search"
             style="width:110px"
             @click="downloadResultSheet"
           >
             结果下载
+          </a-button>
+        </div>
+        <div class="itemName" style="margin-right:30px">
+          <a-button
+            type="primary"
+            style="width:110px"
+            @click="downloadWorkLoad"
+          >
+            工作量下载
           </a-button>
         </div>
       </div>
@@ -503,6 +511,38 @@ export default {
         var fileLink = document.createElement("a");
         fileLink.href = fileUrl;
         fileLink.setAttribute("download", "查询结果.xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
+    async downloadWorkLoad() {
+      axios({
+        url: GLOBAL.env + "/comprehensiveinquery/queryworkloaddownload",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          projectsn: this.queryProjectsn,
+          projectname: this.queryProjectName,
+          projectClient: this.queryProjectClient,
+          sDate: this.sDate,
+          eDate: this.eDate,
+          xmstate: this.queryProjectState,
+          location: this.queryProjectLocation,
+          clientpeople: this.queryProjectClientPeople,
+          projecttype: this.queryProjectType,
+          clmanuserid: this.queryProjectClManUserID,
+          recordnum: this.queryPeojectRecordNum,
+          hetongid: this.queryContractID,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "工作量结果.xlsx");
         document.body.append(fileLink);
         fileLink.click();
         window.URL.revokeObjectURL(fileUrl);

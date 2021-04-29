@@ -63,7 +63,7 @@
         :loading="spinning"
         rowKey="id"
       >
-        <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
+        <a slot="name" slot-scope="text" @click="viewdetail(text)">{{
           text
         }}</a>
         <span slot="customTitle"><a-icon type="tags" /> 项目登记号</span>
@@ -142,18 +142,18 @@ const columns = [
     width: 250,
   },
   {
-    title: "坐落",
-    key: "sceneLocation",
-    dataIndex: "sceneLocation",
-    width: 150,
+    title: "办理",
+    key: "tonextstep",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "tonextstep" },
+    width: 100,
   },
-  {
-    title: "当前环节",
-    key: "processCondition",
-    dataIndex: "processCondition",
-    scopedSlots: { customRender: "tags" },
-    width: 120,
-  },
+  // {
+  //   title: "坐落",
+  //   key: "sceneLocation",
+  //   dataIndex: "sceneLocation",
+  //   width: 150,
+  // },
 
   {
     title: "测绘承办",
@@ -167,21 +167,21 @@ const columns = [
     dataIndex: "cltjsj",
     width: 100,
   },
+  {
+    title: "当前环节",
+    key: "processCondition",
+    dataIndex: "processCondition",
+    scopedSlots: { customRender: "tags" },
+    width: 120,
+  },
   //TODO 查看模态框取消编辑状态
-  {
-    title: "查看",
-    key: "viewdetail",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "viewdetail" },
-    width: 100,
-  },
-  {
-    title: "办理",
-    key: "tonextstep",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "tonextstep" },
-    width: 100,
-  },
+  // {
+  //   title: "查看",
+  //   key: "viewdetail",
+  //   dataIndex: "Projectsn",
+  //   scopedSlots: { customRender: "viewdetail" },
+  //   width: 100,
+  // },
 ];
 const pagination_setting = {
   defaultPageSize: 10,

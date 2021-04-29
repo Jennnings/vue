@@ -128,12 +128,23 @@
         @childFn="parentFn"
       />
     </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import CreateProject from "./FlowWindowCheckin/CreateProject";
 // import ModifyProject from "./FlowWindowCheckin/ModifyProject";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import EditProjectModal from "./common/EditProject/EditProjectModal";
@@ -165,19 +176,6 @@ const columns = [
     width: 250,
   },
   {
-    title: "当前环节",
-    key: "processCondition",
-    dataIndex: "processCondition",
-    scopedSlots: { customRender: "tags" },
-    width: 150,
-  },
-  {
-    title: "操作者",
-    key: "djmanUser",
-    dataIndex: "djmanUser",
-    width: 150,
-  },
-  {
     title: "编辑",
     key: "editor",
     dataIndex: "Projectsn",
@@ -198,6 +196,19 @@ const columns = [
     scopedSlots: { customRender: "delete" },
     width: 100,
   },
+  {
+    title: "操作者",
+    key: "djmanUser",
+    dataIndex: "djmanUser",
+    width: 150,
+  },
+  {
+    title: "当前环节",
+    key: "processCondition",
+    dataIndex: "processCondition",
+    scopedSlots: { customRender: "tags" },
+    width: 150,
+  },
 ];
 const pagination_setting = {
   defaultPageSize: 10,
@@ -207,6 +218,7 @@ export default {
     CreateProject,
     //ModifyProject,
     EditProjectModal,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -216,6 +228,7 @@ export default {
       pagination_setting,
       createModalVisible: false,
       modifyModalVisible: false,
+      viewProjectInfoVisible: false,
       distoryThis: true,
       params: null,
       sDate: "",
@@ -279,6 +292,8 @@ export default {
       this.spinning = false;
     },
     clickforInfo(info) {
+      this.viewProjectInfoVisible = true;
+      this.selectProjectInfo = info;
       //this.$message.success(info);
     },
     editorClick(item) {

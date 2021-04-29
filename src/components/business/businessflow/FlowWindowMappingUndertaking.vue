@@ -139,6 +139,16 @@
         @modalClose="postSuccessParent"
       />
     </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -148,6 +158,7 @@ import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import MappingOpinionModal from "./FlowWindowMappingUndertaking/MappingOpinionModal";
 import EditProjectModal from "./common/EditProject/EditProjectModal";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 const ModuleID = 33;
 const columns = [
   {
@@ -169,31 +180,12 @@ const columns = [
     key: "projectClient",
     width: 250,
   },
-  {
-    title: "坐落",
-    key: "sceneLocation",
-    dataIndex: "sceneLocation",
-    width: 150,
-  },
-  {
-    title: "派件时间",
-    key: "pjtjsj",
-    dataIndex: "pjtjsj",
-    width: 100,
-  },
-  {
-    title: "当前环节",
-    key: "processCondition",
-    dataIndex: "processCondition",
-    scopedSlots: { customRender: "tags" },
-    width: 120,
-  },
-  {
-    title: "操作者",
-    key: "pjmanUser",
-    dataIndex: "pjmanUser",
-    width: 120,
-  },
+  // {
+  //   title: "坐落",
+  //   key: "sceneLocation",
+  //   dataIndex: "sceneLocation",
+  //   width: 150,
+  // },
   {
     title: "编辑",
     key: "editor",
@@ -215,6 +207,25 @@ const columns = [
     scopedSlots: { customRender: "delete" },
     width: 100,
   },
+  {
+    title: "操作者",
+    key: "pjmanUser",
+    dataIndex: "pjmanUser",
+    width: 120,
+  },
+  {
+    title: "派件时间",
+    key: "pjtjsj",
+    dataIndex: "pjtjsj",
+    width: 100,
+  },
+  {
+    title: "当前环节",
+    key: "processCondition",
+    dataIndex: "processCondition",
+    scopedSlots: { customRender: "tags" },
+    width: 120,
+  },
 ];
 const pagination_setting = {
   defaultPageSize: 10,
@@ -223,6 +234,7 @@ export default {
   components: {
     EditProjectModal,
     MappingOpinionModal,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -233,6 +245,7 @@ export default {
       createModalVisible: false,
       modifyModalVisible: false,
       mappingOpinionVisible: false,
+      viewProjectInfoVisible: false,
       distoryThis: true,
       params: null,
       sDate: "",
@@ -358,6 +371,10 @@ export default {
     parentFn() {
       // this.projectSendoutVisible = false;
       // this.clickrequest();
+    },
+    clickforInfo(item) {
+      this.viewProjectInfoVisible = true;
+      this.selectProjectInfo = item;
     },
   },
   created: function() {

@@ -5,7 +5,7 @@
         :value="value"
         @change="handleChange"
         @pressEnter="check"
-        style="width: 100px"
+        style="width: 100%"
       /><a-icon type="check" class="editable-cell-icon-check" @click="check" />
     </div>
     <div v-else class="editable-cell-text-wrapper">
