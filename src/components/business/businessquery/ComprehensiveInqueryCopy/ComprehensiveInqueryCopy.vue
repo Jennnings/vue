@@ -297,6 +297,8 @@ export default {
           }
         }
       });
+      this.params["approachTime"] = moment().format("YYYY-MM-DD");
+      this.params["clientDate"] = moment().format("YYYY-MM-DD");
       this.supportFileList = [];
       this.spinning = false;
     },

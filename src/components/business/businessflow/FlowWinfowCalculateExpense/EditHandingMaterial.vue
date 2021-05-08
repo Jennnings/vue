@@ -12,7 +12,6 @@
               <a-input
                 style="width:240px;margin-left:10px"
                 v-model="handingManName"
-                disabled
               ></a-input>
             </div>
             <div class="itembox">
@@ -20,7 +19,6 @@
               <a-input
                 style="width:240px;margin-left:10px"
                 v-model="handingManPhone"
-                disabled
               ></a-input>
             </div>
           </div>
@@ -36,7 +34,6 @@
                 style="margin-left:20px"
                 :default-value="moment(handingTimeDate, 'YYYY-MM-DD')"
                 :allowClear="false"
-                disabled
               />
             </div>
 
@@ -44,22 +41,16 @@
               <a-checkbox
                 :checked="officalSealChecked"
                 @change="onOfficakSealChange"
-                disabled
               >
                 使用公章
               </a-checkbox>
               <a-checkbox
                 :checked="priceInfoChecked"
                 @change="onPriceInfoChange"
-                disabled
               >
                 价格信息
               </a-checkbox>
-              <a-checkbox
-                :checked="isformerReturn"
-                @change="onformerReturn"
-                disabled
-              >
+              <a-checkbox :checked="isformerReturn" @change="onformerReturn">
                 原报告回收
               </a-checkbox>
             </div>
@@ -75,7 +66,6 @@
             class="editable-add-btn"
             size="small"
             style="margin-left:10px"
-            disabled
           >
             添 加
           </a-button>
@@ -124,19 +114,18 @@
             v-model="remarkInfo"
             :auto-size="{ maxRows: 2 }"
             style="margin-top:10px"
-            disabled
           />
         </div>
       </div>
       <div class="itemupload">
         <div class="splitLine"></div>
-        <!-- <a-button
+        <a-button
           type="primary"
           style="float:right;margin-right:10px;margin-top:10px"
           @click="uploadHandingOver"
         >
           提交
-        </a-button> -->
+        </a-button>
         <!-- <a-button
         type="default"
         style="float:right;margin-right:10px;margin-top:10px"
@@ -150,6 +139,8 @@
 </template>
 <script>
 import ExpenseOpinionEditableTable from "./ExpenseOpinionEditableTable";
+import axios from "axios";
+import GLOBAL from "./../../../../utils/global_variable";
 import moment from "moment";
 import request from "@/utils/request";
 const groupcolumns = [
@@ -267,15 +258,38 @@ export default {
       this.isformerReturn = !this.isformerReturn;
     },
     uploadHandingOver() {
-      console.log("clicked");
-      console.log(this.projectInfo);
-      console.log(this.handingManName);
-      console.log(this.handingTimeDate);
-      console.log(this.officalSealChecked);
-      console.log(this.priceInfoChecked);
-      console.log(this.isformerReturn);
-      console.log(this.handingMaterialTableData);
-      console.log(this.remarkInfo);
+      if (this.handingManName == "") {
+        this.$message.warning("请输入接收人姓名");
+        return;
+      }
+      let postParams = new URLSearchParams();
+      postParams.append("handingsn", this.projectInfo);
+      postParams.append("handingTime", this.handingTimeDate);
+      postParams.append("handingMan", this.handingManName);
+      postParams.append("handingManPhone", this.handingManPhone);
+      postParams.append("isSeal", this.officalSealChecked);
+      postParams.append("isPrice", this.priceInfoChecked);
+      postParams.append("isReturn", this.isformerReturn);
+      postParams.append("Remark", this.remarkInfo);
+      postParams.append(
+        "SendingMan",
+        JSON.parse(sessionStorage.getItem("userToken")).UserName
+      );
+      let materialInfoStr = "";
+      this.handingMaterialTableData.forEach((e) => {
+        materialInfoStr += e.materialName + "," + e.materialCount + ";";
+      });
+      postParams.append("handingMaterial", materialInfoStr);
+      axios
+        .post(GLOBAL.env + "/resulthanding/edithandingrecord", postParams)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("修改成功");
+            this.$emit("childFn");
+          } else {
+            this.$message.error("修改失败");
+          }
+        });
     },
   },
   mounted: function() {

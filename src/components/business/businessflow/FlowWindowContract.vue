@@ -166,10 +166,10 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ViewContract
+      <ContractViewTab
         @createSuccessChild="parentFn"
         @childFn="parentFn"
-        :selectid="selectProjectInfo"
+        :projectInfo="selectProjectInfo"
       />
     </a-modal>
     <a-modal
@@ -181,7 +181,10 @@
       :maskClosable="false"
       @cancel="closeContractModify"
     >
-      <ModifyContract :selectid="selectProjectInfo" @childFn="modifyParentFn" />
+      <ModifyContractModal
+        :projectInfo="selectProjectInfo"
+        @childFn="modifyParentFn"
+      />
     </a-modal>
     <a-modal
       v-model="viewProjectInfoVisible"
@@ -227,6 +230,8 @@ import ModifyContract from "./FlowWindowContract/ModifyContract";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptModal";
 import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
+import ContractViewTab from "./FlowWindowContract/ContractViewTab";
+import ModifyContractModal from "./FlowWindowContract/MofifyContractModal";
 const ModuleID = 42;
 const columns = [
   {
@@ -252,12 +257,12 @@ const columns = [
     key: "Id",
     scopedSlots: { customRender: "contractEdit" },
   },
-  {
-    title: "关联发票",
-    dataIndex: "Id",
-    key: "receiptEdit",
-    scopedSlots: { customRender: "receiptEdit" },
-  },
+  // {
+  //   title: "关联发票",
+  //   dataIndex: "Id",
+  //   key: "receiptEdit",
+  //   scopedSlots: { customRender: "receiptEdit" },
+  // },
   {
     title: "删除",
     dataIndex: "Id",
@@ -318,10 +323,12 @@ export default {
   components: {
     CreateContract,
     ViewProjectInfo,
-    ViewContract,
-    ModifyContract,
+    // ViewContract,
+    //ModifyContract,
     ViewReceiptModal,
     ViewContractModalForContract,
+    ContractViewTab,
+    ModifyContractModal,
   },
   data() {
     return {

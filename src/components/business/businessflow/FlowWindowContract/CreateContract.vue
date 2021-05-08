@@ -53,6 +53,12 @@
         <a-descriptions-item label="合同结束时间" :span="1">
           <a-date-picker style="width:100%" @change="getContractEndDate" />
         </a-descriptions-item>
+        <a-descriptions-item label="结算金额" :span="1">
+          <a-input placeholder="结算金额" v-model="balanceExpense"> </a-input>
+        </a-descriptions-item>
+        <a-descriptions-item label="到账金额" :span="1">
+          <a-input placeholder="到账金额" v-model="paidInAmount"> </a-input>
+        </a-descriptions-item>
         <a-descriptions-item label="备注说明" :span="2">
           <a-input placeholder="备注说明" v-model="contractRemark"> </a-input>
         </a-descriptions-item>
@@ -113,6 +119,8 @@ export default {
       contractSignDate: "",
       contractStartDate: "",
       contractEndDate: "",
+      balanceExpense: "",
+      paidInAmount: "",
       fileList: [],
       savedFileList: [],
       uploading: false,
@@ -172,6 +180,8 @@ export default {
       postParams.append("contractexpense", this.contractExpense);
       postParams.append("contractsigndate", this.contractSignDate);
       postParams.append("contractcompany", this.contractCompany);
+      postParams.append("balanceexpense", this.balanceExpense);
+      postParams.append("paidinamount", this.paidInAmount);
       axios
         .post(GLOBAL.env + "/contractmanagement/createcontract", postParams)
         .then((res) => {
@@ -179,6 +189,7 @@ export default {
             console.log(res);
             if (this.fileList.length) {
               this.handleUpload(res.data[0].contractid);
+              this.$message.success("新建合同成功");
             }
             this.$emit("createSuccessChild");
           } else {

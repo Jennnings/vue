@@ -2,7 +2,8 @@
   <div>
     <a-spin :spinning="spinning">
       <div class="projectInfo">
-        <a-descriptions title="合同信息" bordered :column="2" size="small">
+        <!-- title="合同信息" -->
+        <a-descriptions bordered :column="2" size="small">
           <a-descriptions-item label="合同编号" :span="1">
             <a-badge dot>
               <a-input
@@ -91,6 +92,22 @@
               :disabled="disableEdit"
             />
           </a-descriptions-item>
+          <a-descriptions-item label="结算金额" :span="1">
+            <a-input
+              placeholder="结算金额"
+              v-model="balanceExpense"
+              :disabled="disableEdit"
+            >
+            </a-input>
+          </a-descriptions-item>
+          <a-descriptions-item label="到账金额" :span="1">
+            <a-input
+              placeholder="到账金额"
+              v-model="paidInAmount"
+              :disabled="disableEdit"
+            >
+            </a-input>
+          </a-descriptions-item>
           <a-descriptions-item label="备注说明" :span="2">
             <a-input
               placeholder="备注说明"
@@ -137,6 +154,8 @@ export default {
       contractSignDate: "",
       contractStartDate: "",
       contractEndDate: "",
+      balanceExpense: "",
+      paidInAmount: "",
       fileList: [],
       savedFileList: [],
       uploading: false,
@@ -163,6 +182,8 @@ export default {
       this.contractExpense = datas.contractExpense;
       this.contractCompany = datas.contractCompany;
       this.contractRemark = datas.contractOtherInfo;
+      this.balanceExpense = datas.balanceexpense;
+      this.paidInAmount = datas.paidinamount;
       if (datas.contractFileList) {
         this.savedFileList = datas.contractFileList.split("\/");
       }

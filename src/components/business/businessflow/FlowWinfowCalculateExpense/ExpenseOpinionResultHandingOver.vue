@@ -46,7 +46,10 @@
       :footer="null"
       width="1300px"
     >
-      <CreateHandingMaterial :projectInfo="projectInfo" />
+      <CreateHandingMaterial
+        :projectInfo="projectInfo"
+        @childFn="closeHandingMaterial"
+      />
     </a-modal>
     <a-modal
       v-model="viewHandingInfoVisible"
@@ -58,6 +61,17 @@
     >
       <ViewHandingMaterial :projectInfo="selectedRecord" />
     </a-modal>
+    <a-modal
+      v-model="editHandingInfoVisible"
+      title="编辑交接内容"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+      :footer="null"
+      @cancel="getReceipts"
+      width="1300px"
+    >
+      <EditHandingMaterial :projectInfo="selectedRecord" />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -66,6 +80,7 @@ import GLOBAL from "./../../../../utils/global_variable";
 import axios from "axios";
 import CreateHandingMaterial from "./CreateHandingMaterial";
 import ViewHandingMaterial from "./ViewHandingMaterial";
+import EditHandingMaterial from "./EditHandingMaterial";
 const columns = [
   {
     dataIndex: "handingsn",
@@ -157,8 +172,7 @@ export default {
   components: {
     CreateHandingMaterial,
     ViewHandingMaterial,
-    // ViewReceiptDetail,
-    // EditReceiptModal,
+    EditHandingMaterial,
   },
   data() {
     return {
@@ -177,6 +191,7 @@ export default {
       authorith_Edit: false,
       authorith_Grant: false,
       viewHandingInfoVisible: false,
+      editHandingInfoVisible: false,
     };
   },
   methods: {
@@ -206,18 +221,21 @@ export default {
       let postParams = new URLSearchParams();
       let that = this;
       this.$confirm({
-        title: "确定删除该发票?",
-        content: "删除发票将无法恢复",
+        title: "确定删除该记录?",
+        content: "删除记录将无法恢复",
         okText: "确认",
         okType: "danger",
         cancelText: "取消",
         onOk() {
-          console.log("OK");
+          //console.log("OK");
           //执行删除操作
           if (item) {
-            postParams.append("id", item);
+            postParams.append("handingsn", item);
             axios
-              .post(GLOBAL.env + "/receipt/deletereceipt", postParams)
+              .post(
+                GLOBAL.env + "/resulthanding/deletehandingrecord",
+                postParams
+              )
               .then((res) => {
                 if (res.data === "success") {
                   that.$message.success("删除成功");
@@ -232,17 +250,44 @@ export default {
     },
     edititem(item) {
       //receiptEditVisible
-      this.receiptEditVisible = true;
-      this.selectedReceipt = item;
+      // this.receiptEditVisible = true;
+      // this.selectedReceipt = item;
+      this.editHandingInfoVisible = true;
+      this.selectedRecord = item;
     },
     viewdetail(item) {
       this.receiptDetailVisible = true;
       this.selectedReceipt = item;
     },
-    printHandingInfo() {},
+    async printHandingInfo(item) {
+      axios({
+        url: GLOBAL.env + "/relatedfiles/jjd",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          handingsn: item,
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "jjd.xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
     clickforInfo(item) {
       this.viewHandingInfoVisible = true;
       this.selectedRecord = item;
+    },
+    closeHandingMaterial() {
+      this.createHandingInfoVisible = false;
+      this.getReceipts();
     },
   },
   mounted: function() {

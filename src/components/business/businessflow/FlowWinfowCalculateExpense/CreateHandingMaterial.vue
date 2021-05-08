@@ -123,18 +123,20 @@
       >
         提交
       </a-button>
-      <!-- <a-button
+      <a-button
         type="default"
         style="float:right;margin-right:10px;margin-top:10px"
-        @click="tmpSaveProject"
+        @click="cancelSaveHandingOver"
       >
-        暂存
-      </a-button> -->
+        取消
+      </a-button>
     </div>
   </div>
 </template>
 <script>
 import ExpenseOpinionEditableTable from "./ExpenseOpinionEditableTable";
+import GLOBAL from "./../../../../utils/global_variable";
+import axios from "axios";
 import moment from "moment";
 const groupcolumns = [
   {
@@ -214,16 +216,40 @@ export default {
       this.isformerReturn = !this.isformerReturn;
     },
     uploadHandingOver() {
-      console.log("clicked");
-      console.log(this.projectInfo);
-      console.log(this.handingManName);
-      console.log(this.handingTimeDate);
-      console.log(this.officalSealChecked);
-      console.log(this.priceInfoChecked);
-      console.log(this.isformerReturn);
-      console.log(this.handingMaterialTableData);
-      console.log(this.remarkInfo);
+      if (this.handingManName == "") {
+        this.$message.warning("请输入接收人姓名");
+        return;
+      }
+      let postParams = new URLSearchParams();
+      postParams.append("projectsn", this.projectInfo);
+      postParams.append("handingTime", this.handingTimeDate);
+      postParams.append("handingMan", this.handingManName);
+      postParams.append("handingManPhone", this.handingManPhone);
+      postParams.append("isSeal", this.officalSealChecked);
+      postParams.append("isPrice", this.priceInfoChecked);
+      postParams.append("isReturn", this.isformerReturn);
+      postParams.append("Remark", this.remarkInfo);
+      postParams.append(
+        "SendingMan",
+        JSON.parse(sessionStorage.getItem("userToken")).UserName
+      );
+      let materialInfoStr = "";
+      this.handingMaterialTableData.forEach((e) => {
+        materialInfoStr += e.materialName + "," + e.materialCount + ";";
+      });
+      postParams.append("handingMaterial", materialInfoStr);
+      axios
+        .post(GLOBAL.env + "/resulthanding/inserthandinginfo", postParams)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("创建成功");
+            this.$emit("childFn");
+          } else {
+            this.$message.error("创建失败");
+          }
+        });
     },
+    cancelSaveHandingOver() {},
   },
 };
 </script>

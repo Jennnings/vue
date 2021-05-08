@@ -24,6 +24,7 @@
           
         /> -->
       </div>
+
       <div v-else-if="noTitleKey === 'backtoformer'">
         <div class="backFormerContainer">
           <div class="titleContainer">

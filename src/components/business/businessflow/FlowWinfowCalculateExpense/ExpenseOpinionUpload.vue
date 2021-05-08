@@ -132,7 +132,7 @@
         总收费
       </div>
       <div class="itemContainer">
-        <div class="smallItem">
+        <div class="smallItems">
           <div class="itembox">
             <span>应收(元)</span>
             <a-input
@@ -179,7 +179,7 @@
         class="itemContainer"
         style="display:flex;flex-direction:row;align-items: center;width:100%"
       >
-        <div class="smallItem">
+        <div class="smallItems">
           <div>
             <span>客户评价</span>
             <a-rate :default-value="2.5" allow-half style="margin-left:10px" />
@@ -214,7 +214,7 @@
             </div>
           </a-list-item>
         </a-list>
-        <div class="smallItem" style="margin-top:10px">
+        <div class="smallItems" style="margin-top:10px">
           <div>
             <a-upload
               :file-list="fileList"
@@ -937,7 +937,7 @@ export default {
     .itemTitle {
     }
     .itemContainer {
-      .smallItem {
+      .smallItems {
         width: 100%;
         display: grid;
         grid-template-columns: 45% 25% 25%;

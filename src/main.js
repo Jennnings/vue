@@ -9,9 +9,11 @@ import "ant-design-vue/dist/antd.css"; // 引入Ant Design Vue样式
 // import ElementUI from 'element-ui';
 // import 'element-ui/lib/theme-chalk/index.css';
 import moment from "moment";
+import * as echarts from "echarts";
 
 Vue.config.productionTip = false;
 Vue.prototype.$moment = moment;
+Vue.prototype.$echarts = echarts;
 Vue.use(Antd);
 // Vue.use(ElementUI);
 const VueRouterPush = VueRouter.prototype.push;
