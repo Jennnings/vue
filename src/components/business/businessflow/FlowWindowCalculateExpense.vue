@@ -99,6 +99,7 @@
     </div>
     <!-- </a-spin> -->
     <a-modal
+      :dialog-style="{ top: '20px' }"
       v-model="expenseOpinionVisible"
       title="核算收费"
       :footer="null"

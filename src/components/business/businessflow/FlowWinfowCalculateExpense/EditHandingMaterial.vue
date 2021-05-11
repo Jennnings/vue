@@ -27,7 +27,7 @@
           <div class="smallItem">
             <div class="itembox">
               <!-- <span></span> -->
-              <span>交接时间</span>
+              <span>创建时间</span>
               <a-date-picker
                 @change="handingTimeChange"
                 v-if="handingTimeDate"
@@ -56,6 +56,21 @@
             </div>
           </div>
         </div>
+        <div class="itemContainer">
+          <div class="smallItem">
+            <div class="itembox">
+              <!-- <span></span> -->
+              <span>交接时间</span>
+              <a-input
+                style="width:240px;margin-left:10px"
+                v-model="sendTime"
+                disabled
+              ></a-input>
+            </div>
+
+            <div class="itembox"></div>
+          </div>
+        </div>
       </div>
       <div class="item">
         <div class="itemTitle">
@@ -66,6 +81,7 @@
             class="editable-add-btn"
             size="small"
             style="margin-left:10px"
+            @click="handlegroupDataGCLTableAdd"
           >
             添 加
           </a-button>
@@ -103,6 +119,53 @@
               </a-popconfirm>
             </template>
           </a-table>
+        </div>
+      </div>
+      <div class="item">
+        <div class="itemTitle">
+          <span>交接文件</span>
+          <div class="uploadFileConainer">
+            <a-list
+              size="small"
+              bordered
+              :data-source="uploadedFileList"
+              style="width:100%"
+            >
+              <a-list-item slot="renderItem" slot-scope="item">
+                <a @click="downloadFile(item)">{{ item }}</a>
+                <div slot="actions">
+                  <a-popconfirm
+                    title="是否确认删除？"
+                    ok-text="确定"
+                    cancel-text="取消"
+                    @confirm="deleteSelectItem(item)"
+                  >
+                    <a>删除</a>
+                  </a-popconfirm>
+                </div>
+              </a-list-item>
+            </a-list>
+            <div class="smallItems" style="margin-top:10px">
+              <div>
+                <a-upload
+                  :file-list="fileList"
+                  :remove="handleRemove"
+                  :before-upload="beforeUpload"
+                >
+                  <a-button> <a-icon type="upload" /> 选择文件 </a-button>
+                </a-upload>
+                <a-button
+                  type="primary"
+                  :disabled="fileList.length === 0"
+                  :loading="uploading"
+                  style="margin-top: 16px"
+                  @click="handleUpload"
+                >
+                  {{ uploading ? "上传中" : "开始上传" }}
+                </a-button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="item">
@@ -179,7 +242,11 @@ export default {
       handingManPhone: "",
       isformerReturn: false,
       remarkInfo: "",
+      sendTime: "",
       spinning: false,
+      uploadedFileList: [],
+      fileList: [],
+      uploading: false,
     };
   },
   methods: {
@@ -191,6 +258,8 @@ export default {
           handingsn: this.projectInfo,
         },
       });
+      this.handingMaterialTableData = [];
+      this.handingMaterialTableCount = 0;
       const tmp_datax = tmp_data.data[0];
       console.log(tmp_datax);
       this.handingManName = tmp_datax.handingman;
@@ -200,6 +269,10 @@ export default {
       this.priceInfoChecked = tmp_datax.isPrice;
       this.isformerReturn = tmp_datax.isReturn;
       this.remarkInfo = tmp_datax.remark;
+      if (tmp_datax.handingFile !== "") {
+        this.uploadedFileList = tmp_datax.handingFile.split("\/");
+        this.sendTime = tmp_datax.sendTime;
+      }
       const materialInfo = tmp_datax.handingmaterial.slice(
         0,
         tmp_datax.handingmaterial.length - 1
@@ -284,12 +357,120 @@ export default {
         .post(GLOBAL.env + "/resulthanding/edithandingrecord", postParams)
         .then((res) => {
           if (res.data === "success") {
-            this.$message.success("修改成功");
-            this.$emit("childFn");
+            if (this.fileList.length == 0) {
+              let updatefile = new URLSearchParams();
+              updatefile.append("handingsn", this.projectInfo);
+              let existedFileStr = "";
+              if (this.uploadedFileList.length != 0) {
+                for (let i = 0; i < this.uploadedFileList.length; i++) {
+                  existedFileStr += this.uploadedFileList[i] + "\/";
+                }
+                existedFileStr = existedFileStr.slice(
+                  0,
+                  existedFileStr.length - 1
+                );
+              }
+              updatefile.append("existedFiles", existedFileStr);
+              this.uploading = true;
+              axios
+                .post(
+                  GLOBAL.env + "/resulthanding/updatewithoutnewhandingfile",
+                  updatefile
+                )
+                .then((res) => {
+                  if (res.data === "success") {
+                    this.$message.success("修改成功");
+                    this.getHandingInfo();
+                    this.fileList = [];
+                  } else {
+                    this.$message.error("修改失败");
+                  }
+                  this.uploading = false;
+                });
+            } else {
+              this.handleUpload();
+              this.$message.success("修改成功");
+            }
           } else {
             this.$message.error("修改失败");
           }
         });
+    },
+    //文件上传
+    handleRemove(file) {
+      const index = this.fileList.indexOf(file);
+      const newFileList = this.fileList.slice();
+      newFileList.splice(index, 1);
+      this.fileList = newFileList;
+    },
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      return false;
+    },
+    handleUpload() {
+      const { fileList } = this;
+      const formData = new FormData();
+      fileList.forEach((file) => {
+        formData.append("myfile", file);
+      });
+      formData.append("handingsn", this.projectInfo);
+      let existedFileStr = "";
+      if (this.uploadedFileList.length != 0) {
+        for (let i = 0; i < this.uploadedFileList.length; i++) {
+          existedFileStr += this.uploadedFileList[i] + "\/";
+        }
+        existedFileStr = existedFileStr.slice(0, existedFileStr.length - 1);
+      }
+      formData.append("existedFiles", existedFileStr);
+      this.uploading = true;
+      axios
+        .post(GLOBAL.env + "/resulthanding/uploadhandingfile", formData)
+        .then((res) => {
+          if (res.data === "success") {
+            this.$message.success("上传成功");
+            this.fileList = [];
+            this.getHandingInfo();
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
+    },
+    deleteSelectItem(item) {
+      const index = this.uploadedFileList.indexOf(item);
+      const newFileList = this.uploadedFileList.slice();
+      newFileList.splice(index, 1);
+      this.uploadedFileList = newFileList;
+    },
+    async downloadFile(item) {
+      const tmp_data = await request.get("/resulthanding/downloadhandingfile", {
+        params: {
+          postfilename: item,
+        },
+      });
+      if (tmp_data.data === "error") {
+        this.$message.error("文件不存在");
+        return;
+      }
+      axios({
+        url: GLOBAL.env + "/resulthanding/downloadhandingfile",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          postfilename: item,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", item);
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
     },
   },
   mounted: function() {
@@ -323,6 +504,8 @@ export default {
           border: 1px rgb(232, 232, 232) solid;
         }
       }
+    }
+    .uploadFileConainer {
     }
   }
   .splitLine {

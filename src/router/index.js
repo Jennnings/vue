@@ -99,6 +99,12 @@ const routes = [
             "../components/business/businessquery/ComprehensiveInquery.vue"
           ),
       },
+      {
+        path: "usermanagement",
+        name: "UserManagement",
+        component: () =>
+          import("../components/business/systemsetting/UserManagement.vue"),
+      },
     ],
   },
   {

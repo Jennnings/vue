@@ -39,6 +39,7 @@
       </span>
     </a-table>
     <a-modal
+      :dialog-style="{ top: '20px' }"
       v-model="createHandingInfoVisible"
       title="创建交接内容"
       :destroyOnClose="distoryThis"
@@ -52,6 +53,7 @@
       />
     </a-modal>
     <a-modal
+      :dialog-style="{ top: '20px' }"
       v-model="viewHandingInfoVisible"
       title="查看交接内容"
       :destroyOnClose="distoryThis"
@@ -62,6 +64,7 @@
       <ViewHandingMaterial :projectInfo="selectedRecord" />
     </a-modal>
     <a-modal
+      :dialog-style="{ top: '20px' }"
       v-model="editHandingInfoVisible"
       title="编辑交接内容"
       :destroyOnClose="distoryThis"

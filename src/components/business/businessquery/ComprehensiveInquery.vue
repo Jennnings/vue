@@ -264,6 +264,7 @@
       <EditProjectModal v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
     <a-modal
+      :dialog-style="{ top: '20px' }"
       v-model="viewCalculateExpenseVisible"
       title="核算收费"
       :footer="null"

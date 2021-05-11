@@ -387,6 +387,8 @@ export default {
           projectsn: this.projectInfo,
         },
       });
+      this.groupDataGCLTable = [];
+      this.groupDataGCLTableCount = 0;
       this.groupdata = tmp_data.data[0].gznr + "\n" + tmp_data.data[0].gcl;
       if (tmp_data.data[0].getcost !== "null") {
         this.getCost = tmp_data.data[0].getcost;
@@ -418,10 +420,10 @@ export default {
           newData.type = tmp_data.data[0].gznr.split(",")[i];
           newData.gcl = tmp_data.data[0].gcl
             .split(";")
-            [i].replace(/[^0-9]/gi, "");
+            [i].replace(/[^0-9.]/gi, "");
           newData.unit = tmp_data.data[0].gcl
             .split(";")
-            [i].replace(/[0-9]/g, "");
+            [i].replace(/[0-9.]/g, "");
           this.groupDataGCLTable.push(newData);
           this.groupDataGCLTableCount++;
         }

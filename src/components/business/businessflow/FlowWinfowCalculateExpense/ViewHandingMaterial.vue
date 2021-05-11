@@ -29,7 +29,7 @@
           <div class="smallItem">
             <div class="itembox">
               <!-- <span></span> -->
-              <span>交接时间</span>
+              <span>创建时间</span>
               <a-date-picker
                 @change="handingTimeChange"
                 v-if="handingTimeDate"
@@ -63,6 +63,21 @@
                 原报告回收
               </a-checkbox>
             </div>
+          </div>
+        </div>
+        <div class="itemContainer">
+          <div class="smallItem">
+            <div class="itembox">
+              <!-- <span></span> -->
+              <span>交接时间</span>
+              <a-input
+                style="width:240px;margin-left:10px"
+                v-model="sendTime"
+                disabled
+              ></a-input>
+            </div>
+
+            <div class="itembox"></div>
           </div>
         </div>
       </div>
@@ -117,6 +132,23 @@
       </div>
       <div class="item">
         <div class="itemTitle">
+          <span>交接文件</span>
+          <div class="uploadFileConainer">
+            <a-list
+              size="small"
+              bordered
+              :data-source="uploadedFileList"
+              style="width:100%"
+            >
+              <a-list-item slot="renderItem" slot-scope="item">
+                <a @click="downloadFile(item)">{{ item }}</a>
+              </a-list-item>
+            </a-list>
+          </div>
+        </div>
+      </div>
+      <div class="item">
+        <div class="itemTitle">
           <span>备注</span>
         </div>
         <div class="itemContainer">
@@ -152,6 +184,8 @@
 import ExpenseOpinionEditableTable from "./ExpenseOpinionEditableTable";
 import moment from "moment";
 import request from "@/utils/request";
+import axios from "axios";
+import GLOBAL from "./../../../../utils/global_variable";
 const groupcolumns = [
   {
     title: "资料名称",
@@ -189,6 +223,8 @@ export default {
       isformerReturn: false,
       remarkInfo: "",
       spinning: false,
+      uploadedFileList: [],
+      sendTime: "",
     };
   },
   methods: {
@@ -209,6 +245,10 @@ export default {
       this.priceInfoChecked = tmp_datax.isPrice;
       this.isformerReturn = tmp_datax.isReturn;
       this.remarkInfo = tmp_datax.remark;
+      if (tmp_datax.handingFile !== "") {
+        this.uploadedFileList = tmp_datax.handingFile.split("\/");
+        this.sendTime = tmp_datax.sendTime;
+      }
       const materialInfo = tmp_datax.handingmaterial.slice(
         0,
         tmp_datax.handingmaterial.length - 1
@@ -277,6 +317,36 @@ export default {
       console.log(this.handingMaterialTableData);
       console.log(this.remarkInfo);
     },
+    async downloadFile(item) {
+      const tmp_data = await request.get("/resulthanding/downloadhandingfile", {
+        params: {
+          postfilename: item,
+        },
+      });
+      if (tmp_data.data === "error") {
+        this.$message.error("文件不存在");
+        return;
+      }
+      axios({
+        url: GLOBAL.env + "/resulthanding/downloadhandingfile",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          postfilename: item,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", item);
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
   },
   mounted: function() {
     this.getHandingInfo();
@@ -309,6 +379,8 @@ export default {
           border: 1px rgb(232, 232, 232) solid;
         }
       }
+    }
+    .uploadFileConainer {
     }
   }
   .splitLine {
