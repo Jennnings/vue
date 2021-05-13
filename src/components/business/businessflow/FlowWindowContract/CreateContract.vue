@@ -20,9 +20,9 @@
             </a-input>
           </a-badge>
         </a-descriptions-item>
-        <a-descriptions-item label="乙方(委托)单位" :span="1">
+        <a-descriptions-item label="甲方(委托)单位" :span="1">
           <a-badge dot>
-            <a-input placeholder="乙方(委托)单位" v-model="contractClient">
+            <a-input placeholder="甲方(委托)单位" v-model="contractClient">
               <a-tooltip slot="suffix" title="必填项目">
                 <a-icon type="info-circle" style="color: red" />
               </a-tooltip>
@@ -159,7 +159,7 @@ export default {
         return;
       }
       if (this.contractClient === "") {
-        this.$message.error("乙方(委托)单位为必填项目");
+        this.$message.error("甲方(委托)单位为必填项目");
         return;
       }
       if (this.contractSignDate === "") {

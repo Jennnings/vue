@@ -41,10 +41,10 @@
           />
         </div>
         <div class="itemName">
-          <span>乙方(委托)单位:</span>
+          <span>甲方(委托)单位:</span>
           <a-auto-complete
             style="width: 150px;margin-left:10px"
-            placeholder="乙方(委托)单位"
+            placeholder="甲方(委托)单位"
             v-model="contractClient"
           />
         </div>
@@ -243,7 +243,7 @@ const columns = [
   },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
   { title: "合同签订时间", dataIndex: "contractSignTime", key: "version" },
-  { title: "乙方（委托）单位", dataIndex: "contractClient", key: "upgradeNum" },
+  { title: "甲方（委托）单位", dataIndex: "contractClient", key: "upgradeNum" },
   {
     title: "查看",
     dataIndex: "Id",
