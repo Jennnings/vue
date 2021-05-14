@@ -234,11 +234,11 @@
           >复制</a
         >
         <span slot="contractRepeat" slot-scope="isRepeated">
-          <a-tag v-if="isRepeated" color="red">
+          <a-tag v-if="isRepeated == ''" color="red">
             <span>未登记</span>
           </a-tag>
-          <a-tag v-if="!isRepeated" color="#52c41a">
-            <span>已登记</span>
+          <a-tag v-if="isRepeated != ''" color="#52c41a">
+            <span>{{ isRepeated }}</span>
           </a-tag>
         </span>
       </a-table>

@@ -105,6 +105,12 @@ const routes = [
         component: () =>
           import("../components/business/systemsetting/UserManagement.vue"),
       },
+      {
+        path: "rolemanagement",
+        name: "RoleManagement",
+        component: () =>
+          import("../components/business/systemsetting/RoleManagement.vue"),
+      },
     ],
   },
   {
