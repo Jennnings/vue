@@ -41,12 +41,71 @@
         <a slot="delete" slot-scope="item" @click="deleteClick(item)">删除</a>
       </a-table>
     </div>
+    <a-modal
+      v-model="createRoleVisible"
+      title="新增角色"
+      :footer="null"
+      width="800px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <!-- @cancel="cancelEdit" -->
+      <!--@closeModal="closeCreateModal"-->
+      <CreateRole
+        @createrolesuccess="createRoleSuccess"
+        @cancelCreateRole="cancelCreateRole"
+      />
+    </a-modal>
+    <a-modal
+      v-model="viewRoleVisible"
+      title="查看角色"
+      :footer="null"
+      width="800px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <!-- @cancel="cancelEdit" -->
+      <!--@closeModal="closeCreateModal"-->
+      <ViewRole :selecteditem="selectedItem" />
+    </a-modal>
+    <a-modal
+      v-model="editRoleVisible"
+      title="编辑角色"
+      :footer="null"
+      width="800px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <!-- @cancel="cancelEdit" -->
+      <!--@closeModal="closeCreateModal"-->
+      <ModifyRole
+        :selecteditem="selectedItem"
+        @cancelModifyRole="cancelModifyRole"
+        @modifySuccess="modifySuccess"
+      />
+    </a-modal>
+    <a-modal
+      v-model="authorityRoleVisible"
+      title="角色授权"
+      :footer="null"
+      width="800px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <!-- @cancel="cancelEdit" -->
+      <!--@closeModal="closeCreateModal"-->
+      <AuthorityRole :selecteditem="selectedItem" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import GLOBAL from "./../../../utils/global_variable";
 import axios from "axios";
+import CreateRole from "./rolemanagement/CreateRole";
+import ViewRole from "./rolemanagement/ViewRole";
+import ModifyRole from "./rolemanagement/ModifyRole";
+import AuthorityRole from "./rolemanagement/AuthorityRole";
 const columns = [
   {
     dataIndex: "rolename",
@@ -94,12 +153,24 @@ const pagination_setting = {
   defaultPageSize: 10,
 };
 export default {
+  components: {
+    CreateRole,
+    ViewRole,
+    ModifyRole,
+    AuthorityRole,
+  },
   data() {
     return {
+      createRoleVisible: false,
+      distoryThis: true,
       columns,
       pagination_setting,
       spinning: false,
       data: [],
+      selectedItem: "",
+      viewRoleVisible: false,
+      editRoleVisible: false,
+      authorityRoleVisible: false,
     };
   },
   methods: {
@@ -110,11 +181,35 @@ export default {
       this.spinning = false;
     },
     createRole() {
-      console.log("createRole");
+      this.createRoleVisible = true;
     },
-    editorClick() {},
-    authorityClick() {},
+    editorClick(item) {
+      this.editRoleVisible = true;
+      this.selectedItem = item;
+    },
+    viewdetail(item) {
+      this.viewRoleVisible = true;
+      this.selectedItem = item.roleid;
+    },
+    authorityClick(item) {
+      this.authorityRoleVisible = true;
+      this.selectedItem = item;
+    },
     deleteClick() {},
+    createRoleSuccess() {
+      this.createRoleVisible = false;
+      this.getRoles();
+    },
+    modifySuccess() {
+      this.editRoleVisible = false;
+      this.getRoles();
+    },
+    cancelCreateRole() {
+      this.createRoleVisible = false;
+    },
+    cancelModifyRole() {
+      this.editRoleVisible = false;
+    },
   },
   mounted: function() {
     this.getRoles();

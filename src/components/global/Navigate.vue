@@ -181,5 +181,18 @@ export default {
 .container {
   width: fit-content;
   height: 100%;
+  overflow-y: auto;
+}
+.container::-webkit-scrollbar-track {
+}
+
+.container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  margin-left: 20px;
+  border-radius: 3px;
 }
 </style>

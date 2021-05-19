@@ -11,11 +11,15 @@
         <a-tab-pane key="3" tab="流程文件">
           <FlowFilesDownload v-bind:projectInfo="projectInfo" />
         </a-tab-pane>
+
         <a-tab-pane key="4" tab="测绘成果" v-if="xmstatement != 8">
           <FileDownload v-bind:projectInfo="projectInfo" />
         </a-tab-pane>
         <a-tab-pane key="5" tab="归档文件" v-if="xmstatement == 8">
           <GDFileDownload v-bind:projectInfo="projectInfo" />
+        </a-tab-pane>
+        <a-tab-pane key="6" tab="历史文件">
+          <HistroyFile v-bind:projectInfo="projectInfo" />
         </a-tab-pane>
       </a-tabs>
     </div>
@@ -27,6 +31,7 @@ import FileDownload from "./FileDownload";
 import ProjectInfoDetail from "./ProjectInfoDetail";
 import FlowFilesDownload from "./FlowFilesDownload";
 import GDFileDownload from "./GDFileDownload";
+import HistroyFile from "./HistroyFile";
 import request from "@/utils/request";
 import GLOBAL from "./../../../../../utils/global_variable";
 export default {
@@ -36,6 +41,7 @@ export default {
     ProjectInfoDetail,
     FlowFilesDownload,
     GDFileDownload,
+    HistroyFile,
   },
   props: ["projectInfo"],
   data() {
