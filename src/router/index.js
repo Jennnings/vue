@@ -111,6 +111,24 @@ const routes = [
         component: () =>
           import("../components/business/systemsetting/RoleManagement.vue"),
       },
+      {
+        path: "optionmanagement",
+        name: "OptionManagement",
+        component: () =>
+          import("../components/business/systemsetting/OptionManagement.vue"),
+      },
+      {
+        path: "dispatchmanagement",
+        name: "DispatchManagement",
+        component: () =>
+          import("../components/business/systemsetting/DispatchManagement.vue"),
+      },
+      {
+        path: "fincialstatic",
+        name: "FincialStatic",
+        component: () =>
+          import("../components/business/businessquery/FincialStatics.vue"),
+      },
     ],
   },
   {

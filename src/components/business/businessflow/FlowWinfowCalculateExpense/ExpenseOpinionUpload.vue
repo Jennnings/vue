@@ -430,8 +430,11 @@ export default {
       } else {
         let remarkStr = tmp_data.data[0].priceRemark;
         remarkStr = remarkStr.slice(0, remarkStr.length - 1);
+        let sfInfoStr = tmp_data.data[0].sfOtherInfo;
+        sfInfoStr = sfInfoStr.slice(0, sfInfoStr.length - 1);
         for (let i = 0; i < remarkStr.split(";").length; i++) {
           let tmpdata = remarkStr.split(";")[i].split(",");
+          let otherInfoStr = sfInfoStr.split(";")[i];
           let newData = {
             key: this.groupDataGCLTableCount,
             type: tmpdata[4],
@@ -440,7 +443,7 @@ export default {
             unit: tmpdata[1],
             perPrice: tmpdata[2],
             totalPrice: tmpdata[3],
-            otherInfo: "",
+            otherInfo: otherInfoStr,
           };
           this.groupDataGCLTable.push(newData);
           this.groupDataGCLTableCount++;
@@ -602,6 +605,7 @@ export default {
       console.log("tmpsaveProject");
       let remarkStr = "";
       let isRemainCost;
+      let infoStr = "";
       // let postGetCost = this.getCost;
       // let postTotalPrice = this.totalPrice;
       if (this.groupDataGCLTable.length) {
@@ -626,6 +630,7 @@ export default {
             "," +
             tmpdata.type +
             ";";
+          infoStr += tmpdata.otherInfo + ";";
         }
       }
       if (this.isRemainChecked) {
@@ -645,6 +650,7 @@ export default {
       postParams.append("getcost", this.getCost);
       postParams.append("isremain", isRemainCost);
       postParams.append("sfOpinion", this.expenseOpinionStr);
+      postParams.append("sfOtherInfo", infoStr);
       axios
         .post(GLOBAL.env + "/calculateexpense/uploadproject", postParams)
         .then((res) => {
@@ -714,8 +720,9 @@ export default {
         });
     },
     tmpSaveProject() {
-      console.log("tmpsaveProject");
+      console.log("tmpsaveProject", this.groupDataGCLTable);
       let remarkStr = "";
+      let infoStr = "";
       let isRemainCost;
       // let postGetCost = this.getCost;
       // let postTotalPrice = this.totalPrice;
@@ -741,6 +748,7 @@ export default {
             "," +
             tmpdata.type +
             ";";
+          infoStr += tmpdata.otherInfo + ";";
         }
       }
       if (this.isRemainChecked) {
@@ -748,6 +756,7 @@ export default {
       } else {
         isRemainCost = 0;
       }
+      console.log(infoStr);
       console.log(remarkStr);
       let postParams = new URLSearchParams();
       postParams.append(
@@ -760,6 +769,7 @@ export default {
       postParams.append("getcost", this.getCost);
       postParams.append("isremain", isRemainCost);
       postParams.append("sfOpinion", this.expenseOpinionStr);
+      postParams.append("sfOtherInfo", infoStr);
       axios
         .post(GLOBAL.env + "/calculateexpense/remainproject", postParams)
         .then((res) => {

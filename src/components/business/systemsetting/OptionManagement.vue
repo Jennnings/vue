@@ -8,7 +8,7 @@
         padding-left:10px;
         font-weight:
         "
-        title="角色管理"
+        title="操作列表"
       />
     </div>
     <div class="toolbar">
@@ -17,9 +17,9 @@
           type="primary"
           icon="file-add"
           style="width:110px"
-          @click="createRole"
+          @click="createOption"
         >
-          新增角色
+          新增操作
         </a-button>
       </div>
     </div>
@@ -30,71 +30,38 @@
         :pagination="pagination_setting"
         :loading="spinning"
       >
-        <a slot="name" slot-scope="text, index" @click="viewdetail(index)">{{
-          text
-        }}</a>
-        <span slot="customTitle"><a-icon type="tags" /> 角色名称</span>
+        <a slot="name" slot-scope="text">{{ text }}</a>
+        <span slot="customTitle"><a-icon type="tags" /> 名称</span>
         <a slot="editor" slot-scope="item" @click="editorClick(item)">编辑</a>
-        <a slot="authority" slot-scope="item" @click="authorityClick(item)"
-          >授权</a
-        >
         <a slot="delete" slot-scope="item" @click="deleteClick(item)">删除</a>
       </a-table>
     </div>
     <a-modal
-      v-model="createRoleVisible"
-      title="新增角色"
+      v-model="createOptionVisible"
+      title="新增操作"
       :footer="null"
       width="800px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
       <!-- @cancel="cancelEdit" -->
-      <!--@closeModal="closeCreateModal"-->
-      <CreateRole
-        @createrolesuccess="createRoleSuccess"
-        @cancelCreateRole="cancelCreateRole"
+
+      <CreateOption
+        @createsuccess="createSuccess"
+        @createcancel="createCancel"
       />
     </a-modal>
     <a-modal
-      v-model="viewRoleVisible"
-      title="查看角色"
+      v-model="modifyOptionVisible"
+      title="编辑操作"
       :footer="null"
       width="800px"
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
       <!-- @cancel="cancelEdit" -->
-      <!--@closeModal="closeCreateModal"-->
-      <ViewRole :selecteditem="selectedItem" />
-    </a-modal>
-    <a-modal
-      v-model="editRoleVisible"
-      title="编辑角色"
-      :footer="null"
-      width="800px"
-      :destroyOnClose="distoryThis"
-      :maskClosable="false"
-    >
-      <!-- @cancel="cancelEdit" -->
-      <!--@closeModal="closeCreateModal"-->
-      <ModifyRole
-        :selecteditem="selectedItem"
-        @cancelModifyRole="cancelModifyRole"
-        @modifySuccess="modifySuccess"
-      />
-    </a-modal>
-    <a-modal
-      v-model="authorityRoleVisible"
-      title="角色授权"
-      :footer="null"
-      width="800px"
-      :destroyOnClose="distoryThis"
-      :maskClosable="false"
-    >
-      <!-- @cancel="cancelEdit" -->
-      <!--@closeModal="closeCreateModal"-->
-      <AuthorityRole :selecteditem="selectedItem" />
+
+      <ModifyOption :selecteditem="selecteditem" @cancelmodify="cancelModify" />
     </a-modal>
   </div>
 </template>
@@ -102,49 +69,46 @@
 import request from "@/utils/request";
 import GLOBAL from "./../../../utils/global_variable";
 import axios from "axios";
-import CreateRole from "./rolemanagement/CreateRole";
-import ViewRole from "./rolemanagement/ViewRole";
-import ModifyRole from "./rolemanagement/ModifyRole";
-import AuthorityRole from "./rolemanagement/AuthorityRole";
+import CreateOption from "./optionmanagement/CreateOption";
+import ModifyOption from "./optionmanagement/ModifyOption";
 const columns = [
   {
-    dataIndex: "rolename",
-    key: "rolename",
+    dataIndex: "AuthorityName",
+    key: "AuthorityName",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
     width: 150,
   },
   {
-    title: "排序",
-    dataIndex: "roleorder",
-    key: "roleorder",
+    title: "标识",
+    dataIndex: "AuthorityTag",
+    key: "AuthorityTag",
     width: 50,
   },
   {
-    title: "说明",
-    key: "roledescription",
-    dataIndex: "roledescription",
+    title: "排序",
+    key: "AuthorityOrder",
+    dataIndex: "AuthorityOrder",
     width: 100,
   },
 
   {
-    title: "编辑",
-    key: "editor",
-    dataIndex: "roleid",
-    scopedSlots: { customRender: "editor" },
+    title: "说明",
+    key: "AuthorityDescription",
+    dataIndex: "AuthorityDescription",
     width: 100,
   },
   {
-    title: "授权",
-    key: "authority",
-    dataIndex: "roleid",
-    scopedSlots: { customRender: "authority" },
+    title: "编辑",
+    key: "editor",
+    dataIndex: "AuthorityID",
+    scopedSlots: { customRender: "editor" },
     width: 100,
   },
   {
     title: "删除",
     key: "delete",
-    dataIndex: "roleid",
+    dataIndex: "AuthorityID",
     scopedSlots: { customRender: "delete" },
     width: 100,
   },
@@ -154,93 +118,75 @@ const pagination_setting = {
 };
 export default {
   components: {
-    CreateRole,
-    ViewRole,
-    ModifyRole,
-    AuthorityRole,
+    CreateOption,
+    ModifyOption,
   },
   data() {
     return {
-      createRoleVisible: false,
-      distoryThis: true,
       columns,
       pagination_setting,
-      spinning: false,
       data: [],
-      selectedItem: "",
-      viewRoleVisible: false,
-      editRoleVisible: false,
-      authorityRoleVisible: false,
+      spinning: false,
+      createOptionVisible: false,
+      distoryThis: true,
+      modifyOptionVisible: false,
+      selecteditem: "",
     };
   },
   methods: {
-    async getRoles() {
+    async getOptionList() {
       this.spinning = true;
-      const tmp_data = await request.get("rolemanagement/getrole");
+      const tmp_data = await request.get("optionmanagement/getoptionlist");
       this.data = tmp_data.data;
       this.spinning = false;
     },
-    createRole() {
-      this.createRoleVisible = true;
+    createOption() {
+      this.createOptionVisible = true;
     },
     editorClick(item) {
-      this.editRoleVisible = true;
-      this.selectedItem = item;
-    },
-    viewdetail(item) {
-      this.viewRoleVisible = true;
-      this.selectedItem = item.roleid;
-    },
-    authorityClick(item) {
-      this.authorityRoleVisible = true;
-      this.selectedItem = item;
+      console.log(item);
+      this.modifyOptionVisible = true;
+      this.selecteditem = item;
     },
     deleteClick(item) {
       let postParams = new URLSearchParams();
       let that = this;
       this.$confirm({
-        title: "确定删除该角色?",
-        content: "删除角色将无法恢复",
+        title: "确定删除该权限?",
+        content: "删除权限将无法恢复",
         okText: "确认",
         okType: "danger",
         cancelText: "取消",
         onOk() {
           if (item) {
-            postParams.append("roleid", item);
+            postParams.append("authorityid", item);
             axios
-              .post(GLOBAL.env + "/rolemanagement/deleterole", postParams)
+              .post(GLOBAL.env + "/optionmanagement/deleteoption", postParams)
               .then((res) => {
                 if (res.data == "success") {
                   that.$message.success("删除成功");
-                  that.getRoles();
+                  that.getOptionList();
                 } else {
                   that.$message.error("删除失败");
                 }
               });
           }
         },
-        onCancel() {
-          console.log("Cancel");
-        },
       });
     },
-    createRoleSuccess() {
-      this.createRoleVisible = false;
-      this.getRoles();
+    createSuccess() {
+      this.createOptionVisible = false;
+      this.getOptionList();
     },
-    modifySuccess() {
-      this.editRoleVisible = false;
-      this.getRoles();
+    createCancel() {
+      this.createOptionVisible = false;
     },
-    cancelCreateRole() {
-      this.createRoleVisible = false;
-    },
-    cancelModifyRole() {
-      this.editRoleVisible = false;
+    cancelModify() {
+      this.modifyOptionVisible = false;
     },
   },
   mounted: function() {
-    this.getRoles();
+    this.getOptionList();
   },
 };
 </script>

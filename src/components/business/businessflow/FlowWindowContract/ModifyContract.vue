@@ -108,7 +108,12 @@
             >
             </a-input>
           </a-descriptions-item>
-          <a-descriptions-item label="备注说明" :span="2">
+          <a-descriptions-item label="收费类型" :span="1">
+            <a-checkbox :checked="isTotalPrice" @change="isTotalPriceChanged">
+              总价合同
+            </a-checkbox>
+          </a-descriptions-item>
+          <a-descriptions-item label="备注说明" :span="1">
             <a-input
               placeholder="备注说明"
               v-model="contractRemark"
@@ -207,6 +212,7 @@ export default {
       uploading: false,
       spinning: false,
       disableEdit: false,
+      isTotalPrice: false,
     };
   },
   methods: {
@@ -230,6 +236,11 @@ export default {
       this.contractRemark = datas.contractOtherInfo;
       this.balanceExpense = datas.balanceexpense;
       this.paidInAmount = datas.paidinamount;
+      if (datas.isTotalPrice == 1) {
+        this.isTotalPrice = true;
+      } else {
+        this.isTotalPrice = false;
+      }
       if (datas.contractFileList) {
         this.savedFileList = datas.contractFileList.split("\/");
       }
@@ -334,6 +345,7 @@ export default {
       infoparams.append("contractremark", this.contractRemark);
       infoparams.append("balanceexpense", this.balanceExpense);
       infoparams.append("paidinamount", this.paidInAmount);
+      infoparams.append("istotalprice", this.isTotalPrice);
       axios
         .post(GLOBAL.env + "/contractmanagement/modifycontractinfo", infoparams)
         .then((res) => {
@@ -409,6 +421,9 @@ export default {
       const newFileList = this.savedFileList.slice();
       newFileList.splice(index, 1);
       this.savedFileList = newFileList;
+    },
+    isTotalPriceChanged() {
+      this.isTotalPrice = !this.isTotalPrice;
     },
   },
   mounted: function() {

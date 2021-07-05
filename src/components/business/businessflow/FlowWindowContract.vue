@@ -88,6 +88,26 @@
         <!-- <a slot="contractname" slot-scope="text" @click="viewItem(text)">{{
           text
         }}</a> -->
+        <span slot="isTotalPrice" slot-scope="isTotalPrice">
+          <a-tag v-if="isTotalPrice" color="green">
+            <span>总价合同</span>
+          </a-tag>
+          <a-tag v-if="!isTotalPrice" color="volcano">
+            <span>分项收费</span>
+          </a-tag>
+          <!-- <a-icon
+            v-if="isTotalPrice"
+            type="check-circle"
+            theme="twoTone"
+            two-tone-color="#52c41a"
+          />
+          <a-icon
+            v-if="!isTotalPrice"
+            type="close-circle"
+            theme="twoTone"
+            two-tone-color="red"
+          /> -->
+        </span>
         <span slot="contractView" slot-scope="item" @click="viewItem(item)">
           <a>查看</a>
         </span>
@@ -245,6 +265,12 @@ const columns = [
   { title: "合同签订时间", dataIndex: "contractSignTime", key: "version" },
   { title: "甲方（委托）单位", dataIndex: "contractClient", key: "upgradeNum" },
   {
+    title: "收费方式",
+    dataIndex: "isTotalPrice",
+    key: "isTotalPrice",
+    scopedSlots: { customRender: "isTotalPrice" },
+  },
+  {
     title: "查看",
     dataIndex: "Id",
     key: "contractID",
@@ -257,12 +283,12 @@ const columns = [
     key: "Id",
     scopedSlots: { customRender: "contractEdit" },
   },
-  // {
-  //   title: "关联发票",
-  //   dataIndex: "Id",
-  //   key: "receiptEdit",
-  //   scopedSlots: { customRender: "receiptEdit" },
-  // },
+  {
+    title: "关联发票",
+    dataIndex: "Id",
+    key: "receiptEdit",
+    scopedSlots: { customRender: "receiptEdit" },
+  },
   {
     title: "删除",
     dataIndex: "Id",

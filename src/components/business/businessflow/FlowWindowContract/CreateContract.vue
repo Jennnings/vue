@@ -59,7 +59,12 @@
         <a-descriptions-item label="到账金额" :span="1">
           <a-input placeholder="到账金额" v-model="paidInAmount"> </a-input>
         </a-descriptions-item>
-        <a-descriptions-item label="备注说明" :span="2">
+        <a-descriptions-item label="收费类型" :span="1">
+          <a-checkbox :checked="isTotalPrice" @change="isTotalPriceChanged">
+            总价合同
+          </a-checkbox>
+        </a-descriptions-item>
+        <a-descriptions-item label="备注说明" :span="1">
           <a-input placeholder="备注说明" v-model="contractRemark"> </a-input>
         </a-descriptions-item>
         <a-descriptions-item label="文件列表" :span="2"> </a-descriptions-item>
@@ -124,6 +129,7 @@ export default {
       fileList: [],
       savedFileList: [],
       uploading: false,
+      isTotalPrice: false,
     };
   },
   methods: {
@@ -182,6 +188,7 @@ export default {
       postParams.append("contractcompany", this.contractCompany);
       postParams.append("balanceexpense", this.balanceExpense);
       postParams.append("paidinamount", this.paidInAmount);
+      postParams.append("istotalprice", this.isTotalPrice);
       axios
         .post(GLOBAL.env + "/contractmanagement/createcontract", postParams)
         .then((res) => {
@@ -219,6 +226,9 @@ export default {
           }
           this.uploading = false;
         });
+    },
+    isTotalPriceChanged() {
+      this.isTotalPrice = !this.isTotalPrice;
     },
   },
 };

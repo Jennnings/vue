@@ -52,6 +52,12 @@
         "indexs":"9",
         "key":"pieces",
         "value":"个"
+    },
+    {
+        "index":10,
+        "indexs":"10",
+        "key":"item",
+        "value":"件"
     }
 ]
 }

@@ -5,7 +5,7 @@
         <!-- <a-list-item-meta description=""> -->
 
         <div>
-          <span>{{ item.id }}</span
+          <span>{{ item.uploadtime }}</span
           ><br />
           <div v-for="file in item.filelist" :key="file">
             <a @click="downHistoryFile(file)">{{ file }}</a>
@@ -38,8 +38,8 @@ export default {
         }
       );
       tmp_data.data.forEach((element) => {
-        let tmp_data = { id: "", filelist: [] };
-        tmp_data.id = element.fileid;
+        let tmp_data = { uploadtime: "", filelist: [] };
+        tmp_data.uploadtime = element.uploadtime;
         tmp_data.filelist = element.filename.split("/");
         this.historyFile.push(tmp_data);
       });

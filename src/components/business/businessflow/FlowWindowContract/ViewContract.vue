@@ -108,7 +108,12 @@
             >
             </a-input>
           </a-descriptions-item>
-          <a-descriptions-item label="备注说明" :span="2">
+          <a-descriptions-item label="收费类型" :span="1">
+            <a-checkbox :disabled="disableEdit" :checked="isTotalPrice">
+              总价合同
+            </a-checkbox>
+          </a-descriptions-item>
+          <a-descriptions-item label="备注说明" :span="1">
             <a-input
               placeholder="备注说明"
               v-model="contractRemark"
@@ -160,6 +165,7 @@ export default {
       savedFileList: [],
       uploading: false,
       spinning: false,
+      isTotalPrice: false,
       disableEdit: true,
     };
   },
@@ -184,6 +190,11 @@ export default {
       this.contractRemark = datas.contractOtherInfo;
       this.balanceExpense = datas.balanceexpense;
       this.paidInAmount = datas.paidinamount;
+      if (datas.isTotalPrice == 1) {
+        this.isTotalPrice = true;
+      } else {
+        this.isTotalPrice = false;
+      }
       if (datas.contractFileList) {
         this.savedFileList = datas.contractFileList.split("\/");
       }
