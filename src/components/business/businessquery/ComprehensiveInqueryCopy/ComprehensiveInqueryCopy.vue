@@ -348,7 +348,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/common/modifyprojectfile", formData)
+        .post(GLOBAL.env_file + "/common/modifyprojectfile", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");

@@ -304,7 +304,7 @@ export default {
         formData.append("myfile", file);
       });
       this.uploading = true;
-      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
+      axios.post(GLOBAL.env_file + "/cxch/uploadfile", formData).then((res) => {
         console.log(res);
         if (res.data === "upload over") {
           this.$message.success("上传成功");

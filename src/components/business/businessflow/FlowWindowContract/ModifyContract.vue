@@ -298,7 +298,10 @@ export default {
       formData.append("contractid", this.selectid);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/contractmanagement/uploadcontractFile", formData)
+        .post(
+          GLOBAL.env_file + "/contractmanagement/uploadcontractFile",
+          formData
+        )
         .then((res) => {
           if (res.data === "upload over") {
             this.$message.success("上传成功");

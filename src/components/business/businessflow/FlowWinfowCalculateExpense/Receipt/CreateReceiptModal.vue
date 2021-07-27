@@ -249,7 +249,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/receipt/uploadreceiptfile", formData)
+        .post(GLOBAL.env_file + "/receipt/uploadreceiptfile", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");

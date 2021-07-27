@@ -214,7 +214,10 @@ export default {
       formData.append("existedFiles", "");
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/contractmanagement/uploadcontractFile", formData)
+        .post(
+          GLOBAL.env_file + "/contractmanagement/uploadcontractFile",
+          formData
+        )
         .then((res) => {
           // console.log(res);
           if (res.data === "upload over") {

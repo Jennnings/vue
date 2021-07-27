@@ -574,7 +574,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/calculateexpense/jkdfileupload", formData)
+        .post(GLOBAL.env_file + "/calculateexpense/jkdfileupload", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");
@@ -853,7 +853,7 @@ export default {
         key: initDataLength.toString(),
         value: this.projectTypeCustomer,
       };
-      this.projectType = push(tmp_obj);
+      this.projectType.push(tmp_obj);
       this.projectTypeCustomer = "";
       console.log(initDataLength);
     },

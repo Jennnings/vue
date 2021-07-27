@@ -400,7 +400,9 @@ export default {
       formData.append("projectid", projectid);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/cxch/uploadfile", formData, { timeout: 300000 })
+        .post(GLOBAL.env_file + "/cxch/uploadfile", formData, {
+          timeout: 300000,
+        })
         .then((res) => {
           // console.log(res);
           if (res.data === "upload over") {

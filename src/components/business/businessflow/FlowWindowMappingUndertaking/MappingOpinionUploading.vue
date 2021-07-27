@@ -390,7 +390,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/mappingundertaking/uploadchcg", formData)
+        .post(GLOBAL.env_file + "/mappingundertaking/uploadchcg", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");
@@ -638,6 +638,7 @@ export default {
           }
         });
     },
+    //暂存功能
     temporarySave() {
       this.postParams = new URLSearchParams();
       this.postParams.append("projectsn", this.projectInfo);

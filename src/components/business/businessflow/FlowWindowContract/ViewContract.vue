@@ -292,8 +292,9 @@ export default {
         this.$message.error("文件不存在");
         return;
       }
+      //TODO 改为66端口
       axios({
-        url: GLOBAL.env + "/common/getcontract",
+        url: GLOBAL.env_file + "/common/getcontract",
         method: "GET",
         header: {
           contentType: "application/x-www-form-urlencoded; charset=utf-8",

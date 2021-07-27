@@ -424,7 +424,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/resulthanding/uploadhandingfile", formData)
+        .post(GLOBAL.env_file + "/resulthanding/uploadhandingfile", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");
