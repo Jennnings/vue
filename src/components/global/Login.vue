@@ -34,12 +34,15 @@
 <script>
 import request from "@/utils/request";
 import { Modal } from "ant-design-vue";
+import axios from "axios";
+import GLOBAL from "./../../utils/global_variable";
 export default {
   data() {
     return {
       userName: "",
       passWord: "",
       loginInfo: "",
+      ip: "",
     };
   },
   methods: {
@@ -49,31 +52,91 @@ export default {
         content: "请确认用户名与密码是否正确",
       });
     },
-    async login() {
-      this.loginInfo = await request.get("/cxch/login", {
-        params: { username: this.userName, password: this.passWord },
+    login() {
+      let postParams = new URLSearchParams();
+      postParams.append("username", this.userName);
+      postParams.append("password", this.passWord);
+      axios.post(GLOBAL.env + "/cxch/login/", postParams).then((res) => {
+        this.loginInfo = res;
+        if (this.loginInfo.data === "wrong") {
+          this.error();
+        } else {
+          sessionStorage.setItem(
+            "userToken",
+            JSON.stringify(this.loginInfo.data[0])
+          );
+          sessionStorage.setItem(
+            "userInfo",
+            JSON.stringify({ userName: this.userName })
+          );
+          this.$router.push("/home");
+        }
+        // sessionStorage.setItem("userToken", "xxxx");
+        // this.$router.replace("/home");
       });
-      console.log(this.loginInfo.data);
-      if (this.loginInfo.data === "wrong") {
-        this.error();
-      } else {
-        sessionStorage.setItem(
-          "userToken",
-          JSON.stringify(this.loginInfo.data[0])
-        );
-        sessionStorage.setItem(
-          "userInfo",
-          JSON.stringify({ userName: this.userName })
-        );
-        this.$router.push("/home");
-      }
-      //   sessionStorage.setItem("userToken", "xxxx");
-      //   this.$router.replace("/home");
+      // this.loginInfo = await request.get("/cxch/login", {
+      //   params: { username: this.userName, password: this.passWord },
+      // });
+      // console.log(this.loginInfo.data);
     },
     onEnterPress() {
       console.log("enter express");
       this.login();
     },
+    getUserIP(onNewIP) {
+      let MyPeerConnection =
+        window.RTCPeerConnection ||
+        window.mozRTCPeerConnection ||
+        window.webkitRTCPeerConnection;
+
+      let pc = new MyPeerConnection({
+        iceServers: [],
+      });
+
+      let noop = () => {};
+
+      let localIPs = {};
+
+      let ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/g;
+
+      let iterateIP = (ip) => {
+        if (!localIPs[ip]) onNewIP(ip);
+
+        localIPs[ip] = true;
+      };
+
+      pc.createDataChannel("");
+
+      pc.createOffer()
+        .then((sdp) => {
+          sdp.sdp.split("\n").forEach(function(line) {
+            if (line.indexOf("candidate") < 0) return;
+
+            line.match(ipRegex).forEach(iterateIP);
+          });
+
+          pc.setLocalDescription(sdp, noop, noop);
+        })
+        .catch((reason) => {});
+
+      pc.onicecandidate = (ice) => {
+        if (
+          !ice ||
+          !ice.candidate ||
+          !ice.candidate.candidate ||
+          !ice.candidate.candidate.match(ipRegex)
+        )
+          return;
+
+        ice.candidate.candidate.match(ipRegex).forEach(iterateIP);
+      };
+    },
+  },
+  mounted: function() {
+    this.getUserIP((ip) => {
+      this.ip = ip;
+      console.log(this.ip);
+    });
   },
 };
 </script>

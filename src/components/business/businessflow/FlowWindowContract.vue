@@ -41,10 +41,10 @@
           />
         </div>
         <div class="itemName">
-          <span>乙方(委托)单位:</span>
+          <span>甲方(委托)单位:</span>
           <a-auto-complete
             style="width: 150px;margin-left:10px"
-            placeholder="乙方(委托)单位"
+            placeholder="甲方(委托)单位"
             v-model="contractClient"
           />
         </div>
@@ -85,6 +85,29 @@
         :pagination="pagination_setting"
         @expand="expandContract"
       >
+        <!-- <a slot="contractname" slot-scope="text" @click="viewItem(text)">{{
+          text
+        }}</a> -->
+        <span slot="isTotalPrice" slot-scope="isTotalPrice">
+          <a-tag v-if="isTotalPrice" color="green">
+            <span>总价合同</span>
+          </a-tag>
+          <a-tag v-if="!isTotalPrice" color="volcano">
+            <span>分项收费</span>
+          </a-tag>
+          <!-- <a-icon
+            v-if="isTotalPrice"
+            type="check-circle"
+            theme="twoTone"
+            two-tone-color="#52c41a"
+          />
+          <a-icon
+            v-if="!isTotalPrice"
+            type="close-circle"
+            theme="twoTone"
+            two-tone-color="red"
+          /> -->
+        </span>
         <span slot="contractView" slot-scope="item" @click="viewItem(item)">
           <a>查看</a>
         </span>
@@ -106,6 +129,9 @@
           :loading="loading"
           :pagination="pagination_setting_inner"
         >
+          <a slot="name" slot-scope="text" @click="viewdetail(text)">{{
+            text
+          }}</a>
           <span slot="XMState" slot-scope="XMState">
             <a-tag v-if="XMState === '1'" color="volcano">
               <span>登记中</span>
@@ -160,10 +186,10 @@
       :destroyOnClose="distoryThis"
       :maskClosable="false"
     >
-      <ViewContract
+      <ContractViewTab
         @createSuccessChild="parentFn"
         @childFn="parentFn"
-        :selectid="selectProjectInfo"
+        :projectInfo="selectProjectInfo"
       />
     </a-modal>
     <a-modal
@@ -175,7 +201,10 @@
       :maskClosable="false"
       @cancel="closeContractModify"
     >
-      <ModifyContract :selectid="selectProjectInfo" @childFn="modifyParentFn" />
+      <ModifyContractModal
+        :projectInfo="selectProjectInfo"
+        @childFn="modifyParentFn"
+      />
     </a-modal>
     <a-modal
       v-model="viewProjectInfoVisible"
@@ -221,13 +250,26 @@ import ModifyContract from "./FlowWindowContract/ModifyContract";
 import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptModal";
 import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
+import ContractViewTab from "./FlowWindowContract/ContractViewTab";
+import ModifyContractModal from "./FlowWindowContract/MofifyContractModal";
 const ModuleID = 42;
 const columns = [
-  { title: "合同编号", dataIndex: "contractID", key: "name", with: 80 },
+  {
+    title: "合同编号",
+    dataIndex: "contractID",
+    key: "ID",
+    with: 80,
+    // scopedSlots: { customRender: "contractname" },
+  },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
   { title: "合同签订时间", dataIndex: "contractSignTime", key: "version" },
-  { title: "乙方（委托）单位", dataIndex: "contractClient", key: "upgradeNum" },
-  { title: "代建单位", dataIndex: "contractAssistCompany", key: "creator" },
+  { title: "甲方（委托）单位", dataIndex: "contractClient", key: "upgradeNum" },
+  {
+    title: "收费方式",
+    dataIndex: "isTotalPrice",
+    key: "isTotalPrice",
+    scopedSlots: { customRender: "isTotalPrice" },
+  },
   {
     title: "查看",
     dataIndex: "Id",
@@ -253,10 +295,17 @@ const columns = [
     key: "contractDelete",
     scopedSlots: { customRender: "contractDelete" },
   },
+  { title: "代建单位", dataIndex: "contractAssistCompany", key: "creator" },
 ];
 
 const innerColumns = [
-  { title: "项目登记号", dataIndex: "projectsn", key: "projectsn", width: 200 },
+  {
+    title: "项目登记号",
+    dataIndex: "projectsn",
+    key: "projectsn",
+    width: 200,
+    scopedSlots: { customRender: "name" },
+  },
   {
     title: "项目名称",
     dataIndex: "projectname",
@@ -271,12 +320,24 @@ const innerColumns = [
     width: 200,
   },
   {
-    title: "查看",
-    key: "viewdetail",
-    dataIndex: "projectsn",
-    scopedSlots: { customRender: "viewdetail" },
+    title: "应收费用",
+    dataIndex: "cost",
+    key: "cost",
     width: 200,
   },
+  {
+    title: "已收费用",
+    dataIndex: "getCost",
+    key: "getCost",
+    width: 200,
+  },
+  // {
+  //   title: "查看",
+  //   key: "viewdetail",
+  //   dataIndex: "projectsn",
+  //   scopedSlots: { customRender: "viewdetail" },
+  //   width: 200,
+  // },
 ];
 const pagination_setting = {
   defaultPageSize: 8,
@@ -288,10 +349,12 @@ export default {
   components: {
     CreateContract,
     ViewProjectInfo,
-    ViewContract,
-    ModifyContract,
+    // ViewContract,
+    //ModifyContract,
     ViewReceiptModal,
     ViewContractModalForContract,
+    ContractViewTab,
+    ModifyContractModal,
   },
   data() {
     return {

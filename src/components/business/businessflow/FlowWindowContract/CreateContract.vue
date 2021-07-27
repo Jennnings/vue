@@ -20,9 +20,9 @@
             </a-input>
           </a-badge>
         </a-descriptions-item>
-        <a-descriptions-item label="乙方(委托)单位" :span="1">
+        <a-descriptions-item label="甲方(委托)单位" :span="1">
           <a-badge dot>
-            <a-input placeholder="乙方(委托)单位" v-model="contractClient">
+            <a-input placeholder="甲方(委托)单位" v-model="contractClient">
               <a-tooltip slot="suffix" title="必填项目">
                 <a-icon type="info-circle" style="color: red" />
               </a-tooltip>
@@ -53,7 +53,18 @@
         <a-descriptions-item label="合同结束时间" :span="1">
           <a-date-picker style="width:100%" @change="getContractEndDate" />
         </a-descriptions-item>
-        <a-descriptions-item label="备注说明" :span="2">
+        <a-descriptions-item label="结算金额" :span="1">
+          <a-input placeholder="结算金额" v-model="balanceExpense"> </a-input>
+        </a-descriptions-item>
+        <a-descriptions-item label="到账金额" :span="1">
+          <a-input placeholder="到账金额" v-model="paidInAmount"> </a-input>
+        </a-descriptions-item>
+        <a-descriptions-item label="收费类型" :span="1">
+          <a-checkbox :checked="isTotalPrice" @change="isTotalPriceChanged">
+            总价合同
+          </a-checkbox>
+        </a-descriptions-item>
+        <a-descriptions-item label="备注说明" :span="1">
           <a-input placeholder="备注说明" v-model="contractRemark"> </a-input>
         </a-descriptions-item>
         <a-descriptions-item label="文件列表" :span="2"> </a-descriptions-item>
@@ -113,9 +124,12 @@ export default {
       contractSignDate: "",
       contractStartDate: "",
       contractEndDate: "",
+      balanceExpense: "",
+      paidInAmount: "",
       fileList: [],
       savedFileList: [],
       uploading: false,
+      isTotalPrice: false,
     };
   },
   methods: {
@@ -151,7 +165,7 @@ export default {
         return;
       }
       if (this.contractClient === "") {
-        this.$message.error("乙方(委托)单位为必填项目");
+        this.$message.error("甲方(委托)单位为必填项目");
         return;
       }
       if (this.contractSignDate === "") {
@@ -172,6 +186,9 @@ export default {
       postParams.append("contractexpense", this.contractExpense);
       postParams.append("contractsigndate", this.contractSignDate);
       postParams.append("contractcompany", this.contractCompany);
+      postParams.append("balanceexpense", this.balanceExpense);
+      postParams.append("paidinamount", this.paidInAmount);
+      postParams.append("istotalprice", this.isTotalPrice);
       axios
         .post(GLOBAL.env + "/contractmanagement/createcontract", postParams)
         .then((res) => {
@@ -179,6 +196,7 @@ export default {
             console.log(res);
             if (this.fileList.length) {
               this.handleUpload(res.data[0].contractid);
+              this.$message.success("新建合同成功");
             }
             this.$emit("createSuccessChild");
           } else {
@@ -196,7 +214,10 @@ export default {
       formData.append("existedFiles", "");
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/contractmanagement/uploadcontractFile", formData)
+        .post(
+          GLOBAL.env_file + "/contractmanagement/uploadcontractFile",
+          formData
+        )
         .then((res) => {
           // console.log(res);
           if (res.data === "upload over") {
@@ -208,6 +229,9 @@ export default {
           }
           this.uploading = false;
         });
+    },
+    isTotalPriceChanged() {
+      this.isTotalPrice = !this.isTotalPrice;
     },
   },
 };

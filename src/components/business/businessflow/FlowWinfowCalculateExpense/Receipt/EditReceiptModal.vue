@@ -227,7 +227,7 @@ export default {
       this.spinning = false;
     },
     async downloadFile(item) {
-      const tmp_data = await request.get("/common/downloadfile", {
+      const tmp_data = await request.get("/common/getreceipt", {
         params: {
           postfilename: item,
         },
@@ -237,7 +237,7 @@ export default {
         return;
       }
       axios({
-        url: GLOBAL.env + "/common/downloadfile",
+        url: GLOBAL.env + "/common/getreceipt",
         method: "GET",
         header: {
           contentType: "application/x-www-form-urlencoded; charset=utf-8",
@@ -314,7 +314,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/receipt/uploadreceiptfile", formData)
+        .post(GLOBAL.env_file + "/receipt/uploadreceiptfile", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");

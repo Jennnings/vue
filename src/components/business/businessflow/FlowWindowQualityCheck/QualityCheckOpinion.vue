@@ -12,6 +12,9 @@
           @updateSuccess="updateSuccess"
         />
       </div>
+      <div v-else-if="noTitleKey === 'resultfile'">
+        <FileDownload v-bind:projectInfo="projectInfo" />
+      </div>
       <div v-else-if="noTitleKey === 'backtoformer'">
         <div class="backFormerContainer">
           <div class="titleContainer">
@@ -36,6 +39,7 @@
 </template>
 <script>
 import QualityCheckOpinionUploading from "./QualityCheckOpinionUploading";
+import FileDownload from "./../common/ViewProjectInfo/FileDownload";
 import GLOBAL from "./../../../../utils/global_variable";
 import axios from "axios";
 import moment from "moment";
@@ -43,6 +47,7 @@ export default {
   props: ["projectInfo"],
   components: {
     QualityCheckOpinionUploading,
+    FileDownload,
   },
   data() {
     return {
@@ -50,6 +55,10 @@ export default {
         {
           key: "qualitycheck",
           tab: "质检意见",
+        },
+        {
+          key: "resultfile",
+          tab: "成果文件",
         },
         {
           key: "backtoformer",

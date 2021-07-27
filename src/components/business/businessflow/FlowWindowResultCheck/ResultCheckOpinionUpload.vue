@@ -325,8 +325,11 @@ export default {
           let newData = {
             key: j,
             type: data.data[0].gznr.split(",")[j],
-            number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
-            unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
+
+            // number: parseFloat(data.data[0].gcl.split(";")[j]),
+            // unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
+            number: data.data[0].gcl.split(";")[j].replace(/[^0-9.]/gi, ""),
+            unit: data.data[0].gcl.split(";")[j].replace(/[0-9.]+/g, ""),
           };
           console.log(newData);
           this.chgclAddGroup.push(newData);

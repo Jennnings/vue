@@ -390,7 +390,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/mappingundertaking/uploadchcg", formData)
+        .post(GLOBAL.env_file + "/mappingundertaking/uploadchcg", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");
@@ -438,8 +438,8 @@ export default {
           let newData = {
             key: j + 1,
             type: data.data[0].gznr.split(",")[j],
-            number: data.data[0].gcl.split(";")[j].replace(/[^0-9]/gi, ""),
-            unit: data.data[0].gcl.split(";")[j].replace(/[0-9]/g, ""),
+            number: data.data[0].gcl.split(";")[j].replace(/[^0-9.]/gi, ""),
+            unit: data.data[0].gcl.split(";")[j].replace(/[0-9.]+/g, ""),
           };
           this.chgclAddGroup.push(newData);
         }
@@ -638,6 +638,7 @@ export default {
           }
         });
     },
+    //暂存功能
     temporarySave() {
       this.postParams = new URLSearchParams();
       this.postParams.append("projectsn", this.projectInfo);

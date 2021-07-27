@@ -99,6 +99,36 @@ const routes = [
             "../components/business/businessquery/ComprehensiveInquery.vue"
           ),
       },
+      {
+        path: "usermanagement",
+        name: "UserManagement",
+        component: () =>
+          import("../components/business/systemsetting/UserManagement.vue"),
+      },
+      {
+        path: "rolemanagement",
+        name: "RoleManagement",
+        component: () =>
+          import("../components/business/systemsetting/RoleManagement.vue"),
+      },
+      {
+        path: "optionmanagement",
+        name: "OptionManagement",
+        component: () =>
+          import("../components/business/systemsetting/OptionManagement.vue"),
+      },
+      {
+        path: "dispatchmanagement",
+        name: "DispatchManagement",
+        component: () =>
+          import("../components/business/systemsetting/DispatchManagement.vue"),
+      },
+      {
+        path: "fincialstatic",
+        name: "FincialStatic",
+        component: () =>
+          import("../components/business/businessquery/FincialStatics.vue"),
+      },
     ],
   },
   {

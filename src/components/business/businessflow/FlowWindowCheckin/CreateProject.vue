@@ -399,17 +399,21 @@ export default {
       });
       formData.append("projectid", projectid);
       this.uploading = true;
-      axios.post(GLOBAL.env + "/cxch/uploadfile", formData).then((res) => {
-        // console.log(res);
-        if (res.data === "upload over") {
-          this.$message.success("上传成功");
-          this.$emit("childFn");
-          this.fileList = [];
-        } else {
-          this.$message.error("上传失败");
-        }
-        this.uploading = false;
-      });
+      axios
+        .post(GLOBAL.env_file + "/cxch/uploadfile", formData, {
+          timeout: 300000,
+        })
+        .then((res) => {
+          // console.log(res);
+          if (res.data === "upload over") {
+            this.$message.success("上传成功");
+            this.$emit("childFn");
+            this.fileList = [];
+          } else {
+            this.$message.error("上传失败");
+          }
+          this.uploading = false;
+        });
     },
   },
   mounted: function() {

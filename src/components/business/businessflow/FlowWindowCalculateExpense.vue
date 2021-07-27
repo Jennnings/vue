@@ -74,7 +74,7 @@
         :loading="spinning"
         rowKey="id"
       >
-        <a slot="name" slot-scope="text" @click="clickforInfo(text)">{{
+        <a slot="name" slot-scope="text" @click="viewdetail(text)">{{
           text
         }}</a>
         <span slot="customTitle"><a-icon type="tags" /> 项目登记号</span>
@@ -99,6 +99,7 @@
     </div>
     <!-- </a-spin> -->
     <a-modal
+      :dialog-style="{ top: '20px' }"
       v-model="expenseOpinionVisible"
       title="核算收费"
       :footer="null"
@@ -108,6 +109,7 @@
     >
       <ExpenseOpinion
         v-bind:projectInfo="selectProjectInfo"
+        :isFromComprehensiveInquery="false"
         @closemodal="parentCloseModal"
       />
       <!-- 
@@ -160,12 +162,12 @@ const columns = [
     key: "projectClient",
     width: 250,
   },
-  {
-    title: "坐落",
-    key: "sceneLocation",
-    dataIndex: "sceneLocation",
-    width: 150,
-  },
+  // {
+  //   title: "坐落",
+  //   key: "sceneLocation",
+  //   dataIndex: "sceneLocation",
+  //   width: 150,
+  // },
   {
     title: "开单情况",
     key: "ischeck",
@@ -173,7 +175,13 @@ const columns = [
     scopedSlots: { customRender: "tags" },
     width: 100,
   },
-
+  {
+    title: "办理",
+    key: "tonextstep",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "tonextstep" },
+    width: 100,
+  },
   {
     title: "测绘承办",
     key: "clmanUser",
@@ -193,20 +201,13 @@ const columns = [
     width: 100,
   },
   //TODO 查看模态框取消编辑状态
-  {
-    title: "查看",
-    key: "viewdetail",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "viewdetail" },
-    width: 100,
-  },
-  {
-    title: "办理",
-    key: "tonextstep",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "tonextstep" },
-    width: 100,
-  },
+  // {
+  //   title: "查看",
+  //   key: "viewdetail",
+  //   dataIndex: "Projectsn",
+  //   scopedSlots: { customRender: "viewdetail" },
+  //   width: 100,
+  // },
 ];
 const pagination_setting = {
   defaultPageSize: 10,

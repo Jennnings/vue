@@ -132,7 +132,7 @@
         总收费
       </div>
       <div class="itemContainer">
-        <div class="smallItem">
+        <div class="smallItems">
           <div class="itembox">
             <span>应收(元)</span>
             <a-input
@@ -161,6 +161,15 @@
               v-model="getCost"
             ></a-input>
           </div>
+          <div class="itembox">
+            <a-button
+              type="primary"
+              style="margin-left:10px"
+              @click="downLoadJKD"
+            >
+              缴款单下载
+            </a-button>
+          </div>
         </div>
       </div>
     </div>
@@ -170,7 +179,7 @@
         class="itemContainer"
         style="display:flex;flex-direction:row;align-items: center;width:100%"
       >
-        <div class="smallItem">
+        <div class="smallItems">
           <div>
             <span>客户评价</span>
             <a-rate :default-value="2.5" allow-half style="margin-left:10px" />
@@ -205,7 +214,7 @@
             </div>
           </a-list-item>
         </a-list>
-        <div class="smallItem" style="margin-top:10px">
+        <div class="smallItems" style="margin-top:10px">
           <div>
             <a-upload
               :file-list="fileList"
@@ -246,6 +255,7 @@
         type="primary"
         style="float:right;margin-right:10px;margin-top:10px"
         @click="uploadProject"
+        v-if="!fromComprehensiveInquery"
       >
         提交
       </a-button>
@@ -338,7 +348,7 @@ const groupcolumns = [
 const unitData = unitdata;
 const projectData = projectdata;
 export default {
-  props: ["projectInfo"],
+  props: ["projectInfo", "fromComprehensiveInquery"],
   components: {
     ExpenseOpinionEditableTable,
     VNodes: {
@@ -377,6 +387,8 @@ export default {
           projectsn: this.projectInfo,
         },
       });
+      this.groupDataGCLTable = [];
+      this.groupDataGCLTableCount = 0;
       this.groupdata = tmp_data.data[0].gznr + "\n" + tmp_data.data[0].gcl;
       if (tmp_data.data[0].getcost !== "null") {
         this.getCost = tmp_data.data[0].getcost;
@@ -385,6 +397,9 @@ export default {
         this.totalPrice = tmp_data.data[0].totalcost;
       }
       this.expenseOpinionStr = tmp_data.data[0].sfOpinion;
+      if (this.expenseOpinionStr === "null") {
+        this.expenseOpinionStr = "";
+      }
       if (tmp_data.data[0].isremain) {
         this.isRemainChecked = true;
       } else {
@@ -405,18 +420,21 @@ export default {
           newData.type = tmp_data.data[0].gznr.split(",")[i];
           newData.gcl = tmp_data.data[0].gcl
             .split(";")
-            [i].replace(/[^0-9]/gi, "");
+            [i].replace(/[^0-9.]/gi, "");
           newData.unit = tmp_data.data[0].gcl
             .split(";")
-            [i].replace(/[0-9]/g, "");
+            [i].replace(/[0-9.]/g, "");
           this.groupDataGCLTable.push(newData);
           this.groupDataGCLTableCount++;
         }
       } else {
         let remarkStr = tmp_data.data[0].priceRemark;
         remarkStr = remarkStr.slice(0, remarkStr.length - 1);
+        let sfInfoStr = tmp_data.data[0].sfOtherInfo;
+        sfInfoStr = sfInfoStr.slice(0, sfInfoStr.length - 1);
         for (let i = 0; i < remarkStr.split(";").length; i++) {
           let tmpdata = remarkStr.split(";")[i].split(",");
+          let otherInfoStr = sfInfoStr.split(";")[i];
           let newData = {
             key: this.groupDataGCLTableCount,
             type: tmpdata[4],
@@ -425,13 +443,13 @@ export default {
             unit: tmpdata[1],
             perPrice: tmpdata[2],
             totalPrice: tmpdata[3],
-            otherInfo: "",
+            otherInfo: otherInfoStr,
           };
           this.groupDataGCLTable.push(newData);
           this.groupDataGCLTableCount++;
         }
       }
-      if (tmp_data.data[0].filelist) {
+      if (tmp_data.data[0].filelist && tmp_data.data[0].filelist != "No") {
         this.uploadedFileList = tmp_data.data[0].filelist.split("/");
       }
     },
@@ -458,29 +476,33 @@ export default {
     },
     //选择项目/工作类型
     selectprojectType(key, value) {
-      const chgclAddGroup = [...this.chgclAddGroup];
+      const chgclAddGroup = [...this.groupDataGCLTable];
+      // console.log(groupDataGCLTable);
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
+      const tmp_projecttype = [...this.projectType];
       if (target) {
-        const selectedvalue = this.projectType.find(
+        const selectedvalue = tmp_projecttype.find(
           (item) => item.indexs == value
         );
+        console.log(selectedvalue);
         target.type = selectedvalue.value;
-        this.chgclAddGroup = chgclAddGroup;
+        this.groupDataGCLTable = chgclAddGroup;
       }
       // this.postParams.append(this.chgclAddGroup);
     },
     selectUnitType(key, value) {
       console.log(value);
-      const chgclAddGroup = [...this.chgclAddGroup];
+      const chgclAddGroup = [...this.groupDataGCLTable];
       // this.postParams.append(key, value, chgclAddGroup);
       const target = chgclAddGroup.find((item) => item.key === key);
       if (target) {
         const selectedvalue = this.unitType.find(
           (item) => item.indexs == value
         );
+        console.log(target);
         target.unit = selectedvalue.value;
-        this.chgclAddGroup = chgclAddGroup;
+        this.groupDataGCLTable = chgclAddGroup;
       }
     },
     onGZLDataChange(key, dataIndex, value) {
@@ -552,7 +574,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/calculateexpense/jkdfileupload", formData)
+        .post(GLOBAL.env_file + "/calculateexpense/jkdfileupload", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");
@@ -583,6 +605,7 @@ export default {
       console.log("tmpsaveProject");
       let remarkStr = "";
       let isRemainCost;
+      let infoStr = "";
       // let postGetCost = this.getCost;
       // let postTotalPrice = this.totalPrice;
       if (this.groupDataGCLTable.length) {
@@ -607,6 +630,7 @@ export default {
             "," +
             tmpdata.type +
             ";";
+          infoStr += tmpdata.otherInfo + ";";
         }
       }
       if (this.isRemainChecked) {
@@ -626,6 +650,7 @@ export default {
       postParams.append("getcost", this.getCost);
       postParams.append("isremain", isRemainCost);
       postParams.append("sfOpinion", this.expenseOpinionStr);
+      postParams.append("sfOtherInfo", infoStr);
       axios
         .post(GLOBAL.env + "/calculateexpense/uploadproject", postParams)
         .then((res) => {
@@ -695,8 +720,9 @@ export default {
         });
     },
     tmpSaveProject() {
-      console.log("tmpsaveProject");
+      console.log("tmpsaveProject", this.groupDataGCLTable);
       let remarkStr = "";
+      let infoStr = "";
       let isRemainCost;
       // let postGetCost = this.getCost;
       // let postTotalPrice = this.totalPrice;
@@ -722,6 +748,7 @@ export default {
             "," +
             tmpdata.type +
             ";";
+          infoStr += tmpdata.otherInfo + ";";
         }
       }
       if (this.isRemainChecked) {
@@ -729,6 +756,7 @@ export default {
       } else {
         isRemainCost = 0;
       }
+      console.log(infoStr);
       console.log(remarkStr);
       let postParams = new URLSearchParams();
       postParams.append(
@@ -741,6 +769,7 @@ export default {
       postParams.append("getcost", this.getCost);
       postParams.append("isremain", isRemainCost);
       postParams.append("sfOpinion", this.expenseOpinionStr);
+      postParams.append("sfOtherInfo", infoStr);
       axios
         .post(GLOBAL.env + "/calculateexpense/remainproject", postParams)
         .then((res) => {
@@ -787,6 +816,7 @@ export default {
                       .then((res) => {
                         if (res.data === "success") {
                           this.$message.success("暂存成功");
+                          this.groupDataGCLTable = [];
                           this.getGroupGZL();
                           this.fileList = [];
                         } else {
@@ -879,6 +909,28 @@ export default {
       newFileList.splice(index, 1);
       this.uploadedFileList = newFileList;
     },
+    async downLoadJKD() {
+      axios({
+        url: GLOBAL.env + "/relatedfiles/" + "jkd",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          projectsn: this.projectInfo,
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "JKD" + ".xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
   },
   created: function() {
     this.getGroupGZL();
@@ -897,10 +949,10 @@ export default {
     .itemTitle {
     }
     .itemContainer {
-      .smallItem {
+      .smallItems {
         width: 100%;
         display: grid;
-        grid-template-columns: 45% 45%;
+        grid-template-columns: 45% 25% 25%;
         .itembox {
           display: flex;
           flex-direction: row;

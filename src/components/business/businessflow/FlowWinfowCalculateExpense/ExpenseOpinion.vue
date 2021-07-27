@@ -9,6 +9,7 @@
       <div v-if="noTitleKey === 'expensecheck'">
         <ExpenseOpinionUpload
           v-bind:projectInfo="projectInfo"
+          :fromComprehensiveInquery="isFromComprehensiveInquery"
           @updateSuccess="updateSuccess"
         />
         <!-- <ResultCheckOpinionUpload
@@ -16,6 +17,14 @@
           
         /> -->
       </div>
+      <div v-if="noTitleKey === 'resultHanding'">
+        <ExpenseOpinionResultHandingOver :projectInfo="projectInfo" />
+        <!-- <ResultCheckOpinionUpload
+          
+          
+        /> -->
+      </div>
+
       <div v-else-if="noTitleKey === 'backtoformer'">
         <div class="backFormerContainer">
           <div class="titleContainer">
@@ -42,16 +51,21 @@
 import GLOBAL from "./../../../../utils/global_variable";
 import axios from "axios";
 import ExpenseOpinionUpload from "./ExpenseOpinionUpload";
+import ExpenseOpinionResultHandingOver from "./ExpenseOpinionResultHandingOver";
 import moment from "moment";
 export default {
-  props: ["projectInfo"],
-  components: { ExpenseOpinionUpload },
+  props: ["projectInfo", "isFromComprehensiveInquery"],
+  components: { ExpenseOpinionUpload, ExpenseOpinionResultHandingOver },
   data() {
     return {
       tabListNoTitle: [
         {
           key: "expensecheck",
           tab: "收费意见",
+        },
+        {
+          key: "resultHanding",
+          tab: "项目交接",
         },
         {
           key: "backtoformer",

@@ -64,6 +64,9 @@
         rowKey="id"
       >
         <span slot="customTitle"><a-icon type="tags" /> 项目登记号</span>
+        <a slot="name" slot-scope="text" @click="viewdetail(text)">{{
+          text
+        }}</a>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
           >查看</a
         >
@@ -96,6 +99,16 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <!-- <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
+    </a-modal> -->
   </div>
 </template>
 <script>
@@ -123,11 +136,31 @@ const columns = [
     key: "projectClient",
     width: 250,
   },
+  // {
+  //   title: "坐落",
+  //   key: "sceneLocation",
+  //   dataIndex: "sceneLocation",
+  //   width: 150,
+  // },
   {
-    title: "坐落",
-    key: "sceneLocation",
-    dataIndex: "sceneLocation",
-    width: 150,
+    title: "办理",
+    key: "tonextstep",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "tonextstep" },
+    width: 100,
+  },
+  {
+    title: "收费核算",
+    key: "sfmanUser",
+    dataIndex: "sfmanUser",
+    width: 100,
+  },
+
+  {
+    title: "收费时间",
+    key: "sftjsj",
+    dataIndex: "sftjsj",
+    width: 100,
   },
   {
     title: "归档号",
@@ -136,33 +169,14 @@ const columns = [
     width: 100,
   },
 
-  {
-    title: "收费核算",
-    key: "sfmanUser",
-    dataIndex: "sfmanUser",
-    width: 100,
-  },
-  {
-    title: "收费时间",
-    key: "sftjsj",
-    dataIndex: "sftjsj",
-    width: 100,
-  },
   //TODO 查看模态框取消编辑状态
-  {
-    title: "查看",
-    key: "viewdetail",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "viewdetail" },
-    width: 100,
-  },
-  {
-    title: "办理",
-    key: "tonextstep",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "tonextstep" },
-    width: 100,
-  },
+  // {
+  //   title: "查看",
+  //   key: "viewdetail",
+  //   dataIndex: "Projectsn",
+  //   scopedSlots: { customRender: "viewdetail" },
+  //   width: 100,
+  // },
 ];
 const pagination_setting = {
   defaultPageSize: 10,

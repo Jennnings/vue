@@ -139,12 +139,23 @@
         @childFn="parentFn"
       />
     </a-modal>
+    <a-modal
+      v-model="viewProjectInfoVisible"
+      title="查看项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
   </div>
 </template>
 <script>
 import request from "@/utils/request";
 import EditProjectModal from "./common/EditProject/EditProjectModal";
 import ProjectSendOut from "./FlowWindowSendOut/ProjectSendOut";
+import ViewProjectInfo from "./common/ViewProjectInfo/ViewProjectInfo";
 const ModuleID = 32;
 const columns = [
   {
@@ -167,10 +178,30 @@ const columns = [
     width: 250,
   },
   {
-    title: "坐落",
-    key: "sceneLocation",
-    dataIndex: "sceneLocation",
-    scopedSlots: { customRender: "sceneLocation" },
+    title: "编辑",
+    key: "editor",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "editor" },
+    width: 100,
+  },
+  {
+    title: "办理",
+    key: "projectsendout",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "projectsendout" },
+    width: 100,
+  },
+  // {
+  //   title: "坐落",
+  //   key: "sceneLocation",
+  //   dataIndex: "sceneLocation",
+  //   scopedSlots: { customRender: "sceneLocation" },
+  //   width: 150,
+  // },
+  {
+    title: "窗口登记",
+    key: "djmanUser",
+    dataIndex: "djmanUser",
     width: 150,
   },
   {
@@ -186,26 +217,6 @@ const columns = [
     scopedSlots: { customRender: "tags" },
     width: 150,
   },
-  {
-    title: "窗口登记",
-    key: "djmanUser",
-    dataIndex: "djmanUser",
-    width: 150,
-  },
-  {
-    title: "编辑",
-    key: "editor",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "editor" },
-    width: 100,
-  },
-  {
-    title: "办理",
-    key: "projectsendout",
-    dataIndex: "Projectsn",
-    scopedSlots: { customRender: "projectsendout" },
-    width: 100,
-  },
 ];
 const pagination_setting = {
   defaultPageSize: 10,
@@ -214,6 +225,7 @@ export default {
   components: {
     EditProjectModal,
     ProjectSendOut,
+    ViewProjectInfo,
   },
   data() {
     return {
@@ -225,6 +237,7 @@ export default {
       pagination_setting,
       modifyModalVisible: false,
       projectSendoutVisible: false,
+      viewProjectInfoVisible: false,
       selectProjectInfo: "",
       distoryThis: true,
       eDate: "",
@@ -297,6 +310,10 @@ export default {
     parentFn() {
       this.projectSendoutVisible = false;
       this.clickrequest();
+    },
+    clickforInfo(item) {
+      this.viewProjectInfoVisible = true;
+      this.selectProjectInfo = item;
     },
   },
   created: function() {

@@ -118,7 +118,7 @@
           <a-auto-complete
             style="width: 150px;margin-left:10px"
             placeholder="合同编号"
-            v-model="queryPeojectRecordNum"
+            v-model="queryContractID"
           />
         </div>
       </div>
@@ -142,6 +142,24 @@
             项目查询
           </a-button>
         </div>
+        <div class="itemName" style="margin-right:30px">
+          <a-button
+            type="primary"
+            style="width:110px"
+            @click="downloadResultSheet"
+          >
+            结果下载
+          </a-button>
+        </div>
+        <div class="itemName" style="margin-right:30px">
+          <a-button
+            type="primary"
+            style="width:110px"
+            @click="downloadWorkLoad"
+          >
+            工作量下载
+          </a-button>
+        </div>
       </div>
     </div>
     <div class="table_contianer">
@@ -152,7 +170,9 @@
         :loading="spinning"
       >
         <span slot="customTitle"> 项目登记号</span>
-        <a slot="name" slot-scope="text">{{ text }}</a>
+        <a slot="name" slot-scope="text" @click="viewdetail(text)">{{
+          text
+        }}</a>
         <span slot="XMState" slot-scope="XMState">
           <a-tag v-if="XMState === '1'" color="volcano">
             <span>登记中</span>
@@ -196,18 +216,29 @@
             two-tone-color="red"
           />
         </span>
-        <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
-          >查看</a
+        <a
+          slot="editdetail"
+          slot-scope="item"
+          @click="editdetail(item)"
+          :disabled="!authority_Edit"
+          >编辑合同</a
         >
         <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
           >办理</a
         >
+        <a
+          slot="tocopystep"
+          slot-scope="item"
+          @click="copyProject(item)"
+          :disabled="!authority_Add"
+          >复制</a
+        >
         <span slot="contractRepeat" slot-scope="isRepeated">
-          <a-tag v-if="isRepeated" color="red">
+          <a-tag v-if="isRepeated == ''" color="red">
             <span>未登记</span>
           </a-tag>
-          <a-tag v-if="!isRepeated" color="#52c41a">
-            <span>已登记</span>
+          <a-tag v-if="isRepeated != ''" color="#52c41a">
+            <span>{{ isRepeated }}</span>
           </a-tag>
         </span>
       </a-table>
@@ -222,6 +253,43 @@
     >
       <ViewProjectInfo v-bind:projectInfo="selectProjectInfo" />
     </a-modal>
+    <a-modal
+      v-model="viewEditProjectVisible"
+      title="修改项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <EditProjectModal v-bind:projectInfo="selectProjectInfo" />
+    </a-modal>
+    <a-modal
+      :dialog-style="{ top: '20px' }"
+      v-model="viewCalculateExpenseVisible"
+      title="核算收费"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ExpenseOpinion
+        v-bind:projectInfo="selectProjectInfo"
+        :isFromComprehensiveInquery="true"
+      />
+    </a-modal>
+    <a-modal
+      v-model="comprehensiveInqueryCopyVisible"
+      title="复制项目"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ComprehensiveInqueryCopy
+        v-bind:projectInfo="selectProjectInfo"
+        @childFn="closeCopyFn"
+      />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -230,17 +298,21 @@ import axios from "axios";
 import GLOBAL from "./../../../utils/global_variable";
 import moment from "moment";
 import ViewProjectInfo from "./../businessflow/common/ViewProjectInfo/ViewProjectInfo";
+import ComprehensiveInqueryCopy from "./ComprehensiveInqueryCopy/ComprehensiveInqueryCopy";
+import ExpenseOpinion from "./../businessflow/FlowWinfowCalculateExpense/ExpenseOpinion";
 import projectdata from "./../../../assets/menulist/project-type.json";
 import project_state from "./../../../assets/menulist/project-state.json";
+import EditProjectModal from "./EditProject/EditProjectModal";
 const projectData = projectdata;
 const projectStateData = project_state;
+const ModuleID = 1;
 const columns = [
   {
     dataIndex: "Projectsn",
     key: "Projectsn",
     slots: { title: "customTitle" },
     scopedSlots: { customRender: "name" },
-    width: 100,
+    width: 120,
   },
   {
     title: "项目名称",
@@ -252,7 +324,7 @@ const columns = [
     title: "委托单位",
     dataIndex: "projectClient",
     key: "projectClient",
-    width: 250,
+    width: 230,
   },
   {
     title: "项目状态",
@@ -284,22 +356,35 @@ const columns = [
     key: "isReceipted",
     dataIndex: "isReceipted",
     scopedSlots: { customRender: "isReceipted" },
-    width: 100,
+    width: 85,
+  },
+  {
+    title: "归档号",
+    key: "projcetRecordNum",
+    dataIndex: "projcetRecordNum",
+    width: 85,
   },
   //TODO 查看模态框取消编辑状态
   {
-    title: "查看",
-    key: "viewdetail",
+    title: "编辑合同",
+    key: "editdetail",
     dataIndex: "Projectsn",
-    scopedSlots: { customRender: "viewdetail" },
-    width: 100,
+    scopedSlots: { customRender: "editdetail" },
+    width: 90,
   },
   {
     title: "办理",
     key: "tonextstep",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "tonextstep" },
-    width: 100,
+    width: 80,
+  },
+  {
+    title: "复制",
+    key: "tocopystep",
+    dataIndex: "Projectsn",
+    scopedSlots: { customRender: "tocopystep" },
+    width: 80,
   },
   {
     title: "合同情况",
@@ -315,14 +400,20 @@ const pagination_setting = {
 export default {
   components: {
     ViewProjectInfo,
+    ExpenseOpinion,
+    ComprehensiveInqueryCopy,
+    EditProjectModal,
   },
   data() {
     return {
+      ModuleID,
       data: [],
       columns,
       pagination_setting,
       spinning: false,
       viewProjectInfoVisible: false,
+      viewCalculateExpenseVisible: false,
+      viewEditProjectVisible: false,
       distoryThis: true,
       selectProjectInfo: "",
       queryProjectsn: "",
@@ -340,6 +431,12 @@ export default {
       userData: [],
       projectType: projectData.data,
       projectState: projectStateData.data,
+      comprehensiveInqueryCopyVisible: false,
+      authority_Add: false,
+      authority_Browse: false,
+      authority_Delete: false,
+      authority_Edit: false,
+      authority_Grant: false,
     };
   },
   methods: {
@@ -352,6 +449,20 @@ export default {
     async getchUsers() {
       const user = await request.get("/sendout/getchUsers");
       this.userData = user.data;
+    },
+    async getAuthority() {
+      const tmp_menu = await request("/common/getmoduleauthority", {
+        params: {
+          userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
+          moduleid: this.ModuleID,
+        },
+      });
+      const authority_temp = tmp_menu.data[0];
+      this.authority_Add = authority_temp.RGP_ADD;
+      this.authority_Browse = authority_temp.RGP_BROWSE;
+      this.authority_Edit = authority_temp.RGP_EDIT;
+      this.authority_Delete = authority_temp.RGP_DELETE;
+      this.authority_Grant = authority_temp.RGP_GRANT;
     },
     async queryClicked() {
       this.spinning = true;
@@ -374,6 +485,70 @@ export default {
       this.data = tmp_data.data;
       this.spinning = false;
     },
+    async downloadResultSheet() {
+      axios({
+        url: GLOBAL.env + "/comprehensiveinquery/queryresultdownload",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          projectsn: this.queryProjectsn,
+          projectname: this.queryProjectName,
+          projectClient: this.queryProjectClient,
+          sDate: this.sDate,
+          eDate: this.eDate,
+          xmstate: this.queryProjectState,
+          location: this.queryProjectLocation,
+          clientpeople: this.queryProjectClientPeople,
+          projecttype: this.queryProjectType,
+          clmanuserid: this.queryProjectClManUserID,
+          recordnum: this.queryPeojectRecordNum,
+          hetongid: this.queryContractID,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "查询结果.xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
+    async downloadWorkLoad() {
+      axios({
+        url: GLOBAL.env + "/comprehensiveinquery/queryworkloaddownload",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+        },
+        responseType: "blob",
+        params: {
+          projectsn: this.queryProjectsn,
+          projectname: this.queryProjectName,
+          projectClient: this.queryProjectClient,
+          sDate: this.sDate,
+          eDate: this.eDate,
+          xmstate: this.queryProjectState,
+          location: this.queryProjectLocation,
+          clientpeople: this.queryProjectClientPeople,
+          projecttype: this.queryProjectType,
+          clmanuserid: this.queryProjectClManUserID,
+          recordnum: this.queryPeojectRecordNum,
+          hetongid: this.queryContractID,
+        },
+      }).then((response) => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "工作量结果.xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
     onstartDateChange(date, dateString) {
       this.sDate = dateString;
     },
@@ -382,6 +557,10 @@ export default {
     },
     viewdetail(item) {
       this.viewProjectInfoVisible = true;
+      this.selectProjectInfo = item;
+    },
+    editdetail(item) {
+      this.viewEditProjectVisible = true;
       this.selectProjectInfo = item;
     },
     selectChUserChange(value) {
@@ -404,12 +583,22 @@ export default {
       }
     },
     tonextstep(item) {
-      this.$message.warning("即将上线");
+      this.selectProjectInfo = item;
+      this.viewCalculateExpenseVisible = true;
+    },
+    copyProject(item) {
+      this.comprehensiveInqueryCopyVisible = true;
+      this.selectProjectInfo = item;
+    },
+    closeCopyFn() {
+      this.comprehensiveInqueryCopyVisible = false;
+      this.getInitProject();
     },
   },
   mounted: function() {
     this.getInitProject();
     this.getchUsers();
+    this.getAuthority();
   },
 };
 </script>
@@ -443,6 +632,12 @@ export default {
     }
     .itemRight {
       margin-right: 20px;
+      .itemName {
+        float: left;
+        font-family: "微软雅黑";
+        font-size: 15px;
+        margin-left: 12px;
+      }
     }
   }
   .table_contianer {

@@ -2,7 +2,8 @@
   <div>
     <a-spin :spinning="spinning">
       <div class="projectInfo">
-        <a-descriptions title="合同信息" bordered :column="2" size="small">
+        <!-- title="合同信息" -->
+        <a-descriptions bordered :column="2" size="small">
           <a-descriptions-item label="合同编号" :span="1">
             <a-badge dot>
               <a-input
@@ -29,10 +30,10 @@
               </a-input>
             </a-badge>
           </a-descriptions-item>
-          <a-descriptions-item label="乙方(委托)单位" :span="1">
+          <a-descriptions-item label="甲方(委托)单位" :span="1">
             <a-badge dot>
               <a-input
-                placeholder="乙方(委托)单位"
+                placeholder="甲方(委托)单位"
                 v-model="contractClient"
                 :disabled="disableEdit"
               >
@@ -91,7 +92,28 @@
               :disabled="disableEdit"
             />
           </a-descriptions-item>
-          <a-descriptions-item label="备注说明" :span="2">
+          <a-descriptions-item label="结算金额" :span="1">
+            <a-input
+              placeholder="结算金额"
+              v-model="balanceExpense"
+              :disabled="disableEdit"
+            >
+            </a-input>
+          </a-descriptions-item>
+          <a-descriptions-item label="到账金额" :span="1">
+            <a-input
+              placeholder="到账金额"
+              v-model="paidInAmount"
+              :disabled="disableEdit"
+            >
+            </a-input>
+          </a-descriptions-item>
+          <a-descriptions-item label="收费类型" :span="1">
+            <a-checkbox :disabled="disableEdit" :checked="isTotalPrice">
+              总价合同
+            </a-checkbox>
+          </a-descriptions-item>
+          <a-descriptions-item label="备注说明" :span="1">
             <a-input
               placeholder="备注说明"
               v-model="contractRemark"
@@ -137,10 +159,13 @@ export default {
       contractSignDate: "",
       contractStartDate: "",
       contractEndDate: "",
+      balanceExpense: "",
+      paidInAmount: "",
       fileList: [],
       savedFileList: [],
       uploading: false,
       spinning: false,
+      isTotalPrice: false,
       disableEdit: true,
     };
   },
@@ -163,6 +188,13 @@ export default {
       this.contractExpense = datas.contractExpense;
       this.contractCompany = datas.contractCompany;
       this.contractRemark = datas.contractOtherInfo;
+      this.balanceExpense = datas.balanceexpense;
+      this.paidInAmount = datas.paidinamount;
+      if (datas.isTotalPrice == 1) {
+        this.isTotalPrice = true;
+      } else {
+        this.isTotalPrice = false;
+      }
       if (datas.contractFileList) {
         this.savedFileList = datas.contractFileList.split("\/");
       }
@@ -220,7 +252,7 @@ export default {
         return;
       }
       if (this.contractClient === "") {
-        this.$message.error("乙方(委托)单位为必填项目");
+        this.$message.error("甲方(委托)单位为必填项目");
         return;
       }
       if (this.contractSignDate === "") {
@@ -251,7 +283,7 @@ export default {
     },
     handleUpload() {},
     async downloadFile(item) {
-      const tmp_data = await request.get("/common/downloadfile", {
+      const tmp_data = await request.get("/common/getcontract", {
         params: {
           postfilename: item,
         },
@@ -260,8 +292,9 @@ export default {
         this.$message.error("文件不存在");
         return;
       }
+      //TODO 改为66端口
       axios({
-        url: GLOBAL.env + "/common/downloadfile",
+        url: GLOBAL.env_file + "/common/getcontract",
         method: "GET",
         header: {
           contentType: "application/x-www-form-urlencoded; charset=utf-8",

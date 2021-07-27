@@ -12,6 +12,9 @@
           @updateSuccess="updateSuccess"
         />
       </div>
+      <div v-else-if="noTitleKey === 'resultfile'">
+        <FileDownload v-bind:projectInfo="projectInfo" />
+      </div>
       <div v-else-if="noTitleKey === 'backtoformer'">
         <div class="backFormerContainer">
           <div class="titleContainer">
@@ -37,17 +40,22 @@
 <script>
 import GLOBAL from "./../../../../utils/global_variable";
 import ResultCheckOpinionUpload from "./ResultCheckOpinionUpload";
+import FileDownload from "./../common/ViewProjectInfo/FileDownload";
 import axios from "axios";
 import moment from "moment";
 export default {
   props: ["projectInfo"],
-  components: { ResultCheckOpinionUpload },
+  components: { ResultCheckOpinionUpload, FileDownload },
   data() {
     return {
       tabListNoTitle: [
         {
           key: "resultcheck",
           tab: "审核意见",
+        },
+        {
+          key: "resultfile",
+          tab: "成果文件",
         },
         {
           key: "backtoformer",

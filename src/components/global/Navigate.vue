@@ -1,12 +1,11 @@
 <template>
   <div class="container">
     <a-spin :spinning="spinning">
+      <!--:open-keys="openKeys" @openChange="onOpenChange"-->
       <a-menu
         style="width: 200px;height:100%"
-        :open-keys="openKeys"
         :defaultSelectedKeys="current"
         mode="inline"
-        @openChange="onOpenChange"
         @click="handleClick"
       >
         <a-menu-item key="guidepage">
@@ -182,5 +181,18 @@ export default {
 .container {
   width: fit-content;
   height: 100%;
+  overflow-y: auto;
+}
+.container::-webkit-scrollbar-track {
+}
+
+.container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  margin-left: 20px;
+  border-radius: 3px;
 }
 </style>

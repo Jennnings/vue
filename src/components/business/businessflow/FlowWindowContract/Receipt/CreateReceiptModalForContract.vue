@@ -264,7 +264,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/receipt/uploadreceiptfile", formData)
+        .post(GLOBAL.env_file + "/receipt/uploadreceiptfile", formData)
         .then((res) => {
           if (res.data === "success") {
             this.$message.success("上传成功");
@@ -317,7 +317,8 @@ export default {
         .then((res) => {
           if (res.data[0].result === "success") {
             this.$message.success("新建发票成功");
-            if (this.fileList.length) {
+            if (this.fileList.length != 0) {
+              console.log(this.fileList.length);
               this.handleUpload(res.data[0].Id);
             } else {
               this.$emit("closeThis");

@@ -29,10 +29,10 @@
               </a-input>
             </a-badge>
           </a-descriptions-item>
-          <a-descriptions-item label="乙方(委托)单位" :span="1">
+          <a-descriptions-item label="甲方(委托)单位" :span="1">
             <a-badge dot>
               <a-input
-                placeholder="乙方(委托)单位"
+                placeholder="甲方(委托)单位"
                 v-model="contractClient"
                 :disabled="disableEdit"
               >
@@ -92,7 +92,28 @@
               :disabled="disableEdit"
             />
           </a-descriptions-item>
-          <a-descriptions-item label="备注说明" :span="2">
+          <a-descriptions-item label="结算金额" :span="1">
+            <a-input
+              placeholder="结算金额"
+              v-model="balanceExpense"
+              :disabled="disableEdit"
+            >
+            </a-input>
+          </a-descriptions-item>
+          <a-descriptions-item label="到账金额" :span="1">
+            <a-input
+              placeholder="到账金额"
+              v-model="paidInAmount"
+              :disabled="disableEdit"
+            >
+            </a-input>
+          </a-descriptions-item>
+          <a-descriptions-item label="收费类型" :span="1">
+            <a-checkbox :checked="isTotalPrice" @change="isTotalPriceChanged">
+              总价合同
+            </a-checkbox>
+          </a-descriptions-item>
+          <a-descriptions-item label="备注说明" :span="1">
             <a-input
               placeholder="备注说明"
               v-model="contractRemark"
@@ -184,11 +205,14 @@ export default {
       contractSignDate: "",
       contractStartDate: "",
       contractEndDate: "",
+      balanceExpense: "",
+      paidInAmount: "",
       fileList: [],
       savedFileList: [],
       uploading: false,
       spinning: false,
       disableEdit: false,
+      isTotalPrice: false,
     };
   },
   methods: {
@@ -210,6 +234,13 @@ export default {
       this.contractExpense = datas.contractExpense;
       this.contractCompany = datas.contractCompany;
       this.contractRemark = datas.contractOtherInfo;
+      this.balanceExpense = datas.balanceexpense;
+      this.paidInAmount = datas.paidinamount;
+      if (datas.isTotalPrice == 1) {
+        this.isTotalPrice = true;
+      } else {
+        this.isTotalPrice = false;
+      }
       if (datas.contractFileList) {
         this.savedFileList = datas.contractFileList.split("\/");
       }
@@ -267,7 +298,10 @@ export default {
       formData.append("contractid", this.selectid);
       this.uploading = true;
       axios
-        .post(GLOBAL.env + "/contractmanagement/uploadcontractFile", formData)
+        .post(
+          GLOBAL.env_file + "/contractmanagement/uploadcontractFile",
+          formData
+        )
         .then((res) => {
           if (res.data === "upload over") {
             this.$message.success("上传成功");
@@ -290,7 +324,7 @@ export default {
         return;
       }
       if (this.contractClient === "") {
-        this.$message.error("乙方(委托)单位为必填项目");
+        this.$message.error("甲方(委托)单位为必填项目");
         return;
       }
       if (this.contractSignDate === "") {
@@ -312,6 +346,9 @@ export default {
       infoparams.append("contractstartdate", this.contractStartDate);
       infoparams.append("contractenddate", this.contractEndDate);
       infoparams.append("contractremark", this.contractRemark);
+      infoparams.append("balanceexpense", this.balanceExpense);
+      infoparams.append("paidinamount", this.paidInAmount);
+      infoparams.append("istotalprice", this.isTotalPrice);
       axios
         .post(GLOBAL.env + "/contractmanagement/modifycontractinfo", infoparams)
         .then((res) => {
@@ -353,7 +390,7 @@ export default {
         });
     },
     async downloadFile(item) {
-      const tmp_data = await request.get("/common/downloadfile", {
+      const tmp_data = await request.get("/common/getcontract", {
         params: {
           postfilename: item,
         },
@@ -363,7 +400,7 @@ export default {
         return;
       }
       axios({
-        url: GLOBAL.env + "/common/downloadfile",
+        url: GLOBAL.env + "/common/getcontract",
         method: "GET",
         header: {
           contentType: "application/x-www-form-urlencoded; charset=utf-8",
@@ -387,6 +424,9 @@ export default {
       const newFileList = this.savedFileList.slice();
       newFileList.splice(index, 1);
       this.savedFileList = newFileList;
+    },
+    isTotalPriceChanged() {
+      this.isTotalPrice = !this.isTotalPrice;
     },
   },
   mounted: function() {
