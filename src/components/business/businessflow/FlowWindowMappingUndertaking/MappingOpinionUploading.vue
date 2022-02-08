@@ -317,6 +317,7 @@ export default {
       chgclAddGroup: [],
       count: 1,
       projectType: projectData.data,
+      //projectType: [],
       unitType: unitData.data,
       projectStartDate: "",
       projectEndDate: "",
@@ -468,6 +469,13 @@ export default {
       if (this.sceneConfirmDate === "") {
         this.sceneConfirmDate = moment().format("YYYY-MM-DD");
       }
+    },
+    //*******************20210721 测试从服务器获取项目类型*********************** */
+    async getProjectType() {
+      const projecttype = await request.get("/common/getprojecttype");
+      console.log(projecttype);
+      this.projectType = projecttype.data;
+      //this.userData = user.data;
     },
     staffPicker(value) {
       this.mappingStaffGroup = value;
@@ -813,6 +821,7 @@ export default {
   },
   created: function() {
     this.getchUsers();
+    //this.getProjectType();
   },
   mounted: function() {
     this.getUndertakingInfo();
