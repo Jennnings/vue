@@ -8,7 +8,7 @@
         padding-left:10px;
         font-weight:
         "
-        title="质量检查"
+        title="一级检查"
       />
     </div>
     <div class="toolbar">
@@ -77,7 +77,7 @@
           >
             <span v-if="tag === '1'">登记中</span>
             <span v-if="tag === '2'">派件中</span>
-            <span v-if="tag !== '1' && tag !== '2'">检查中</span>
+            <span v-if="tag !== '1' && tag !== '2'">一级检查</span>
           </a-tag>
         </span>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"

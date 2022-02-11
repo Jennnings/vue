@@ -8,7 +8,7 @@
         padding-left:10px;
         font-weight:
         "
-        title="成果审批"
+        title="成果审核"
       />
     </div>
     <div class="toolbar">
@@ -77,7 +77,7 @@
           >
             <span v-if="tag === '1'">登记中</span>
             <span v-if="tag === '2'">派件中</span>
-            <span v-if="tag !== '1' && tag !== '2'">审批中</span>
+            <span v-if="tag !== '1' && tag !== '2'">审核中</span>
           </a-tag>
         </span>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"

@@ -1,31 +1,40 @@
 {
-    "data":[{
-        "index":1,
-        "value":"登记中"
-    },{
-        "index":2,
-        "value":"派件中"
-    },{
-        "index":3,
-        "value":"测绘中"
-    },{
-        "index":4,
-        "value":"检查中"
-    },{
-        "index":5,
-        "value":"审核中"
-    },{
-        "index":6,
-        "value":"收费中 "
-    },{
-        "index":7,
-        "value":"归档中"
-    },{
-        "index":8,
-        "value":"已归档"
-    },{
-        "index":9,
-        "value":"审批中"
+  "data": [
+    {
+      "index": 1,
+      "value": "登记中"
+    },
+    {
+      "index": 2,
+      "value": "派件中"
+    },
+    {
+      "index": 3,
+      "value": "测绘中"
+    },
+    {
+      "index": 4,
+      "value": "一级检查"
+    },
+    {
+      "index": 5,
+      "value": "二级检查"
+    },
+    {
+      "index": 6,
+      "value": "收费中 "
+    },
+    {
+      "index": 7,
+      "value": "归档中"
+    },
+    {
+      "index": 8,
+      "value": "已归档"
+    },
+    {
+      "index": 9,
+      "value": "审核中"
     }
-]
+  ]
 }

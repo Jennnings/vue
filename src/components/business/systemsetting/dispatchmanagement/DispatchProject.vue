@@ -100,10 +100,10 @@ export default {
             this.XMState = "测绘中";
           }
           if (res.data[0].XMstate == "4") {
-            this.XMState = "检查中";
+            this.XMState = "一级检查";
           }
           if (res.data[0].XMstate == "5") {
-            this.XMState = "审核中";
+            this.XMState = "二级检查";
           }
           if (res.data[0].XMstate == "6") {
             this.XMState = "收费中";
@@ -115,7 +115,7 @@ export default {
             this.XMState = "已归档";
           }
           if (res.data[0].XMstate == "9") {
-            this.XMState = "审批中";
+            this.XMState = "审核中";
           }
 
           console.log(this.XMState);
@@ -187,10 +187,10 @@ export default {
         return "测绘中";
       }
       if (xmstate_code == "4") {
-        return "检查中";
+        return "一级检查";
       }
       if (xmstate_code == "5") {
-        return "审核中";
+        return "二级检查";
       }
       if (xmstate_code == "6") {
         return "收费中";
@@ -202,7 +202,7 @@ export default {
         return "已归档";
       }
       if (xmstate_code == "9") {
-        return "审批中";
+        return "审核中";
       }
     },
   },
