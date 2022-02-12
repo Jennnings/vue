@@ -77,7 +77,7 @@
           >
             <span v-if="tag === '1'">登记中</span>
             <span v-if="tag === '2'">派件中</span>
-            <span v-if="tag !== '1' && tag !== '2'">审核中</span>
+            <span v-if="tag !== '1' && tag !== '2'">审批中</span>
           </a-tag>
         </span>
         <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)"
@@ -164,13 +164,13 @@ const columns = [
     width: 120,
   },
   {
-    title: "成果审核",
+    title: "二级检查",
     key: "shmanUser",
     dataIndex: "shmanUser",
     width: 100,
   },
   {
-    title: "审核时间",
+    title: "二级检查时间",
     key: "shtjsj",
     dataIndex: "shtjsj",
     width: 100,

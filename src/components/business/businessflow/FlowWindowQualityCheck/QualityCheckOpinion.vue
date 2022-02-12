@@ -54,7 +54,7 @@ export default {
       tabListNoTitle: [
         {
           key: "qualitycheck",
-          tab: "质检意见",
+          tab: "一级检查意见",
         },
         {
           key: "resultfile",

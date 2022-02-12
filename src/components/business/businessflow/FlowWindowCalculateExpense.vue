@@ -189,13 +189,13 @@ const columns = [
     width: 100,
   },
   {
-    title: "质量检查",
+    title: "一级检查",
     key: "jcmanUser",
     dataIndex: "jcmanUser",
     width: 100,
   },
   {
-    title: "成果审核",
+    title: "二级检查",
     key: "shmanUser",
     dataIndex: "shmanUser",
     width: 100,

@@ -115,7 +115,7 @@ export default {
             this.XMState = "已归档";
           }
           if (res.data[0].XMstate == "9") {
-            this.XMState = "审核中";
+            this.XMState = "审批中";
           }
 
           console.log(this.XMState);
@@ -202,7 +202,7 @@ export default {
         return "已归档";
       }
       if (xmstate_code == "9") {
-        return "审核中";
+        return "审批中";
       }
     },
   },

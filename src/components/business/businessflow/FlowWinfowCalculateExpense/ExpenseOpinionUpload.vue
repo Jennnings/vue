@@ -289,7 +289,7 @@
 </template>
 <script>
 import request from "@/utils/request";
-import projectdata from "../../../../assets/menulist/project-type.json";
+import projectdata from "../../../../assets/menulist/project-worktype.json";
 import unitdata from "../../../../assets/menulist/project-unit.json";
 import ExpenseOpinionEditableTable from "./ExpenseOpinionEditableTable";
 import axios from "axios";

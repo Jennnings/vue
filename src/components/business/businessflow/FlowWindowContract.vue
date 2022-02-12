@@ -149,7 +149,7 @@
               <span>二级检查</span>
             </a-tag>
             <a-tag v-if="XMState === '9'" color="SteelBlue">
-              <span>审核中</span>
+              <span>审批中</span>
             </a-tag>
             <a-tag v-if="XMState === '6'" color="PaleVioletRed">
               <span>收费中</span>

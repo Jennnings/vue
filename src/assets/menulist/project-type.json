@@ -138,15 +138,10 @@
     {
       "index": 25,
       "indexs": "25",
-      "key": "cctvgdjc",
-      "value": "CCTV管道检测"
+      "key": "gdjc",
+      "value": "管道检测"
     },
-    {
-      "index": 26,
-      "indexs": "26",
-      "key": "qvgdjc",
-      "value": "QV管道检测"
-    },
+
     {
       "index": 18,
       "indexs": "18",

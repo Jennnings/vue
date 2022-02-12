@@ -1,0 +1,184 @@
+{
+  "data": [
+    {
+      "index": 1,
+      "indexs": "1",
+      "key": "dxcl",
+      "value": "地形测量"
+    },
+    {
+      "index": 2,
+      "indexs": "2",
+      "key": "zbkzd",
+      "value": "坐标控制点"
+    },
+    {
+      "index": 3,
+      "indexs": "3",
+      "key": "szkzd",
+      "value": "水准控制点"
+    },
+    {
+      "index": 4,
+      "indexs": "4",
+      "key": "jzwfx",
+      "value": "建筑物放线"
+    },
+    {
+      "index": 5,
+      "indexs": "5",
+      "key": "qtlxgcfy",
+      "value": "其他零星工程放样"
+    },
+    {
+      "index": 6,
+      "indexs": "6",
+      "key": "jzwghyx",
+      "value": "建筑物规划验线"
+    },
+    {
+      "index": 7,
+      "indexs": "7",
+      "key": "tdcl",
+      "value": "土方测量"
+    },
+    {
+      "index": 8,
+      "indexs": "8",
+      "key": "gxtc",
+      "value": "管线探测"
+    },
+    {
+      "index": 9,
+      "indexs": "9",
+      "key": "gxjg",
+      "value": "管线竣工"
+    },
+    {
+      "index": 10,
+      "indexs": "10",
+      "key": "jgch",
+      "value": "竣工测绘"
+    },
+    {
+      "index": 11,
+      "indexs": "11",
+      "key": "rfjgch",
+      "value": "人防竣工测绘"
+    },
+    {
+      "index": 12,
+      "indexs": "12",
+      "key": "qgmcl",
+      "value": "乔灌木测量"
+    },
+    {
+      "index": 13,
+      "indexs": "13",
+      "key": "skmjcl",
+      "value": "色块面积测量"
+    },
+    {
+      "index": 14,
+      "indexs": "14",
+      "key": "pmcl",
+      "value": "平面测量"
+    },
+    {
+      "index": 15,
+      "indexs": "15",
+      "key": "lmcl",
+      "value": "立面测量"
+    },
+    {
+      "index": 16,
+      "indexs": "16",
+      "key": "wjdc",
+      "value": "违建调查"
+    },
+    {
+      "index": 17,
+      "indexs": "17",
+      "key": "lxgc",
+      "value": "零星工程"
+    },
+    {
+      "index": 18,
+      "indexs": "18",
+      "key": "rzfx",
+      "value": "日照分析"
+    },
+    {
+      "index": 19,
+      "indexs": "19",
+      "key": "mjyc",
+      "value": "面积预测"
+    },
+    {
+      "index": 20,
+      "indexs": "20",
+      "key": "mjsc",
+      "value": "面积实测"
+    },
+    {
+      "index": 21,
+      "indexs": "21",
+      "key": "rfyc",
+      "value": "人防预测"
+    },
+    {
+      "index": 22,
+      "indexs": "22",
+      "key": "rfsc",
+      "value": "人防实测"
+    },
+    {
+      "index": 23,
+      "indexs": "23",
+      "key": "cctvgdjc",
+      "value": "CCTV管道检测"
+    },
+    {
+      "index": 24,
+      "indexs": "24",
+      "key": "qvgdjc",
+      "value": "QVCCTV管道检测"
+    },
+    {
+      "index": 25,
+      "indexs": "25",
+      "key": "zsyx",
+      "value": "正射影像"
+    },
+    {
+      "index": 26,
+      "indexs": "26",
+      "key": "swmx",
+      "value": "三维模型"
+    },
+    {
+      "index": 27,
+      "indexs": "27",
+      "key": "wrjhp",
+      "value": "无人机航拍"
+    },
+    {
+      "index": 28,
+      "indexs": "28",
+      "key": "djch",
+      "value": "地籍测绘"
+    },
+    {
+      "index": 29,
+      "indexs": "29",
+      "key": "djdc",
+      "value": "地籍调查"
+    },
+    {
+      "index": 30,
+      "indexs": "30",
+      "key": "tdkcdj",
+      "value": "土地勘测定界"
+    }
+  ]
+}

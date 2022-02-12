@@ -206,7 +206,7 @@
 <script>
 import request from "@/utils/request";
 import GLOBAL from "./../../../../utils/global_variable";
-import projectdata from "../../../../assets/menulist/project-type.json";
+import projectdata from "../../../../assets/menulist/project-worktype.json";
 import unitdata from "../../../../assets/menulist/project-unit.json";
 import QualityCheckOpinionEditableTable from "./QualityCheckOpinionEditableTable";
 import axios from "axios";

@@ -93,7 +93,7 @@
     </div>
     <a-modal
       v-model="resultcheckOpinionVisible"
-      title="审核意见"
+      title="二级检查意见"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"
@@ -164,13 +164,13 @@ const columns = [
     width: 120,
   },
   {
-    title: "质量检查",
+    title: "一级检查",
     key: "cjmanUser",
     dataIndex: "cjmanUser",
     width: 100,
   },
   {
-    title: "质检时间",
+    title: "一级检查时间",
     key: "jctjsj",
     dataIndex: "jctjsj",
     width: 100,

@@ -292,7 +292,7 @@
 <script>
 import request from "@/utils/request";
 import MappingOpinionEditableTable from "./MappingOpinionEditableTable";
-import projectdata from "../../../../assets/menulist/project-type.json";
+import projectdata from "../../../../assets/menulist/project-worktype.json";
 import unitdata from "../../../../assets/menulist/project-unit.json";
 import moment from "moment";
 const projectData = projectdata;

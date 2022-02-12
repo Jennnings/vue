@@ -65,6 +65,12 @@
       "indexs": "11",
       "key": "m",
       "value": "米"
+    },
+    {
+      "index": 12,
+      "indexs": "12",
+      "key": "km_square",
+      "value": "平方千米"
     }
   ]
 }

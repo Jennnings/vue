@@ -103,7 +103,7 @@
     </a-modal>
     <a-modal
       v-model="qualityCheckOpinionVisible"
-      title="质检意见"
+      title="一级检查意见"
       :footer="null"
       width="1300px"
       :destroyOnClose="distoryThis"
