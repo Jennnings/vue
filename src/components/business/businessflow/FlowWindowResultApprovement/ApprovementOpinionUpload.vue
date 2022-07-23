@@ -146,6 +146,14 @@
               </a-select-option>
             </a-select>
           </template>
+          <template slot="operationExamine" slot-scope="text, record">
+            <a
+              style="float:left;margin-left:10px;margin:auto"
+              @click="operationExamineMethod(record)"
+            >
+              业绩考核
+            </a>
+          </template>
           <template slot="userOperation" slot-scope="text, record">
             <a-popconfirm
               v-if="mappingStaffGroup.length"
@@ -201,6 +209,19 @@
     >
       <a-input v-model="unitTypeCustomer"> </a-input>
     </a-modal>
+    <a-modal
+      title="人员考核"
+      :footer="null"
+      width="500px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+      v-model="userExaimineVisible"
+    >
+      <ApprovementOpinionExaimine
+        v-bind:projectInfo="projectInfo"
+        :userName="selectedUsername"
+      />
+    </a-modal>
   </div>
 </template>
 <script>
@@ -209,6 +230,7 @@ import GLOBAL from "./../../../../utils/global_variable";
 import projectdata from "../../../../assets/menulist/project-worktype.json";
 import unitdata from "../../../../assets/menulist/project-unit.json";
 import ApprovementOpinionEditableTable from "./ApprovementOpinionEditableTable";
+import ApprovementOpinionExaimine from "./Exaimine/ApprovementOpinionExaimine.vue";
 import moment from "moment";
 import axios from "axios";
 const projectData = projectdata;
@@ -217,6 +239,7 @@ export default {
   props: ["projectInfo"],
   components: {
     ApprovementOpinionEditableTable,
+    ApprovementOpinionExaimine,
     VNodes: {
       functional: true,
       render: (h, ctx) => ctx.props.vnodes,
@@ -225,6 +248,7 @@ export default {
   data() {
     return {
       qualitycheckOpinion: "同意，请按照收费标准进行收费。",
+      selectedUsername: "",
       gclcolumns: [
         {
           title: "工作内容",
@@ -242,6 +266,7 @@ export default {
           dataIndex: "unit",
           scopedSlots: { customRender: "projectUnit" },
         },
+
         {
           title: "操作",
           dataIndex: "operation",
@@ -258,8 +283,13 @@ export default {
         {
           title: "工作量",
           dataIndex: "gzl",
-          width: "50%",
+          width: "25%",
           scopedSlots: { customRender: "gzl" },
+        },
+        {
+          title: "工作考核",
+          dataIndex: "operationExamine",
+          scopedSlots: { customRender: "operationExamine" },
         },
         {
           title: "操作",
@@ -281,6 +311,7 @@ export default {
       projectTypeCustomer: "",
       addUnitModalVisible: false,
       unitTypeCustomer: "",
+      userExaimineVisible: false,
     };
   },
   methods: {
@@ -601,6 +632,14 @@ export default {
       };
       this.unitType.push(tmp_obj);
       this.unitTypeCustomer = "";
+    },
+    //人员考核模态框显示
+    operationExamineMethod(record) {
+      console.log(record.UserName);
+      console.log(this.projectInfo);
+      console.log(this.moment().format("YYYY-MM-DD"));
+      this.userExaimineVisible = true;
+      this.selectedUsername = record.UserName;
     },
   },
   created: function() {

@@ -223,7 +223,11 @@
           :disabled="!authority_Edit"
           >编辑合同</a
         >
-        <a slot="tonextstep" slot-scope="item" @click="tonextstep(item)"
+        <a
+          slot="tonextstep"
+          slot-scope="item"
+          @click="tonextstep(item)"
+          :disabled="!authority_Edit"
           >办理</a
         >
         <a
@@ -463,6 +467,7 @@ export default {
       this.authority_Edit = authority_temp.RGP_EDIT;
       this.authority_Delete = authority_temp.RGP_DELETE;
       this.authority_Grant = authority_temp.RGP_GRANT;
+      console.log(authority_temp);
     },
     async queryClicked() {
       this.spinning = true;
