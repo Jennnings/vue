@@ -9,7 +9,7 @@ const env_online_file = "http://192.168.1.107:67";
 // const env = env_online;
 // const env_file = env_online_file;
 const env = env_dev;
-const env_file = env_dev;
+const env_file = file_path;
 export default {
   file_path,
   env,
