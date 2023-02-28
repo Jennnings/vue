@@ -23,7 +23,7 @@
           普票
         </a-tag>
       </span>
-      <a slot="viewdetail" slot-scope="item" @click="viewdetail(item)">查看</a>
+      <a slot="view" slot-scope="item" @click="viewdetail(item)">查看</a>
       <a slot="edit" slot-scope="item" @click="edititem(item)">编辑</a>
       <a slot="print" slot-scope="item" @click="printApplication(item)">打印</a>
       <span slot="delete" slot-scope="item" @click="deleteClick(item)">
@@ -31,7 +31,7 @@
       </span>
     </a-table>
     <a-modal
-      v-model="createReceiptVisible"
+      v-model="createApplicationVisible"
       title="新建开票申请"
       :footer="null"
       width="1300px"
@@ -43,6 +43,29 @@
         :contractinfo="contractinfo"
       ></CreateReceiptModalForContract>
     </a-modal>
+    <a-modal
+      v-model="viewApplicationVisible"
+      title="查看开票"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewInvoiceDetail :applicationinfo="applicationinfo"></ViewInvoiceDetail>
+    </a-modal>
+    <a-modal
+      v-model="modifyApplicationVisible"
+      title="修改开票"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ModifyInvoiceModal
+        @closeThis="closeModifyModal"
+        :applicationinfo="applicationinfo"
+      ></ModifyInvoiceModal>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -51,6 +74,8 @@ import axios from "axios";
 import GLOBAL from "../../../../../utils/global_variable";
 import moment from "moment";
 import CreateReceiptModalForContract from "./CreateInvoiceModalForContract.vue";
+import ViewInvoiceDetail from "./ViewInvoiceDetail.vue";
+import ModifyInvoiceModal from "./ModifyInvoiceModal.vue";
 const columns = [
   {
     dataIndex: "invoiceSn",
@@ -92,9 +117,9 @@ const columns = [
   //   },
   {
     title: "查看",
-    key: "viewdetail",
+    key: "view",
     dataIndex: "invoiceSn",
-    scopedSlots: { customRender: "viewdetail" },
+    scopedSlots: { customRender: "view" },
     width: 50
   },
   {
@@ -125,7 +150,9 @@ const pagination_setting = {
 export default {
   props: ["contractinfo"],
   components: {
-    CreateReceiptModalForContract
+    CreateReceiptModalForContract,
+    ViewInvoiceDetail,
+    ModifyInvoiceModal
   },
   data() {
     return {
@@ -143,11 +170,14 @@ export default {
       contractName: "",
       contractId: "",
       applicationLocation: "",
-      createReceiptVisible: false,
+      createApplicationVisible: false,
+      viewApplicationVisible: false,
       receiptData: null,
       spinning: false,
       distoryThis: true,
-      inVoiceData: null
+      inVoiceData: null,
+      applicationinfo: "",
+      modifyApplicationVisible: false
     };
   },
   methods: {
@@ -164,9 +194,15 @@ export default {
         });
     },
     createInvoice() {
-      this.createReceiptVisible = true;
+      this.createApplicationVisible = true;
     },
-    closeFrontModal() {},
+    closeFrontModal() {
+      this.initInvoiceList();
+      this.createApplicationVisible = false;
+    },
+    closeModifyModal() {
+      this.modifyApplicationVisible = false;
+    },
     async printApplication(item) {
       axios({
         url: GLOBAL.env + "/relatedfiles/printapplicationsheet",
@@ -188,6 +224,45 @@ export default {
         fileLink.click();
         window.URL.revokeObjectURL(fileUrl);
       });
+    },
+    deleteClick(item) {
+      console.log(item);
+      let postParams = new URLSearchParams();
+      let that = this;
+      this.$confirm({
+        title: "确定删除该申请?",
+        content: "删除申请将无法恢复",
+        okText: "确认",
+        okType: "danger",
+        cancelText: "取消",
+        onOk() {
+          console.log("OK");
+          //执行删除操作
+          if (item) {
+            postParams.append("invoicesn", item);
+            axios
+              .post(GLOBAL.env + "/receipt/deleteapplication", postParams)
+              .then(res => {
+                if (res.data === "success") {
+                  that.$message.success("删除成功");
+                  that.initInvoiceList();
+                } else {
+                  that.$message.error("删除失败");
+                }
+              });
+          }
+        }
+      });
+    },
+    //查看开票申请
+    viewdetail(item) {
+      this.applicationinfo = item;
+      this.viewApplicationVisible = true;
+    },
+    //编辑开票申请
+    edititem(item) {
+      this.applicationinfo = item;
+      this.modifyApplicationVisible = true;
     }
   },
   mounted: function() {

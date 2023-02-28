@@ -149,12 +149,12 @@ import GLOBAL from "../../../../../utils/global_variable";
 const receiptType = [
   {
     index: 1,
-    value: "专票",
+    value: "专票"
   },
   {
     index: 2,
-    value: "普票",
-  },
+    value: "普票"
+  }
 ];
 export default {
   props: ["contractinfo"],
@@ -179,7 +179,7 @@ export default {
       receiptRemark: "",
       receiptInDate: "",
       receiptMoneyIn: "",
-      spinning: false,
+      spinning: false
     };
   },
   methods: {
@@ -188,8 +188,8 @@ export default {
       this.spinning = true;
       const tmp_data = await request.get("/receipt/initreceiptbycontract", {
         params: {
-          contractid: this.contractinfo,
-        },
+          contractid: this.contractinfo
+        }
       });
       this.HetongNum = tmp_data.data[0].contractNum;
       this.HetongName = tmp_data.data[0].contractName;
@@ -214,7 +214,7 @@ export default {
     },
     contractInfoDetail(value) {
       const contractInfo = [...this.contractInfo];
-      const target = contractInfo.find((item) => item.index == value);
+      const target = contractInfo.find(item => item.index == value);
       if (target) {
         this.HetongClient = target.HetongClient;
         this.HetongJine = target.HetongJine;
@@ -250,7 +250,7 @@ export default {
     handleUpload(id) {
       const { fileList } = this;
       const formData = new FormData();
-      fileList.forEach((file) => {
+      fileList.forEach(file => {
         formData.append("myfile", file);
       });
       formData.append("id", id);
@@ -265,7 +265,7 @@ export default {
       this.uploading = true;
       axios
         .post(GLOBAL.env_file + "/receipt/uploadreceiptfile", formData)
-        .then((res) => {
+        .then(res => {
           if (res.data === "success") {
             this.$message.success("上传成功");
             // this.initProjectDetail();
@@ -314,7 +314,7 @@ export default {
       );
       axios
         .post(GLOBAL.env + "/receipt/addreceiptbycontract", postParams)
-        .then((res) => {
+        .then(res => {
           if (res.data[0].result === "success") {
             this.$message.success("新建发票成功");
             if (this.fileList.length != 0) {
@@ -327,11 +327,11 @@ export default {
             this.$message.warning("新建发票失败");
           }
         });
-    },
+    }
   },
   mounted: function() {
     this.getContractInfoInit();
-  },
+  }
 };
 </script>
 <style lang="scss">

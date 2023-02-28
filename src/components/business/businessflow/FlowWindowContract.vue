@@ -547,7 +547,9 @@ export default {
                   that.getContract();
                 }
                 if (res.data === "error has project") {
-                  that.$message.error("合同包含子项目或发票，无法删除");
+                  that.$message.error(
+                    "合同包含子项目、发票、开票申请，无法删除"
+                  );
                 }
               });
           }

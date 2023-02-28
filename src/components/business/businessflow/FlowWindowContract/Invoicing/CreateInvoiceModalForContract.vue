@@ -35,7 +35,7 @@
             <a-descriptions-item label="申请日期">
               <a-badge dot>
                 <a-date-picker
-                  @change="onReceiptDateChange"
+                  @change="onApplicationDateChange"
                   style="width:100%"
                 />
               </a-badge>
@@ -52,36 +52,39 @@
                 </a-select-option>
               </a-select>
             </a-descriptions-item>
-            <a-descriptions-item label="发票含税金额(元)">
-              <a-input placeholder="发票含税金额" v-model="receiptTax" />
+            <a-descriptions-item label="开票金额含税（元）">
+              <a-input placeholder="开票金额含税（元）" v-model="receiptNum" />
             </a-descriptions-item>
             <a-descriptions-item label="发票抬头">
-              <a-input placeholder="发票抬头" v-model="receiptNum" />
+              <a-input placeholder="发票抬头" v-model="receiptTitle" />
             </a-descriptions-item>
             <!-- <a-descriptions-item label="项目名称">
             <a-input placeholder="项目名称" />
           </a-descriptions-item> -->
             <a-descriptions-item label="税号">
-              <a-input placeholder="税号" v-model="receiptMoneyIn" />
+              <a-input placeholder="税号" v-model="taxNum" />
             </a-descriptions-item>
             <a-descriptions-item label="开户行" :span="2">
-              <a-input placeholder="开户行" v-model="receiptRemark" />
+              <a-input placeholder="开户行" v-model="bankName" />
             </a-descriptions-item>
             <a-descriptions-item label="账号">
-              <a-input placeholder="账号" v-model="receiptRemark" />
+              <a-input placeholder="账号" v-model="bankAccount" />
             </a-descriptions-item>
             <a-descriptions-item label="地址、联系电话" :span="2">
-              <a-input placeholder="地址、联系电话" v-model="receiptRemark" />
+              <a-input placeholder="地址、联系电话" v-model="addTel" />
             </a-descriptions-item>
             <a-descriptions-item label="项目名称" :span="2">
-              <a-select mode="tags" style="width: 100%">
+              <a-select mode="tags" style="width: 100%" @change="projectPicker">
                 <a-select-option
                   v-for="project in projectData"
-                  :key="project.ProjectName"
+                  :key="project.Projectsn"
                 >
                   {{ project.ProjectName }}
                 </a-select-option>
               </a-select>
+            </a-descriptions-item>
+            <a-descriptions-item label="地点" :span="2">
+              <a-input placeholder="地点" v-model="mLocation" />
             </a-descriptions-item>
             <a-descriptions-item label="文件列表" :span="2">
               <div class="supportMaterials">
@@ -143,7 +146,7 @@
           </a-button>
         </div>
         <div class="singlebutton">
-          <a-button type="primary" @click="confirmReceiptCreate">
+          <a-button type="primary" @click="confirmApplicationCreate">
             确认
           </a-button>
         </div>
@@ -181,13 +184,16 @@ export default {
       HetongJine: "",
       HetongName: "",
       HetongNum: "",
-      receiptDate: "",
-      receiptTypeSelected: "",
-      receiptNum: "",
-      receiptTax: "",
-      receiptRemark: "",
-      receiptInDate: "",
-      receiptMoneyIn: "",
+      applicationDate: "", //申请时间
+      receiptTypeSelected: "", //发票类型
+      receiptNum: "", //发票金额含税
+      receiptTitle: "", //发票抬头
+      taxNum: "", //税号
+      bankName: "", //开户行名称
+      bankAccount: "", //开户银行账号
+      addTel: "", //地址联系电话
+      mLocation: "", //地点
+      relatedProjectName: "", //项目名称
       spinning: false,
       projectData: null
     };
@@ -237,8 +243,8 @@ export default {
       }
     },
     /*合同操作结束 */
-    onReceiptDateChange(date, dateString) {
-      this.receiptDate = dateString;
+    onApplicationDateChange(date, dateString) {
+      this.applicationDate = dateString;
     },
     onReceiptInDateChange(date, dateString) {
       this.receiptInDate = dateString;
@@ -280,7 +286,7 @@ export default {
       formData.append("existedFiles", existedFileStr);
       this.uploading = true;
       axios
-        .post(GLOBAL.env_file + "/receipt/uploadreceiptfile", formData)
+        .post(GLOBAL.env_file + "/receipt/uploadapplicationfile", formData)
         .then(res => {
           if (res.data === "success") {
             this.$message.success("上传成功");
@@ -298,41 +304,58 @@ export default {
       //console.log("close modal");
       this.$emit("closeThis");
     },
-    confirmReceiptCreate() {
-      if (this.receiptDate == "") {
-        this.$message.error("开票日期为必填");
-        return;
-      }
-      if (this.receiptNum == "") {
-        this.$message.error("发票编号为必填");
-        return;
-      }
-      if (this.receiptTax == "") {
-        this.$message.error("发票金额为必填");
+    confirmApplicationCreate() {
+      if (this.applicationDate == "") {
+        this.$message.error("申请日期为必填");
         return;
       }
       if (this.receiptTypeSelected == "") {
         this.$message.error("请选择发票类型");
         return;
       }
+      if (this.receiptNum == "") {
+        this.$message.error("开票金额为必填");
+        return;
+      }
+      if (this.receiptTitle == "") {
+        this.$message.error("发票抬头为必填");
+        return;
+      }
+      if (this.taxNum == "") {
+        this.$message.error("税号为必填");
+        return;
+      }
+      if (this.bankName == "") {
+        this.$message.error("开户行为必填");
+        return;
+      }
+      if (this.bankAccount == "") {
+        this.$message.error("账号为必填");
+      }
+      if (this.addTel == "") {
+        this.$message.error("地址联系电话为必填");
+      }
       let postParams = new URLSearchParams();
-      postParams.append("contractid", this.contractinfo);
-      postParams.append("receiptdate", this.receiptDate);
-      postParams.append("receipttype", this.receiptTypeSelected);
-      postParams.append("receiptnum", this.receiptNum);
-      postParams.append("receipttax", this.receiptTax);
-      postParams.append("receiptremark", this.receiptRemark);
-      postParams.append("receiptindate", this.receiptInDate);
-      postParams.append("receiptinmoney", this.receiptMoneyIn);
+      postParams.append("mApplicationDate", this.applicationDate);
+      postParams.append("mReceiptTypeSelected", this.receiptTypeSelected);
+      postParams.append("mReceiptNum", this.receiptNum);
+      postParams.append("mReceiptTitle", this.receiptTitle);
+      postParams.append("mTaxNum", this.taxNum);
+      postParams.append("mBankName", this.bankName);
+      postParams.append("mAddTel", this.addTel);
+      postParams.append("mLocation", this.mLocation);
+      postParams.append("mRelaterdProjectName", this.relatedProjectName);
+      postParams.append("mBankAccount", this.bankAccount);
+      postParams.append("mContractId", this.contractinfo);
       postParams.append(
-        "userid",
+        "mUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       );
       axios
-        .post(GLOBAL.env + "/receipt/addreceiptbycontract", postParams)
+        .post(GLOBAL.env + "/receipt/insertinvoiceapplication", postParams)
         .then(res => {
           if (res.data[0].result === "success") {
-            this.$message.success("新建发票成功");
+            this.$message.success("新建申请成功");
             if (this.fileList.length != 0) {
               console.log(this.fileList.length);
               this.handleUpload(res.data[0].Id);
@@ -340,10 +363,28 @@ export default {
               this.$emit("closeThis");
             }
           } else {
-            this.$message.warning("新建发票失败");
+            this.$message.warning("新建申请失败");
           }
         });
+    },
+    projectPicker(item) {
+      this.relatedProjectName = "";
+      item.forEach(Element => {
+        this.projectData.forEach(Element2 => {
+          if (Element2.Projectsn == Element) {
+            this.relatedProjectName += Element2.ProjectName + ",";
+          }
+        });
+      });
+      // console.log(
+      //   this.relatedProjectName.substring(0, this.relatedProjectName.length - 1)
+      // );
+      this.relatedProjectName = this.relatedProjectName.substring(
+        0,
+        this.relatedProjectName.length - 1
+      );
     }
+    // 确认开票信息
   },
   mounted: function() {
     this.getContractInfoInit();
