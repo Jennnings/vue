@@ -125,7 +125,7 @@ export default {
       receiptDate: "",
       receiptMoneyIn: "",
       receiptfileList: [],
-      spinning: false,
+      spinning: false
     };
   },
   methods: {
@@ -134,8 +134,8 @@ export default {
       this.spinning = true;
       const tmp_data = await request.get("/receipt/getdetailreceipt", {
         params: {
-          id: this.selectedid,
-        },
+          id: this.selectedid
+        }
       });
       const tmp_datax = tmp_data.data[0];
       this.contractId = tmp_datax.contractNum;
@@ -167,8 +167,8 @@ export default {
     async downloadFile(item) {
       const tmp_data = await request.get("/common/getreceipt", {
         params: {
-          postfilename: item,
-        },
+          postfilename: item
+        }
       });
       if (tmp_data.data === "error") {
         this.$message.error("文件不存在");
@@ -178,13 +178,13 @@ export default {
         url: GLOBAL.env + "/common/getreceipt",
         method: "GET",
         header: {
-          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+          contentType: "application/x-www-form-urlencoded; charset=utf-8"
         },
         responseType: "blob",
         params: {
-          postfilename: item,
-        },
-      }).then((response) => {
+          postfilename: item
+        }
+      }).then(response => {
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
         fileLink.href = fileUrl;
@@ -193,11 +193,11 @@ export default {
         fileLink.click();
         window.URL.revokeObjectURL(fileUrl);
       });
-    },
+    }
   },
   mounted: function() {
     this.getReceiptdetail();
-  },
+  }
 };
 </script>
 <style lang="scss">

@@ -144,13 +144,13 @@ export default {
       params: {
         projectName: "",
         projectClient: "",
-        createTime: "",
+        createTime: ""
       },
       projectTypeSelected: [],
       supportMaterialsSelected: [],
       formLayout: "horizontal",
       form: this.$form.createForm(this, { name: "coordinated" }),
-      postParams: null,
+      postParams: null
     };
   },
   methods: {
@@ -212,7 +212,7 @@ export default {
       ); //创建人信息->需要修改 直接后端判断的
       axios
         .post(GLOBAL.env + "/cxch/insertProject", this.postParams)
-        .then((res) => {
+        .then(res => {
           console.log(res);
           this.$emit("childFn");
         });
@@ -247,11 +247,11 @@ export default {
     handleUpload() {
       const { fileList } = this;
       const formData = new FormData();
-      fileList.forEach((file) => {
+      fileList.forEach(file => {
         formData.append("myfile", file);
       });
       this.uploading = true;
-      axios.post(GLOBAL.env_file + "/cxch/uploadfile", formData).then((res) => {
+      axios.post(GLOBAL.env_file + "/cxch/uploadfile", formData).then(res => {
         console.log(res);
         if (res.data === "upload over") {
           this.$message.success("上传成功");
@@ -260,8 +260,8 @@ export default {
         }
         this.uploading = false;
       });
-    },
-  },
+    }
+  }
 };
 </script>
 <style lang="scss">

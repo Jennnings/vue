@@ -339,18 +339,18 @@ const columns = [
     dataIndex: "clmanUser",
     width: 100,
   },
-  {
-    title: "应收金额",
-    key: "cost",
-    dataIndex: "cost",
-    width: 100,
-  },
-  {
-    title: "实收金额",
-    key: "getCost",
-    dataIndex: "getCost",
-    width: 100,
-  },
+  // {
+  //   title: "应收金额",
+  //   key: "cost",
+  //   dataIndex: "cost",
+  //   width: 100,
+  // },
+  // {
+  //   title: "实收金额",
+  //   key: "getCost",
+  //   dataIndex: "getCost",
+  //   width: 100,
+  // },
   {
     title: "开单情况",
     key: "isReceipted",
@@ -384,7 +384,7 @@ const columns = [
     key: "tocopystep",
     dataIndex: "Projectsn",
     scopedSlots: { customRender: "tocopystep" },
-    width: 80,
+    width: 60,
   },
   {
     title: "合同情况",
@@ -392,6 +392,13 @@ const columns = [
     dataIndex: "isRepeat",
     scopedSlots: { customRender: "contractRepeat" },
     width: 100,
+  },
+  {
+    title: "合同名称",
+    key: "hetongname",
+    dataIndex: "hetongname",
+    scopedSlots: { customRender: "hetongname" },
+    width: 300,
   },
 ];
 const pagination_setting = {

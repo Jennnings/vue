@@ -265,7 +265,7 @@ export default {
       contractDefaultSelected: "",
       fileList: [],
       uploading: false,
-      supportFileList: [],
+      supportFileList: []
     };
   },
   methods: {
@@ -275,8 +275,8 @@ export default {
       const that = this;
       const tmp_data = await request.get("/common/getprojectdetail", {
         params: {
-          projectsn: this.projectInfo,
-        },
+          projectsn: this.projectInfo
+        }
       });
       let objGroup = tmp_data.data[0];
       Object.keys(objGroup).forEach(function(k) {
@@ -330,7 +330,7 @@ export default {
     handleUpload() {
       const { fileList } = this;
       const formData = new FormData();
-      fileList.forEach((file) => {
+      fileList.forEach(file => {
         formData.append("myfile", file);
       });
       formData.append("projectid", this.params.projectId);
@@ -345,9 +345,9 @@ export default {
       this.uploading = true;
       axios
         .post(GLOBAL.env_file + "/common/modifyprojectfile", formData, {
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
-        .then((res) => {
+        .then(res => {
           if (res.data === "success") {
             this.$message.success("上传成功");
             this.initProjectDetail();
@@ -417,7 +417,7 @@ export default {
       let selectedContractID = "";
       if (this.contractDefaultSelected) {
         selectedContractID = this.contractInfo.filter(
-          (item) => item.index === this.contractDefaultSelected
+          item => item.index === this.contractDefaultSelected
         )[0].HetongBianhao;
       }
       postParams.append("aggreementID", selectedContractID); //合同编号
@@ -432,45 +432,43 @@ export default {
         "DjmanUserID",
         JSON.parse(sessionStorage.getItem("userToken")).UserID
       ); // 登记人员ID
-      axios
-        .post(GLOBAL.env + "/common/modifyproject", postParams)
-        .then((res) => {
-          if (res.data[0].result === "success") {
-            if (this.fileList.length == 0) {
-              let postParams2 = new URLSearchParams();
-              let existedFileStr = "";
-              if (this.supportFileList.length != 0) {
-                for (let i = 0; i < this.supportFileList.length; i++) {
-                  existedFileStr += this.supportFileList[i] + "\/";
-                }
-                existedFileStr = existedFileStr.slice(
-                  0,
-                  existedFileStr.length - 1
-                );
+      axios.post(GLOBAL.env + "/common/modifyproject", postParams).then(res => {
+        if (res.data[0].result === "success") {
+          if (this.fileList.length == 0) {
+            let postParams2 = new URLSearchParams();
+            let existedFileStr = "";
+            if (this.supportFileList.length != 0) {
+              for (let i = 0; i < this.supportFileList.length; i++) {
+                existedFileStr += this.supportFileList[i] + "\/";
               }
-              postParams2.append("existedFiles", existedFileStr);
-              postParams2.append("projectid", this.params.projectId);
-              axios
-                .post(GLOBAL.env + "/common/withoutnewfile", postParams2)
-                .then((res) => {
-                  if (res.data === "success") {
-                    this.$message.success("更新成功");
-                    this.initProjectDetail();
-                  }
-                });
-            } else {
-              this.handleUpload();
+              existedFileStr = existedFileStr.slice(
+                0,
+                existedFileStr.length - 1
+              );
             }
+            postParams2.append("existedFiles", existedFileStr);
+            postParams2.append("projectid", this.params.projectId);
+            axios
+              .post(GLOBAL.env + "/common/withoutnewfile", postParams2)
+              .then(res => {
+                if (res.data === "success") {
+                  this.$message.success("更新成功");
+                  this.initProjectDetail();
+                }
+              });
           } else {
-            this.$message.error("更新失败");
+            this.handleUpload();
           }
-        });
+        } else {
+          this.$message.error("更新失败");
+        }
+      });
     },
     async downloadFile(item) {
       const tmp_data = await request.get("/common/downloadfile", {
         params: {
-          postfilename: item,
-        },
+          postfilename: item
+        }
       });
       if (tmp_data.data === "error") {
         this.$message.error("文件不存在");
@@ -480,13 +478,13 @@ export default {
         url: GLOBAL.env + "/common/downloadfile",
         method: "GET",
         header: {
-          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+          contentType: "application/x-www-form-urlencoded; charset=utf-8"
         },
         responseType: "blob",
         params: {
-          postfilename: item,
-        },
-      }).then((response) => {
+          postfilename: item
+        }
+      }).then(response => {
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
         fileLink.href = fileUrl;
@@ -501,12 +499,12 @@ export default {
       const newFileList = this.supportFileList.slice();
       newFileList.splice(index, 1);
       this.supportFileList = newFileList;
-    },
+    }
   },
   mounted: function() {
     this.initProjectDetail();
     this.getContractInfo();
-  },
+  }
 };
 </script>
 <style lang="scss">

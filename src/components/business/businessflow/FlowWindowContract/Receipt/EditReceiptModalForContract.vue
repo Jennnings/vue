@@ -160,12 +160,12 @@ import moment from "moment";
 const receiptType = [
   {
     index: 1,
-    value: "专票",
+    value: "专票"
   },
   {
     index: 2,
-    value: "普票",
-  },
+    value: "普票"
+  }
 ];
 export default {
   props: ["selectedid"],
@@ -189,7 +189,7 @@ export default {
       uploading: false,
       contractInfo: [],
       contractDefaultSelected: "",
-      receiptTypeSelected: "",
+      receiptTypeSelected: ""
     };
   },
   methods: {
@@ -202,8 +202,8 @@ export default {
       this.spinning = true;
       const tmp_data = await request.get("/receipt/getdetailreceipt", {
         params: {
-          id: this.selectedid,
-        },
+          id: this.selectedid
+        }
       });
       const tmp_datax = tmp_data.data[0];
       this.contractDefaultSelected = tmp_datax.contractId;
@@ -231,8 +231,8 @@ export default {
     async downloadFile(item) {
       const tmp_data = await request.get("/common/getreceipt", {
         params: {
-          postfilename: item,
-        },
+          postfilename: item
+        }
       });
       if (tmp_data.data === "error") {
         this.$message.error("文件不存在");
@@ -242,13 +242,13 @@ export default {
         url: GLOBAL.env + "/common/getreceipt",
         method: "GET",
         header: {
-          contentType: "application/x-www-form-urlencoded; charset=utf-8",
+          contentType: "application/x-www-form-urlencoded; charset=utf-8"
         },
         responseType: "blob",
         params: {
-          postfilename: item,
-        },
-      }).then((response) => {
+          postfilename: item
+        }
+      }).then(response => {
         let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
         var fileLink = document.createElement("a");
         fileLink.href = fileUrl;
@@ -275,7 +275,7 @@ export default {
     },
     contractInfoDetail(value) {
       const contractInfo = [...this.contractInfo];
-      const target = contractInfo.find((item) => item.index == value);
+      const target = contractInfo.find(item => item.index == value);
       if (target) {
         this.HetongClient = target.HetongClient;
         this.HetongJine = target.HetongJine;
@@ -301,7 +301,7 @@ export default {
     handleUpload() {
       const { fileList } = this;
       const formData = new FormData();
-      fileList.forEach((file) => {
+      fileList.forEach(file => {
         formData.append("myfile", file);
       });
       formData.append("id", this.selectedid);
@@ -316,7 +316,7 @@ export default {
       this.uploading = true;
       axios
         .post(GLOBAL.env_file + "/receipt/uploadreceiptfile", formData)
-        .then((res) => {
+        .then(res => {
           if (res.data === "success") {
             this.$message.success("上传成功");
             // this.initProjectDetail();
@@ -374,7 +374,7 @@ export default {
       postParams.append("receiptinmoney", this.receiptMoneyIn);
       axios
         .post(GLOBAL.env + "/receipt/modifyreceiptinfo", postParams)
-        .then((res) => {
+        .then(res => {
           if (res.data[0].result === "success") {
             this.$message.success("修改发票成功");
             if (this.fileList.length) {
@@ -395,7 +395,7 @@ export default {
               postParams2.append("Id", this.selectedid);
               axios
                 .post(GLOBAL.env + "/receipt/modifyfilewithoutnew", postParams2)
-                .then((res) => {
+                .then(res => {
                   if (res.data === "success") {
                     this.$message.success("文件修改成功");
                     this.getReceiptdetail();
@@ -406,12 +406,12 @@ export default {
             this.$message.warning("修改发票失败");
           }
         });
-    },
+    }
   },
   mounted: function() {
     this.getContractInfo();
     this.getReceiptdetail();
-  },
+  }
 };
 </script>
 <style lang="scss">

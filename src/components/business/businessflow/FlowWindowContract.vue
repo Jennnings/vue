@@ -62,7 +62,7 @@
           <span style="margin-left:10px">~</span>
           <a-date-picker @change="onendDateChange" style="margin-left:10px" />
         </div>
-        <div class="itemName">
+        <!-- <div class="itemName">
           <a-button
             type="primary"
             icon="search"
@@ -70,6 +70,28 @@
             @click="queryClicked"
           >
             合同查询
+          </a-button>
+        </div> -->
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="itemRight">
+        <div class="itemName">
+          <a-button
+            type="primary"
+            icon="search"
+            style="width:110px;"
+            @click="queryClicked"
+          >
+            合同查询
+          </a-button>
+          <a-button
+            type="primary"
+            icon="download"
+            style="width:110px; margin-left:20px"
+            @click="downloadResult"
+          >
+            结果下载
           </a-button>
         </div>
       </div>
@@ -108,17 +130,40 @@
             two-tone-color="red"
           /> -->
         </span>
+        <!-- <span slot="contractID" slot-scope="item" @click="viewItem(item)">
+          <a>{{item}}</a>
+        </span> -->
         <span slot="contractView" slot-scope="item" @click="viewItem(item)">
           <a>查看</a>
         </span>
         <span slot="contractEdit" slot-scope="item" @click="editItem(item)">
           <a>编辑</a>
         </span>
-        <span slot="receiptEdit" slot-scope="item" @click="receiptEdit(item)">
+        <span
+          slot="receiptEdit"
+          slot-scope="item"
+          style="display:inline-block;margin:0 auto"
+          @click="receiptEdit(item)"
+        >
           <a>关联</a>
+        </span>
+        <span
+          slot="invoicingEdit"
+          slot-scope="item"
+          @click="invoicingApplication(item)"
+        >
+          <a>开票</a>
         </span>
         <span slot="contractDelete" slot-scope="item" @click="deleteItem(item)">
           <a>删除</a>
+        </span>
+        <span slot="contractisBack" slot-scope="contractisBack">
+          <a-tag v-if="contractisBack" color="green">
+            <span>已签</span>
+          </a-tag>
+          <a-tag v-if="!contractisBack" color="volcano">
+            <span>在签</span>
+          </a-tag>
         </span>
         <template> </template>
         <a-table
@@ -238,6 +283,18 @@
         :contractinfo="selectedContractInfo"
       ></ViewContractModalForContract>
     </a-modal>
+    <a-modal
+      v-model="viewInvoicingModalForContract"
+      title="申请开票"
+      :footer="null"
+      width="1300px"
+      :destroyOnClose="distoryThis"
+      :maskClosable="false"
+    >
+      <ViewInvoicingModalForContract
+        :contractinfo="selectedContractInfo"
+      ></ViewInvoicingModalForContract>
+    </a-modal>
   </div>
 </template>
 <script>
@@ -252,14 +309,15 @@ import ViewReceiptModal from "./FlowWinfowCalculateExpense/Receipt/ViewReceiptMo
 import ViewContractModalForContract from "./FlowWindowContract/Receipt/ViewReceiptModalForContract";
 import ContractViewTab from "./FlowWindowContract/ContractViewTab";
 import ModifyContractModal from "./FlowWindowContract/MofifyContractModal";
+import ViewInvoicingModalForContract from "./FlowWindowContract/Invoicing/ViewInvoicingModalForContract";
 const ModuleID = 42;
 const columns = [
   {
     title: "合同编号",
     dataIndex: "contractID",
-    key: "ID",
+    key: "Id",
     with: 80,
-    // scopedSlots: { customRender: "contractname" },
+    scopedSlots: { customRender: "contractID" }
   },
   { title: "合同名称", dataIndex: "contractName", key: "platform", width: 300 },
   { title: "合同签订时间", dataIndex: "contractSignTime", key: "version" },
@@ -268,34 +326,46 @@ const columns = [
     title: "收费方式",
     dataIndex: "isTotalPrice",
     key: "isTotalPrice",
-    scopedSlots: { customRender: "isTotalPrice" },
+    scopedSlots: { customRender: "isTotalPrice" }
   },
   {
     title: "查看",
     dataIndex: "Id",
     key: "contractID",
-    scopedSlots: { customRender: "contractView" },
+    scopedSlots: { customRender: "contractView" }
   },
   //receiptEdit
   {
     title: "编辑",
     dataIndex: "Id",
     key: "Id",
-    scopedSlots: { customRender: "contractEdit" },
+    scopedSlots: { customRender: "contractEdit" }
   },
   {
     title: "关联发票",
     dataIndex: "Id",
     key: "receiptEdit",
-    scopedSlots: { customRender: "receiptEdit" },
+    scopedSlots: { customRender: "receiptEdit" }
+  },
+  {
+    title: "开票申请",
+    dataIndex: "Id",
+    key: "invoicingEdit",
+    scopedSlots: { customRender: "invoicingEdit" }
   },
   {
     title: "删除",
     dataIndex: "Id",
     key: "contractDelete",
-    scopedSlots: { customRender: "contractDelete" },
+    scopedSlots: { customRender: "contractDelete" }
   },
   { title: "代建单位", dataIndex: "contractAssistCompany", key: "creator" },
+  {
+    title: "签订状态",
+    dataIndex: "contractisBack",
+    key: "contractisBack",
+    scopedSlots: { customRender: "contractisBack" }
+  }
 ];
 
 const innerColumns = [
@@ -304,33 +374,33 @@ const innerColumns = [
     dataIndex: "projectsn",
     key: "projectsn",
     width: 200,
-    scopedSlots: { customRender: "name" },
+    scopedSlots: { customRender: "name" }
   },
   {
     title: "项目名称",
     dataIndex: "projectname",
     key: "projectname",
-    width: 200,
+    width: 200
   },
   {
     title: "项目状态",
     key: "XMState",
     dataIndex: "XMState",
     scopedSlots: { customRender: "XMState" },
-    width: 200,
+    width: 200
   },
   {
     title: "应收费用",
     dataIndex: "cost",
     key: "cost",
-    width: 200,
+    width: 200
   },
   {
     title: "已收费用",
     dataIndex: "getCost",
     key: "getCost",
-    width: 200,
-  },
+    width: 200
+  }
   // {
   //   title: "查看",
   //   key: "viewdetail",
@@ -340,10 +410,10 @@ const innerColumns = [
   // },
 ];
 const pagination_setting = {
-  defaultPageSize: 8,
+  defaultPageSize: 8
 };
 const pagination_setting_inner = {
-  defaultPageSize: 5,
+  defaultPageSize: 5
 };
 export default {
   components: {
@@ -355,6 +425,7 @@ export default {
     ViewContractModalForContract,
     ContractViewTab,
     ModifyContractModal,
+    ViewInvoicingModalForContract
   },
   data() {
     return {
@@ -381,6 +452,7 @@ export default {
       viewReceiptVisible: false,
       viewReceiptForContractVisible: false,
       selectedContractInfo: "",
+      viewInvoicingModalForContract: false
     };
   },
   methods: {
@@ -394,8 +466,8 @@ export default {
       const tmp_menu = await request("/common/getmoduleauthority", {
         params: {
           userid: JSON.parse(sessionStorage.getItem("userToken")).UserID,
-          moduleid: this.ModuleID,
-        },
+          moduleid: this.ModuleID
+        }
       });
       const authority_temp = tmp_menu.data[0];
       this.authority_Add = authority_temp.RGP_ADD;
@@ -410,9 +482,9 @@ export default {
       this.loading = true;
       axios
         .get(GLOBAL.env + "/contractmanagement/queryProjectByHeTong", {
-          params: { contractID: record.contractID },
+          params: { contractID: record.contractID }
         })
-        .then((res) => {
+        .then(res => {
           record["innerDatax"] = res.data;
           this.loading = false;
         });
@@ -432,8 +504,8 @@ export default {
           contractclient: this.contractClient,
           contractcompany: this.contractAssistCompany,
           sDate: this.sDate,
-          eDate: this.eDate,
-        },
+          eDate: this.eDate
+        }
       });
       this.data = tmp_data.data;
       this.spinning = false;
@@ -469,20 +541,22 @@ export default {
                 GLOBAL.env + "/contractmanagement/deletecontract",
                 postParams
               )
-              .then((res) => {
+              .then(res => {
                 if (res.data === "success") {
                   that.$message.success("删除成功");
                   that.getContract();
                 }
                 if (res.data === "error has project") {
-                  that.$message.error("合同包含子项目或发票，无法删除");
+                  that.$message.error(
+                    "合同包含子项目、发票、开票申请，无法删除"
+                  );
                 }
               });
           }
         },
         onCancel() {
           console.log("Cancel");
-        },
+        }
       });
     },
     createContract() {
@@ -511,11 +585,41 @@ export default {
     closeContractModify() {
       this.getContract();
     },
+    async downloadResult() {
+      axios({
+        url: GLOBAL.env + "/contractmanagement/downloadquerycontract",
+        method: "GET",
+        header: {
+          contentType: "application/x-www-form-urlencoded; charset=utf-8"
+        },
+        responseType: "blob",
+        params: {
+          contractnum: this.contractID,
+          contractname: this.contractName,
+          contractclient: this.contractClient,
+          contractcompany: this.contractAssistCompany,
+          sDate: this.sDate,
+          eDate: this.eDate
+        }
+      }).then(response => {
+        let fileUrl = window.URL.createObjectURL(new Blob([response.data]));
+        var fileLink = document.createElement("a");
+        fileLink.href = fileUrl;
+        fileLink.setAttribute("download", "合同查询结果.xlsx");
+        document.body.append(fileLink);
+        fileLink.click();
+        window.URL.revokeObjectURL(fileUrl);
+      });
+    },
+    invoicingApplication(item) {
+      this.viewInvoicingModalForContract = true;
+      this.selectedContractInfo = item;
+    }
   },
   mounted: function() {
     this.getContract();
     this.getAuthority();
-  },
+  }
 };
 </script>
 <style lang="scss">
@@ -556,7 +660,10 @@ export default {
       }
     }
     .itemRight {
-      margin-right: 20px;
+      .itemName {
+        float: right;
+      }
+      //margin-right: 20px;
     }
   }
   .table_contianer {
